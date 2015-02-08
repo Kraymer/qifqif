@@ -34,8 +34,8 @@ def main(argv=None):
         argv = sys.argv
 
     parser = argparse.ArgumentParser(
-        description='Enrich your .QIF files with categories.',
-        epilog='Report bugs to kraymer@gmail.com')
+        description='Enrich your .QIF files with categories. '
+        'See https://github.com/Kraymer/qifhack for more infos.')
     parser.add_argument('src', metavar='QIF_FILE',
                         help='.QIF file to process', default='')
     parser.add_argument('-o', '--output', dest='dest',

@@ -27,6 +27,11 @@ Tokens must be entered in a json configuration file like so ::
         }
     }
 
+Installation
+------------
+
+    pip install qifhack
+
 Feedbacks
 ---------
 
