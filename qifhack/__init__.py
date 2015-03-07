@@ -6,7 +6,34 @@
 import argparse
 import json
 import os
+import readline
 import sys
+
+
+def prefilled_input(prompt, prefill=''):
+    readline.set_startup_hook(lambda: readline.insert_text(prefill))
+    try:
+        return raw_input(prompt)
+    finally:
+        readline.set_startup_hook()
+
+
+class InputCompleter(object):  # Custom completer
+
+    def __init__(self, options):
+        self.options = sorted(options)
+
+    def complete(self, text, state):
+        if state == 0:
+            if text:
+                self.matches = [s for s in self.options
+                                if s and s.startswith(text)]
+            else:
+                self.matches = self.options[:]
+        try:
+            return self.matches[state]
+        except IndexError:
+            return None
 
 
 def find_category(categories, payee):
@@ -15,18 +42,52 @@ def find_category(categories, payee):
             return c
 
 
+def pick_category(payee, categories):
+    category = None
+    while not category:
+        category = raw_input("\nPick a category: ")
+        # if not category Skip category [YES, No]
+        if category and category not in categories:
+            uinput = raw_input('Create new category [YES, Cancel]: ')
+            if uinput.upper() not in ['Y', '']:
+                category = None
+            else:
+                categories[category] = []
+
+    save = raw_input('Save association [YES, No]: ')
+    if save.upper() in ('Y', ''):
+        match = None
+        while not match:
+            match = prefilled_input('Enter string to match: ', payee)
+            if match not in payee:
+                print 'match must be a substring of original payee'
+                match = None
+            categories[category].append(match)
+    return (category, categories)
+
+
 def fetch_categories(lines, categories):
+    completer = InputCompleter(categories.keys())
+    readline.set_completer(completer.complete)
+    readline.parse_and_bind('tab: complete')
     result = []
     for line in lines:
-        payee = line if line.startswith('P') else None
-        if payee:
+        if line.startswith('T'):
+            amount = line[1:].strip()
+        payee = line[1:].strip() if line.startswith('P') else None
+        if payee:  # write payee line and find category to write on next line
             result.append(line)
             category = find_category(categories, payee)
-            if category:
-                result.append('L%s\n' % category)
-        else:
+            print amount
+            print payee
+            while not category:
+                category, categories = pick_category(payee, categories)
+            print '=> %s' % category
+            print '---'
+            result.append('L%s\n' % category)
+        elif not line.startswith('L'):  # overwrite previous categories
             result.append(line)
-    return result
+    return result, categories
 
 
 def main(argv=None):
@@ -49,13 +110,20 @@ def main(argv=None):
     args = vars(parser.parse_args())
     if not args['dest']:
         args['dest'] = args['src']
-    with open(args['src'], 'r') as f, open(args['config'], 'r') as cfg:
-        cfg_dict = json.load(cfg)
+
+    if os.path.isfile(args['config']):
+        with open(args['config'], 'r') as cfg:
+            cfg_dict = json.load(cfg)
+    else:
+        cfg_dict = {}
+    with open(args['src'], 'r') as f:
         lines = f.readlines()
-        result = fetch_categories(lines, cfg_dict['categories'])
+        result, categories = fetch_categories(lines, cfg_dict)
     with open(args['dest'], 'w') as f:
         f.writelines(result)
-
+    with open(args['config'], 'w+') as cfg:
+        cfg.write(json.dumps(categories,
+                  sort_keys=True, indent=4, separators=(',', ': ')))
 
 if __name__ == "__main__":
     sys.exit(main())
