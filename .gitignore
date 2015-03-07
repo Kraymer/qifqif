@@ -1,0 +1,4 @@
+qifhack.egg-info/
+build/
+dist/
+*.pyc
