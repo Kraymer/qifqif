@@ -66,7 +66,7 @@ def pick_category(payee, categories):
     return (category, categories)
 
 
-def fetch_categories(lines, categories):
+def fetch_categories(lines, categories, options):
     completer = InputCompleter(categories.keys())
     readline.set_completer(completer.complete)
     readline.parse_and_bind('tab: complete')
@@ -83,10 +83,15 @@ def fetch_categories(lines, categories):
             while not category:
                 category, categories = pick_category(payee, categories)
             print '=> %s' % category
-            print '---'
             result.append('L%s\n' % category)
         elif not line.startswith('L'):  # overwrite previous categories
             result.append(line)
+        if line.startswith('^'):
+            if options['audit']:
+                raw_input('Press a key to continue (<ESC> to exit)')
+                print('\x1b[1A\x1b[2K---')  # erase last line
+            else:
+                print '---'
     return result, categories
 
 
@@ -99,6 +104,9 @@ def main(argv=None):
         'See https://github.com/Kraymer/qifhack for more infos.')
     parser.add_argument('src', metavar='QIF_FILE',
                         help='.QIF file to process', default='')
+    parser.add_argument('-a', '--audit-mode', dest='audit',
+                        action='store_true', help=('pause after'
+                                                   'each transaction'))
     parser.add_argument('-o', '--output', dest='dest',
                         help='Output filename. '
                         'DEFAULT: edit input file in-place', default='')
@@ -118,7 +126,7 @@ def main(argv=None):
         cfg_dict = {}
     with open(args['src'], 'r') as f:
         lines = f.readlines()
-        result, categories = fetch_categories(lines, cfg_dict)
+        result, categories = fetch_categories(lines, cfg_dict, options=args)
     with open(args['dest'], 'w') as f:
         f.writelines(result)
     with open(args['config'], 'w+') as cfg:
