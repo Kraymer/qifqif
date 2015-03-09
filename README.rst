@@ -1,36 +1,42 @@
-qifhack improves your .qif files by inserting additional fields in it from a
-pre-configured json mapping file.
+qifqif
+======
 
-I needed it to speed up my .qif imports in `GnuCash`_, but qifhack logic
-can be extended to fit others workflows as well (PR welcomed).
+*Because adding categories into QIF files can make all the difference.*
 
-One may refer to `Microsoft Money QIF Specification page`_ to have a grasp of
-the .qif specification and terminology.
+QIF is a format widely used by personal money management software such as
+`GnuCash`_ to import information. Yet, the import process is particularly
+tedious as it require to manually pair the transactions contained in the file
+with categories (or "accounts" for double-entry bookkeeping systems).
 
-.. _Microsoft Money QIF Specification page: http://money.mvps.org/articles/qifspecification.aspx
+qifqif augment your qif files by adding a category line for each transaction,
+that additional information can then be used by accounting software to perform
+automatic QIF imports.
+It picks categories by searching for predefined keywords in transactions
+descriptions lines and by repeating choices you previously made regarding
+similar transactions.
+
 .. _GnuCash: http://www.gnucash.org/
+
+Features
+--------
+
+- **Blazing fast edits:** thanks to prefilled inputs and ``<TAB>`` completion
+- **Auditing mode:** review your transaction one by one
+- **Quiet mode (no interactive):** for easy integration with scripts
+- **Easy-going workflow:** dealing with large files? Press ``<Esc>`` to exit
+  anytime ; on next run, editing will resume right there where you left it.
+
 
 Usage
 -----
 
-qifhack searches for tokens in each transaction *Payee* field, when a match is
-found the token category is applied to the transaction by inserting a
-*Category* field.
+    usage: qifqif [-h] [-o DEST] [-c CONFIG] QIF_FILE
 
-Tokens must be entered in a json configuration file like so ::
-
-    {
-        "categories": {
-            "Bars": ["Art Brut", "Indiana", "Sully", "Fontaines", "Hall Beer"],
-            "Clothes": ["DPAM", "GAP", "Docker", "Bonobo", "Camper", "Cafe Coton"],
-            "Restaurant": ["L'Abri", "Pizza Grill Istanbul"]
-        }
-    }
 
 Installation
 ------------
 
-    pip install qifhack
+    pip install qifqif
 
 Feedbacks
 ---------
