@@ -11,7 +11,9 @@ import sys
 
 
 def prefilled_input(prompt, prefill=''):
+    print '#%s#' % prefill
     readline.set_startup_hook(lambda: readline.insert_text(prefill))
+    readline.redisplay()
     try:
         return raw_input(prompt)
     finally:
@@ -42,27 +44,29 @@ def find_category(categories, payee):
             return c
 
 
-def pick_category(payee, categories):
+def pick_category(payee, categories, default=''):
+    default_choice = '[%s]' % default if default else ''
     category = None
     while not category:
-        category = raw_input("\nPick a category: ")
+        category = raw_input("Category%s: " % default_choice) or default
         # if not category Skip category [YES, No]
-        if category and category not in categories:
+        if category.strip() and category not in categories:
             uinput = raw_input('Create new category [YES, Cancel]: ')
             if uinput.upper() not in ['Y', '']:
                 category = None
             else:
                 categories[category] = []
 
-    save = raw_input('Save association [YES, No]: ')
-    if save.upper() in ('Y', ''):
-        match = None
-        while not match:
-            match = prefilled_input('Enter string to match: ', payee)
-            if match not in payee:
-                print 'match must be a substring of original payee'
-                match = None
-            categories[category].append(match)
+    if category != default:
+        save = raw_input('Save association [YES, No]: ')
+        if save.upper() in ('Y', ''):
+            match = None
+            while not match:
+                match = prefilled_input('Enter string to match: ', payee)
+                if match not in payee:
+                    print 'match must be a substring of original payee'
+                    match = None
+                categories[category].append(match)
     return (category, categories)
 
 
@@ -78,20 +82,18 @@ def fetch_categories(lines, categories, options):
         if payee:  # write payee line and find category to write on next line
             result.append(line)
             category = find_category(categories, payee)
-            print amount
-            print payee
+            print 'Amount..: %s\nPayee...: %s' % (amount, payee)
+            prompt = category
+            category = '' if options['audit'] else category
             while not category:
-                category, categories = pick_category(payee, categories)
-            print '=> %s' % category
+                category, categories = pick_category(payee, categories, prompt)
             result.append('L%s\n' % category)
         elif not line.startswith('L'):  # overwrite previous categories
             result.append(line)
         if line.startswith('^'):
             if options['audit']:
-                raw_input('Press a key to continue (<ESC> to exit)')
-                print('\x1b[1A\x1b[2K---')  # erase last line
-            else:
-                print '---'
+                print('\x1b[1A\x1b[2KCategory: %s' % category)  # erase last line
+            print '---'
     return result, categories
 
 
