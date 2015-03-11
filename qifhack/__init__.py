@@ -62,7 +62,7 @@ def diff(a, b, as_error=False):
                        colored.red(b[x + y:]) if as_error else b[x + y:])
 
 
-def pick_category(payee, categories, default_choice='', match=''):
+def pick_category(payee, categories, default_choice='', default_match=''):
     category = None
 
     COMPLETER = InputCompleter(categories.keys())
@@ -74,17 +74,20 @@ def pick_category(payee, categories, default_choice='', match=''):
 
     if category.strip() and category != default_choice:
         while True:
-            match = prefilled_input(overwrite("? Match for '%s': " % category),
-                                    match)
+            match = raw_input(overwrite("? Match for '%s': " % category))
             if match and match not in payee:
                 puts(overwrite('%s Match rejected...: %s\n') %
                      (colored.red('✖'), diff(payee, match, as_error=True)))
             else:
-                if not match:
-                    break
+                if not match and default_match:
+                    use_default = prompt.yn(overwrite("Use '%s' as match?") %
+                                            default_match, default=False)
+                    if use_default:
+                        match = default_match
+                break
         if match:
             puts(overwrite("%s Match for '%s': %s\n" % (colored.green('✔'),
-                 category, match)))
+                 category, str(match))))
             if category not in categories:
                 categories[category] = [match]
             else:
