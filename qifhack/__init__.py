@@ -47,7 +47,10 @@ def find_category(categories, payee):
 
 
 def overwrite(text):
-    return '\x1b[1A\x1b[2K' + text
+    CURSOR_UP_ONE = '\x1b[1A'
+    ERASE_LINE = '\x1b[2K'
+    return CURSOR_UP_ONE + ERASE_LINE + text
+    #  return '\x1b[1A\x1b[1M' + text
 
 
 def diff(a, b):
@@ -60,8 +63,12 @@ def diff(a, b):
 
 def pick_category(payee, categories, default_choice=''):
     category = None
+
+    COMPLETER = InputCompleter(categories.keys())
     while not category:
+        readline.set_completer(COMPLETER.complete)
         category = prompt.query('Category', default=default_choice)
+        readline.set_completer(None)
         # if not category Skip category [YES, No]
         if category.strip() and category not in categories:
             create = prompt.yn(overwrite("Create new '%s' category" %
@@ -84,8 +91,6 @@ def pick_category(payee, categories, default_choice=''):
 
 
 def fetch_categories(lines, categories, options):
-    completer = InputCompleter(categories.keys())
-    readline.set_completer(completer.complete)
     readline.parse_and_bind('tab: complete')
     result = []
     for line in lines:
