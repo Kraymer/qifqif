@@ -9,13 +9,61 @@ import os
 import readline
 import sys
 
+from clint.textui import puts, prompt, colored
+from difflib import SequenceMatcher
 
-def prefilled_input(prompt, prefill=''):
-    print '#%s#' % prefill
+
+def read_single_keypress():
+    """Waits for a single keypress on stdin.
+
+    This is a silly function to call if you need to do it a lot because it has
+    to store stdin's current setup, setup stdin for reading single keystrokes
+    then read the single keystroke then revert stdin back after reading the
+    keystroke.
+
+    Returns the character of the key that was pressed (zero on
+    KeyboardInterrupt which can happen when a signal gets handled)
+
+    """
+    import termios, fcntl, sys, os
+    fd = sys.stdin.fileno()
+    # save old state
+    flags_save = fcntl.fcntl(fd, fcntl.F_GETFL)
+    attrs_save = termios.tcgetattr(fd)
+    # make raw - the way to do this comes from the termios(3) man page.
+    attrs = list(attrs_save) # copy the stored version to update
+    # iflag
+    attrs[0] &= ~(termios.IGNBRK | termios.BRKINT | termios.PARMRK
+                  | termios.ISTRIP | termios.INLCR | termios. IGNCR
+                  | termios.ICRNL | termios.IXON )
+    # oflag
+    attrs[1] &= ~termios.OPOST
+    # cflag
+    attrs[2] &= ~(termios.CSIZE | termios. PARENB)
+    attrs[2] |= termios.CS8
+    # lflag
+    attrs[3] &= ~(termios.ECHONL | termios.ECHO | termios.ICANON
+                  | termios.ISIG | termios.IEXTEN)
+    termios.tcsetattr(fd, termios.TCSANOW, attrs)
+    # turn off non-blocking
+    fcntl.fcntl(fd, fcntl.F_SETFL, flags_save & ~os.O_NONBLOCK)
+    # read a single keystroke
+    try:
+        ret = sys.stdin.read(1) # returns a single character
+    except KeyboardInterrupt:
+        ret = 0
+    finally:
+        # restore old state
+        termios.tcsetattr(fd, termios.TCSAFLUSH, attrs_save)
+        fcntl.fcntl(fd, fcntl.F_SETFL, flags_save)
+    return ret
+
+
+def prefilled_input(_prompt, prefill=''):
     readline.set_startup_hook(lambda: readline.insert_text(prefill))
     readline.redisplay()
     try:
-        return raw_input(prompt)
+        return raw_input(_prompt) or prefill
     finally:
         readline.set_startup_hook()
 
@@ -44,29 +92,42 @@ def find_category(categories, payee):
             return c
 
 
-def pick_category(payee, categories, default=''):
-    default_choice = '[%s]' % default if default else ''
+def overwrite(text):
+    return '\x1b[1A\x1b[2K' + text
+
+
+def diff(a, b):
+    s = SequenceMatcher(None, a, b)
+    match = s.find_longest_match(0, len(a) - 1, 0, len(b) - 1)
+    return '%s%s%s' % (colored.red(b[:match[1]]),
+                       colored.green(b[match[1]:match[1] + match[2]]),
+                       colored.red(b[match[2]:]))
+
+
+def pick_category(payee, categories, default_choice=''):
     category = None
     while not category:
-        category = raw_input("Category%s: " % default_choice) or default
+        category = prompt.query('Category', default=default_choice)
         # if not category Skip category [YES, No]
         if category.strip() and category not in categories:
-            uinput = raw_input('Create new category [YES, Cancel]: ')
-            if uinput.upper() not in ['Y', '']:
+            create = prompt.yn(overwrite("Create new '%s' category" %
+                               category))
+            if not create:
                 category = None
             else:
                 categories[category] = []
 
-    if category != default:
-        save = raw_input('Save association [YES, No]: ')
-        if save.upper() in ('Y', ''):
-            match = None
-            while not match:
-                match = prefilled_input('Enter string to match: ', payee)
-                if match not in payee:
-                    print 'match must be a substring of original payee'
-                    match = None
-                categories[category].append(match)
+    if category != default_choice:
+        match = None
+        while True:
+            match = prefilled_input('Match...: ', match or payee)
+            if match in payee:
+                break
+            else:
+                puts(overwrite('Match...: %s' % diff(payee, match)))
+                read_single_keypress()
+                print '-> '+match
+        categories[category].append(match)
     return (category, categories)
 
 
@@ -82,7 +143,9 @@ def fetch_categories(lines, categories, options):
         if payee:  # write payee line and find category to write on next line
             result.append(line)
             category = find_category(categories, payee)
-            print 'Amount..: %s\nPayee...: %s' % (amount, payee)
+            puts('Amount..: %s' % (colored.green(amount) if float(amount) > 0
+                 else colored.red(amount)))
+            puts('Payee...: ' + payee)
             prompt = category
             category = '' if options['audit'] else category
             while not category:
@@ -92,7 +155,7 @@ def fetch_categories(lines, categories, options):
             result.append(line)
         if line.startswith('^'):
             if options['audit']:
-                print('\x1b[1A\x1b[2KCategory: %s' % category)  # erase last line
+                print('Category: %s' % category)  # erase last line
             print '---'
     return result, categories
 
