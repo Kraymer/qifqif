@@ -53,16 +53,15 @@ def overwrite(text):
     return '\x1b[1A\x1b[1M' + text
 
 
-def diff(a, b, as_error=False):
+def diff(a, b):
     s = SequenceMatcher(None, a, b)
-    match = s.find_longest_match(0, len(a), 0, len(b))
-    _, x, y = match
-    return '%s%s%s' % (colored.red(b[:x]) if as_error else b[:x],
-                       colored.green(b[x:x + y]),
-                       colored.red(b[x + y:]) if as_error else b[x + y:])
+    match = s.find_longest_match(0, len(a) - 1, 0, len(b) - 1)
+    return '%s%s%s' % (colored.red(b[:match[1]]),
+                       colored.green(b[match[1]:match[1] + match[2]]),
+                       colored.red(b[match[2]:]))
 
 
-def pick_category(payee, categories, default_choice='', match=''):
+def pick_category(payee, categories, default_choice=''):
     category = None
 
     COMPLETER = InputCompleter(categories.keys())
@@ -72,18 +71,20 @@ def pick_category(payee, categories, default_choice='', match=''):
         readline.set_completer(None)
         # if not category Skip category [YES, No]
 
+    match = 'plop'
     if category.strip() and category != default_choice:
         while True:
             match = prefilled_input(overwrite("? Match for '%s': " % category),
                                     match)
             if match and match not in payee:
                 puts(overwrite('%s Match rejected...: %s\n') %
-                     (colored.red('✖'), diff(payee, match, as_error=True)))
+                     (colored.red('✖'), diff(payee, match)))
             else:
                 if not match:
-                    break
+                    puts(overwrite('- No match set)'))
+                break
         if match:
-            puts(overwrite("%s Match for '%s': %s\n" % (colored.green('✔'),
+            puts(overwrite("%s Match for '%s': %s" % (colored.green('✔'),
                  category, match)))
             if category not in categories:
                 categories[category] = [match]
@@ -104,18 +105,18 @@ def fetch_categories(lines, categories, options):
             category, match = find_category(categories, payee)
             puts('Amount..: %s' % (colored.green(amount) if float(amount) > 0
                  else colored.red(amount)))
-            puts('Payee...: %s' % (diff(match, payee) if match else payee))
-            while not category or options['audit']:
+            puts('Payee...: ' + diff(match, payee))
+            _prompt = category
+            category = '' if options['audit'] else category
+            while not category:
                 category, categories = pick_category(payee, categories,
-                    category, match)
-                if category:
-                    break
+                                                            _prompt)
             result.append('L%s\n' % category)
         elif not line.startswith('L'):  # overwrite previous categories
             result.append(line)
         if line.startswith('^'):
             if options['audit']:
-                print(overwrite('Category: %s' % (category)))
+                print('Category: %s' % (category))
             print '---'
     return result, categories
 
