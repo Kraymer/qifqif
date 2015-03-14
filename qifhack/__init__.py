@@ -10,8 +10,9 @@ import os
 import readline
 import sys
 
-from clint.textui import puts, prompt, colored
+from clint.textui import puts, colored
 from difflib import SequenceMatcher
+
 
 
 def prefilled_input(_prompt, prefill=''):
@@ -48,7 +49,8 @@ def find_category(categories, payee):
             return c, k
     return None, None
 
-def overwrite(text):
+
+def overwrite(text=''):
     #return text
     return '\x1b[1A\x1b[1M' + text
 
@@ -62,37 +64,45 @@ def diff(a, b, as_error=False):
                        colored.red(b[x + y:]) if as_error else b[x + y:])
 
 
-def pick_category(payee, categories, default_choice='', default_match=''):
-    category = None
-
+def pick_category(default_cat, categories):
     COMPLETER = InputCompleter(categories.keys())
-    while not category:
-        readline.set_completer(COMPLETER.complete)
-        category = prompt.query('Category', default=default_choice)
-        readline.set_completer(None)
-        # if not category Skip category [YES, No]
+    readline.set_completer(COMPLETER.complete)
+    category = raw_input('Category: ')
+    if not category and default_cat:
+        erase = raw_input(overwrite("Remove existing category [y,N]? ")) or 'N'
+        if erase.upper() == 'N':
+            category = default_cat
+    readline.set_completer(None)
+    return category
 
-    if category.strip() and category != default_choice:
-        while True:
-            match = raw_input(overwrite("? Match for '%s': " % category))
-            if match and match not in payee:
+
+def pick_match(default_match, payee):
+    while True:
+        match = raw_input(overwrite("Match:"))
+        if match not in payee:
                 puts(overwrite('%s Match rejected...: %s\n') %
                      (colored.red('✖'), diff(payee, match, as_error=True)))
-            else:
-                if not match and default_match:
-                    use_default = prompt.yn(overwrite("Use '%s' as match?") %
-                                            default_match, default=False)
-                    if use_default:
-                        match = default_match
-                break
-        if match:
-            puts(overwrite("%s Match for '%s': %s\n" % (colored.green('✔'),
-                 category, str(match))))
+        else:
+            puts(overwrite("%s Match: %s\n" % (colored.green('✔'),
+                 str(match) if match else colored.red('<none>'))))
+            break
+    return match
+
+
+def update_config(categories, prev_cat, prev_match, category, match, ):
+    if category != prev_cat:
+        categories[prev_cat].remove(prev_match)
+        if not categories[prev_cat]:
+            del categories[prev_cat]
+        if category and match:
             if category not in categories:
                 categories[category] = [match]
             else:
-                categories[category].append(match)
-    return (category, categories)
+                categories.append(match)
+    else:
+        if match != prev_match:
+            categories[category].remove(prev_match)
+            categories[category].append(match)
 
 
 def fetch_categories(lines, categories, options):
@@ -104,15 +114,24 @@ def fetch_categories(lines, categories, options):
         payee = line[1:].strip() if line.startswith('P') else None
         if payee:  # write payee line and find category to write on next line
             result.append(line)
-            category, match = find_category(categories, payee)
+            prev_cat, prev_match = find_category(categories, payee)
+            category = prev_cat
+            match = prev_match
             puts('Amount..: %s' % (colored.green(amount) if float(amount) > 0
                  else colored.red(amount)))
-            puts('Payee...: %s' % (diff(match, payee) if match else payee))
-            while not category or options['audit']:
-                category, categories = pick_category(payee, categories,
-                    category, match)
-                if category:
-                    break
+            puts('Payee...: %s' % (diff(prev_match, payee) if prev_match
+                 else payee))
+            puts("Category: %s" % prev_cat)
+            edit = None
+            if options['audit']:
+                edit = raw_input('Edit [y/N]? ') or 'N'
+            if not prev_cat or (edit.upper() == 'Y'):
+                category = pick_category(prev_cat, categories)
+                puts(overwrite('Category: %s\n') % (category if category else
+                     colored.red('<none>')))
+            if not prev_match or edit.upper() == 'Y' and category:
+                match = pick_match(prev_match, payee)
+            update_config(categories, prev_cat, prev_match, category, match)
             result.append('L%s\n' % category)
         elif not line.startswith('L'):  # overwrite previous categories
             result.append(line)
