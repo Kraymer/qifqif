@@ -132,23 +132,23 @@ def fetch_tags(lines, tags, options):
                  else payee))
             if prev_tag:
                 puts("Category: %s" % prev_tag)
-            edit = ''
-            if options['audit']:
-                edit = raw_input('Edit [y/N]? ') or 'N'
-            if not prev_tag or (edit.upper() == 'Y'):
+            edit = options['audit']
+            if tag and options['audit']:
+                edit = (raw_input('Edit [y/N]? ') or 'N').lower() == 'y'
+            if not prev_tag or edit:
                 tag = pick_tag(prev_tag, tags)
                 puts(overwrite('Category: %s') % (tag + '\n' if tag else
                      colored.red('<none>')))
-            if tag and not prev_match or edit.upper() == 'Y' and tag:
+            if tag and (not prev_match or edit):
                 match = pick_match(prev_match, payee)
             update_config(options['config'], prev_tag, prev_match, tag, match)
             result.append('L%s\n' % tag)
         elif not line.startswith('L'):  # overwrite previous tags
             result.append(line)
         if line.startswith('^'):
-            if options['audit']:
-                print(overwrite('Category: %s' % (tag)))
-            print '---'
+            delimiter = '-' * 3
+            print overwrite(delimiter) if (options['audit'] and not edit) \
+                else delimiter
     return result, tags
 
 
