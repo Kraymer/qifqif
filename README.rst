@@ -1,7 +1,11 @@
 qifqif
 ======
 
-*Because adding categories into QIF files can make all the difference.*
+CLI tool for quick tagging your QIF files transactions.
+
+
+Description
+-----------
 
 QIF is a format widely used by personal money management software such as
 `GnuCash`_ to import information. Yet, the import process is particularly
@@ -20,11 +24,12 @@ similar transactions.
 Features
 --------
 
-- **Blazing fast edits:** thanks to prefilled inputs and ``<TAB>`` completion
-- **Auditing mode:** review your transaction one by one
+- **Blazing fast edits:** thanks to well-thought-out defaults and ``<TAB>``
+  completion
+- **Auditing mode:** review your transactions one by one
 - **Quiet mode (no interactive):** for easy integration with scripts
-- **Easy-going workflow:** dealing with large files? Press ``<Esc>`` to exit
-  anytime ; on next run, editing will resume right there where you left it.
+- **Easy-going workflow:** dealing with large files? Press ``<Ctrl+C>`` to exit
+  anytime ; on next run, editing will resume right where you left it.
 
 
 Usage

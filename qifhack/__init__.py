@@ -44,9 +44,10 @@ class InputCompleter(object):  # Custom completer
 
 
 def find_tag(tags, payee):
-    for (c, keywords) in tags.items():
-        if any([k.lower() in payee.lower() for k in keywords]):
-            return c, k
+    for (tag, keywords) in tags.items():
+        for k in keywords:
+            if is_match(k, payee):
+                return tag, k
     return None, None
 
 
