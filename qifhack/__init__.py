@@ -138,7 +138,7 @@ def fetch_tags(lines, tags, options):
                 tag = pick_tag(prev_tag, tags)
                 puts(overwrite('Category: %s') % (tag + '\n' if tag else
                      colored.red('<none>')))
-            if not prev_match or edit.upper() == 'Y' and tag:
+            if tag and not prev_match or edit.upper() == 'Y' and tag:
                 match = pick_match(prev_match, payee)
             update_config(options['config'], prev_tag, prev_match, tag, match)
             result.append('L%s\n' % tag)
