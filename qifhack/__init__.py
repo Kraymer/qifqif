@@ -100,7 +100,7 @@ def update_config(categories, prev_cat, prev_match, category, match, ):
             else:
                 categories.append(match)
     else:
-        if match != prev_match:
+        if match and match != prev_match:
             categories[category].remove(prev_match)
             categories[category].append(match)
 
