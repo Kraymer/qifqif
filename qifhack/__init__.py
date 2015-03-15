@@ -9,6 +9,7 @@ import json
 import os
 import readline
 import sys
+import re
 
 from clint.textui import puts, colored
 from difflib import SequenceMatcher
@@ -76,10 +77,14 @@ def pick_tag(default_cat, tags):
     return tag
 
 
+def is_match(match, payee):
+    return re.search(r'\b%s\b' % match, payee, re.I) is not None
+
+
 def pick_match(default_match, payee):
     while True:
-        match = raw_input(overwrite("Match:"))
-        if match not in payee:
+        match = raw_input(overwrite("Match: "))
+        if not is_match(match, payee):
                 puts(overwrite('%s Match rejected...: %s\n') %
                      (colored.red('✖'), diff(payee, match, as_error=True)))
         else:
