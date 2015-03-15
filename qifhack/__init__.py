@@ -47,11 +47,16 @@ def overwrite(text=''):
 
 def diff(a, b, as_error=False):
     s = SequenceMatcher(None, a.lower(), b.lower())
-    match = s.find_longest_match(0, len(a), 0, len(b))
-    _, x, y = match
-    return '%s%s%s' % (colored.red(b[:x]) if as_error else b[:x],
-                       colored.green(b[x:x + y]),
-                       colored.red(b[x + y:]) if as_error else b[x + y:])
+    match_indexes = s.find_longest_match(0, len(a), 0, len(b))
+    _, x, y = match_indexes
+    match = b[x:x + y]
+    words = match.split(' ')
+    res = colored.red(b[:x]) if as_error else b[:x]
+    for w in words:
+        res += (colored.green(w) if is_match(w, a)
+                else colored.yellow(w)) + ' '
+    res += '\b' + (colored.red(b[x + y:]) if as_error else b[x + y:])
+    return res
 
 
 def pick_tag(default_cat, tags):
