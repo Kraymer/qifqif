@@ -88,20 +88,30 @@ def pick_match(default_match, payee):
     return match
 
 
-def update_config(categories, prev_cat, prev_match, category, match, ):
-    if category != prev_cat:
-        categories[prev_cat].remove(prev_match)
-        if not categories[prev_cat]:
-            del categories[prev_cat]
-        if category and match:
-            if category not in categories:
-                categories[category] = [match]
+def update_config(cfg_file, prev_tag, prev_match, tag, match, ):
+    with open(cfg_file, 'r') as cfg:
+        tags_saved = json.load(cfg)
+
+    tags = tags_saved.copy()
+    if tag != prev_tag:
+        if prev_tag:
+            tags[prev_tag].remove(prev_match)
+            if not tags[prev_tag]:
+                del tags[prev_tag]
+        if tag and match:
+            if tag not in tags:
+                tags[tag] = [match]
             else:
-                categories.append(match)
-    else:
-        if match and match != prev_match:
-            categories[category].remove(prev_match)
-            categories[category].append(match)
+                tags[tag].append(match)
+    elif match and match != prev_match:
+        tags[tag].remove(prev_match)
+        tags[tag].append(match)
+    else:  # no diff
+        return
+
+    with open(cfg_file, 'w+') as cfg:
+        cfg.write(json.dumps(tags,
+                  sort_keys=True, indent=4, separators=(',', ': ')))
 
 
 def fetch_tags(lines, tags, options):
