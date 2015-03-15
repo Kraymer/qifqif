@@ -15,18 +15,7 @@ from clint.textui import puts, colored
 from difflib import SequenceMatcher
 
 
-def prefilled_input(_prompt, prefill=''):
-    if prefill:
-        readline.set_startup_hook(lambda: readline.insert_text(prefill))
-    readline.redisplay()
-    try:
-        return raw_input(_prompt)
-    finally:
-        readline.set_startup_hook()
-
-
 class InputCompleter(object):  # Custom completer
-
     def __init__(self, options):
         self.options = options
 
