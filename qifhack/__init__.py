@@ -66,7 +66,7 @@ def diff(a, b, as_error=False):
 def pick_tag(default_cat, tags):
     completer = InputCompleter(sorted(tags.keys()))
     readline.set_completer(completer.complete)
-    tag = raw_input('tag: ')
+    tag = raw_input('Category: ')
     if not tag and default_cat:
         erase = raw_input(overwrite("Remove existing tag [y,N]? ")) or 'N'
         if erase.upper() == 'N':
@@ -136,7 +136,7 @@ def fetch_tags(lines, tags, options):
                 edit = raw_input('Edit [y/N]? ') or 'N'
             if not prev_tag or (edit.upper() == 'Y'):
                 tag = pick_tag(prev_tag, tags)
-                puts(overwrite('tag: %s\n') % (tag if tag else
+                puts(overwrite('Category: %s') % (tag + '\n' if tag else
                      colored.red('<none>')))
             if not prev_match or edit.upper() == 'Y' and tag:
                 match = pick_match(prev_match, payee)
@@ -146,7 +146,7 @@ def fetch_tags(lines, tags, options):
             result.append(line)
         if line.startswith('^'):
             if options['audit']:
-                print(overwrite('tag: %s' % (tag)))
+                print(overwrite('Category: %s' % (tag)))
             print '---'
     return result, tags
 
