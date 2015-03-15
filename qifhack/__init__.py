@@ -56,7 +56,7 @@ def overwrite(text=''):
 
 
 def diff(a, b, as_error=False):
-    s = SequenceMatcher(None, a, b)
+    s = SequenceMatcher(None, a.lower(), b.lower())
     match = s.find_longest_match(0, len(a), 0, len(b))
     _, x, y = match
     return '%s%s%s' % (colored.red(b[:x]) if as_error else b[:x],
