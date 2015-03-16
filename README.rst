@@ -1,3 +1,6 @@
+.. image:: https://travis-ci.org/Kraymer/qifqif.svg?branch=master
+    :target: https://travis-ci.org/Kraymer/qifqif
+
 qifqif
 ======
 
