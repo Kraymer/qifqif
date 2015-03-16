@@ -37,6 +37,10 @@ Usage
 
     usage: qifqif [-h] [-o DEST] [-c CONFIG] QIF_FILE
 
+More infos on the `wiki`_ page
+
+.. _wiki: https://github.com/Kraymer/qifqif/wiki
+
 
 Installation
 ------------
