@@ -48,4 +48,4 @@ Feedbacks
 
 Please submit bugs and features requests on the `Issue tracker`_.
 
-.. _Issue tracker: https://github.com/Kraymer/qifhack/issues
+.. _Issue tracker: https://github.com/Kraymer/qifqif/issues

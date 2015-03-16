@@ -157,20 +157,20 @@ def main(argv=None):
     readline.parse_and_bind('tab: complete')
     parser = argparse.ArgumentParser(
         description='Enrich your .QIF files with tags. '
-        'See https://github.com/Kraymer/qifhack for more infos.')
+        'See https://github.com/Kraymer/qifqif for more infos.')
     parser.add_argument('src', metavar='QIF_FILE',
                         help='.QIF file to process', default='')
     parser.add_argument('-a', '--audit-mode', dest='audit',
                         action='store_true', help=('pause after'
                                                    'each transaction'))
-    parser.add_argument('-o', '--output', dest='dest',
-                        help='Output filename. '
-                        'DEFAULT: edit input file in-place', default='')
     parser.add_argument('-c', '--config', dest='config',
                         help='Configuration filename in json format. '
-                        'DEFAULT: ~/.qifhack.json',
+                        'DEFAULT: ~/.qifqif.json',
                         default=os.path.join(os.path.expanduser('~'),
-                                             '.qifhack.json'))
+                                             '.qifqif.json'))
+    parser.add_argument('-o', '--output', dest='dest',
+                    help='Output filename. '
+                    'DEFAULT: edit input file in-place', default='')
     args = vars(parser.parse_args())
     if not args['dest']:
         args['dest'] = args['src']

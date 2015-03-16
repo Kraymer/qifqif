@@ -17,23 +17,23 @@ if sys.argv[-1] == "publish":
     publish()
     sys.exit()
 
-setup(name='qifhack',
+setup(name='qifqif',
     version='0.1.0.post1',
     description='QIF file editing tool',
     long_description=open('README.rst').read(),
     author='Fabrice Laporte',
     author_email='kraymer@gmail.com',
-    url='https://github.com/KraYmer/qifhack',
+    url='https://github.com/KraYmer/qifqif',
     license='MIT',
     platforms='ALL',
 
     packages=[
-      'qifhack',
+      'qifqif',
     ],
 
     entry_points={
       'console_scripts': [
-          'qifhack = qifhack:main',
+          'qifqif = qifqif:main',
       ],
     },
 
