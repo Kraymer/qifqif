@@ -7,9 +7,9 @@
 import argparse
 import json
 import os
+import re
 import readline
 import sys
-import re
 
 from clint.textui import puts, colored
 from difflib import SequenceMatcher
@@ -169,8 +169,8 @@ def main(argv=None):
                         default=os.path.join(os.path.expanduser('~'),
                                              '.qifqif.json'))
     parser.add_argument('-o', '--output', dest='dest',
-                    help='Output filename. '
-                    'DEFAULT: edit input file in-place', default='')
+                        help='Output filename. '
+                        'DEFAULT: edit input file in-place', default='')
     args = vars(parser.parse_args())
     if not args['dest']:
         args['dest'] = args['src']
