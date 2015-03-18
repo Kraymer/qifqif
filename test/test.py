@@ -18,7 +18,6 @@ CONFIG_FILE = os.path.join(os.path.realpath(os.path.dirname(__file__)),
 class TestQifQif(unittest.TestCase):
 
     def setUp(self):
-        print 'yo'
         with open(CONFIG_FILE, 'r') as cfg:
             tags = json.load(cfg)
         self.tags = tags
@@ -33,11 +32,9 @@ class TestQifQif(unittest.TestCase):
     def test_update_config(self):
         dest = os.path.join(tempfile.mkdtemp(), os.path.basename(CONFIG_FILE))
         shutil.copy2(CONFIG_FILE, dest)
-        qifqif.update_config(dest, 'Bars', 'Sully', 'Drink', 'Sully')
-        with open(dest, 'r') as cfg:
-            new_cfg = json.load(cfg)
-            self.assertTrue('Sully' in new_cfg['Drink'] and
-                            'Sully' not in new_cfg['Bars'])
+        qifqif.update_config('Bars', 'Sully', 'Drink', 'Sully',
+                             {'config': dest})
+
 
 if __name__ == '__main__':
     unittest.main()
