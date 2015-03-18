@@ -79,21 +79,21 @@ def pick_match(default_match, payee):
     while True:
         match = raw_input(overwrite("Match: "))
         if not is_match(match, payee):
-                puts(overwrite('%s Match rejected...: %s\n') %
+                puts(overwrite('%s Match rejected: %s\n') %
                      (colored.red('✖'), diff(payee, match, as_error=True)))
         else:
-            puts(overwrite("%s Match: %s" % (colored.green('✔'),
+            puts(overwrite("%s Match accepted: %s" % (colored.green('✔'),
                  str(match) if match else colored.red('<none>'))))
             break
     return match
 
 
-def update_config(cfg_file, prev_tag, prev_match, tag, match, ):
-    with open(cfg_file, 'r') as cfg:
+def update_config(prev_tag, prev_match, tag, match, options):
+    with open(options['config'], 'r') as cfg:
         tags_saved = json.load(cfg)
 
     tags = tags_saved.copy()
-    if tag != prev_tag:
+    if tag and tag != prev_tag:
         if prev_tag:
             tags[prev_tag].remove(prev_match)
             if not tags[prev_tag]:
@@ -109,12 +109,32 @@ def update_config(cfg_file, prev_tag, prev_match, tag, match, ):
     else:  # no diff
         return
 
-    with open(cfg_file, 'w+') as cfg:
+    with open(options['config'], 'w+') as cfg:
         cfg.write(json.dumps(tags,
                   sort_keys=True, indent=4, separators=(',', ': ')))
 
 
-def fetch_tags(lines, tags, options):
+def query_tag(amount, payee, prev_tag, prev_match, options):
+    puts('Amount..: %s' % (colored.green(amount) if float(amount) > 0
+         else colored.red(amount)))
+    puts('Payee...: %s' % (diff(prev_match, payee) if prev_match
+         else payee))
+    if prev_tag:
+        puts("Category: %s" % prev_tag)
+    tag, match = prev_tag, prev_match
+    edit = options['audit']
+    if prev_tag and options['audit']:
+        edit = (raw_input('Edit [y/N]? ') or 'N').lower() == 'y'
+    if not prev_tag or edit:
+        tag = pick_tag(prev_tag, options['tags'])
+        puts(overwrite('Category: %s') % (tag + '\n' if tag else
+             colored.red('<none>')))
+    if tag and (not prev_match or edit):
+        match = pick_match(prev_match, payee)
+    return tag or prev_tag, match
+
+
+def process_file(lines, options):
     result = []
     for line in lines:
         if line.startswith('T'):
@@ -122,33 +142,23 @@ def fetch_tags(lines, tags, options):
         payee = line[1:].strip() if line.startswith('P') else None
         if payee:  # write payee line and find tag to write on next line
             result.append(line)
-            prev_tag, prev_match = find_tag(tags, payee)
-            tag = prev_tag
-            match = prev_match
-            puts('Amount..: %s' % (colored.green(amount) if float(amount) > 0
-                 else colored.red(amount)))
-            puts('Payee...: %s' % (diff(prev_match, payee) if prev_match
-                 else payee))
-            if prev_tag:
-                puts("Category: %s" % prev_tag)
-            edit = options['audit']
-            if tag and options['audit']:
-                edit = (raw_input('Edit [y/N]? ') or 'N').lower() == 'y'
-            if not prev_tag or edit:
-                tag = pick_tag(prev_tag, tags)
-                puts(overwrite('Category: %s') % (tag + '\n' if tag else
-                     colored.red('<none>')))
-            if tag and (not prev_match or edit):
-                match = pick_match(prev_match, payee)
-            update_config(options['config'], prev_tag, prev_match, tag, match)
+            prev_tag, prev_match = find_tag(options['tags'], payee)
+            if not options['batch']:
+                tag, match = query_tag(amount, payee, prev_tag, prev_match,
+                                       options)
+            else:
+                tag, match = prev_tag, prev_match
+            update_config(prev_tag, prev_match, tag, match, options)
             result.append('L%s\n' % tag)
-        elif not line.startswith('L'):  # overwrite previous tags
+        elif line and not line.startswith('L'):  # overwrite previous tags
             result.append(line)
         if line.startswith('^'):
             delimiter = '-' * 3
-            print overwrite(delimiter) if (options['audit'] and not edit) \
-                else delimiter
-    return result, tags
+            if not options['batch']:
+                print overwrite(delimiter) if options['audit'] else delimiter
+    if options['batch']:
+        print ''.join(result).strip()
+    return result
 
 
 def main(argv=None):
@@ -171,18 +181,25 @@ def main(argv=None):
     parser.add_argument('-o', '--output', dest='dest',
                         help='Output filename. '
                         'DEFAULT: edit input file in-place', default='')
+    parser.add_argument('-b', '--batch-mode', action='store_true',
+                        dest='batch', help=('skip transactions that require '
+                                            'user input'))
+
     args = vars(parser.parse_args())
     if not args['dest']:
         args['dest'] = args['src']
+    if args['audit'] and args['batch']:
+        print 'Error: cannot activate batch-mode when audit-mode is already on'
+        exit(1)
 
     if os.path.isfile(args['config']):
         with open(args['config'], 'r') as cfg:
-            cfg_dict = json.load(cfg)
+            args['tags'] = json.load(cfg)
     else:
-        cfg_dict = {}
+        args['tags'] = {}
     with open(args['src'], 'r') as f:
         lines = f.readlines()
-        result, tags = fetch_tags(lines, cfg_dict, options=args)
+        result = process_file(lines, options=args)
     with open(args['dest'], 'w') as f:
         f.writelines(result)
 
