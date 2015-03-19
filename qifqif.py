@@ -59,14 +59,14 @@ def diff(a, b, as_error=False):
     return res
 
 
-def pick_tag(default_cat, tags):
+def pick_tag(edit, cached_cat, tags):
     completer = InputCompleter(sorted(tags.keys()))
     readline.set_completer(completer.complete)
-    tag = raw_input('Category: ')
-    if not tag and default_cat:
+    tag = raw_input(overwrite('Category: '))
+    if not tag and cached_cat:
         erase = raw_input(overwrite("Remove existing tag [y,N]? ")) or 'N'
         if erase.upper() == 'N':
-            tag = default_cat
+            tag = cached_cat
     readline.set_completer(None)
     return tag
 
@@ -75,36 +75,36 @@ def is_match(match, payee):
     return re.search(r'\b%s\b' % match, payee, re.I) is not None
 
 
-def pick_match(default_match, payee):
+def pick_match(cached_match, payee):
     while True:
         match = raw_input(overwrite("Match: "))
         if not is_match(match, payee):
-                puts(overwrite('%s Match rejected: %s\n') %
-                     (colored.red('✖'), diff(payee, match, as_error=True)))
+            puts(overwrite('%s Match rejected: %s\n') %
+                 (colored.red('✖'), diff(payee, match, as_error=True)))
         else:
-            puts(overwrite("%s Match accepted: %s" % (colored.green('✔'),
+            puts(overwrite("%s Match accepted: %s\n" % (colored.green('✔'),
                  str(match) if match else colored.red('<none>'))))
             break
     return match
 
 
-def update_config(prev_tag, prev_match, tag, match, options):
+def update_config(cached_tag, cached_match, tag, match, options):
     with open(options['config'], 'r') as cfg:
         tags_saved = json.load(cfg)
 
     tags = tags_saved.copy()
-    if tag and tag != prev_tag:
-        if prev_tag:
-            tags[prev_tag].remove(prev_match)
-            if not tags[prev_tag]:
-                del tags[prev_tag]
+    if tag and tag != cached_tag:
+        if cached_tag:
+            tags[cached_tag].remove(cached_match)
+            if not tags[cached_tag]:
+                del tags[cached_tag]
         if tag and match:
             if tag not in tags:
                 tags[tag] = [match]
             else:
                 tags[tag].append(match)
-    elif match and match != prev_match:
-        tags[tag].remove(prev_match)
+    elif match and match != cached_match:
+        tags[tag].remove(cached_match)
         tags[tag].append(match)
     else:  # no diff
         return
@@ -114,24 +114,24 @@ def update_config(prev_tag, prev_match, tag, match, options):
                   sort_keys=True, indent=4, separators=(',', ': ')))
 
 
-def query_tag(amount, payee, prev_tag, prev_match, options):
+def query_tag(amount, payee, cached_tag, cached_match, options):
     puts('Amount..: %s' % (colored.green(amount) if float(amount) > 0
          else colored.red(amount)))
-    puts('Payee...: %s' % (diff(prev_match, payee) if prev_match
+    puts('Payee...: %s\n' % (diff(cached_match, payee) if cached_match
          else payee))
-    if prev_tag:
-        puts("Category: %s" % prev_tag)
-    tag, match = prev_tag, prev_match
-    edit = options['audit']
-    if prev_tag and options['audit']:
-        edit = (raw_input('Edit [y/N]? ') or 'N').lower() == 'y'
-    if not prev_tag or edit:
-        tag = pick_tag(prev_tag, options['tags'])
-        puts(overwrite('Category: %s') % (tag + '\n' if tag else
-             colored.red('<none>')))
-    if tag and (not prev_match or edit):
-        match = pick_match(prev_match, payee)
-    return tag or prev_tag, match
+    tag, match = cached_tag, cached_match
+    edit = False
+    if cached_tag:
+        if options['audit']:
+            edit = (raw_input(overwrite("Edit '%s' category [y/N]? ") %
+                    colored.green(cached_tag)) or 'N').lower() == 'y'
+    if not cached_tag or edit:
+        tag = pick_tag(cached_tag, options['tags'])
+    puts(overwrite('Category: %s') % (colored.green(tag) + '\n' if tag else
+         colored.red('<none>')))
+    if tag and (not cached_match or edit):
+        match = pick_match(cached_match, payee)
+    return tag or cached_tag, match
 
 
 def process_file(lines, options):
@@ -142,20 +142,21 @@ def process_file(lines, options):
         payee = line[1:].strip() if line.startswith('P') else None
         if payee:  # write payee line and find tag to write on next line
             result.append(line)
-            prev_tag, prev_match = find_tag(options['tags'], payee)
+            cached_tag, cached_match = find_tag(options['tags'], payee)
             if not options['batch']:
-                tag, match = query_tag(amount, payee, prev_tag, prev_match,
+                tag, match = query_tag(amount, payee, cached_tag, cached_match,
                                        options)
             else:
-                tag, match = prev_tag, prev_match
-            update_config(prev_tag, prev_match, tag, match, options)
+                tag, match = cached_tag, cached_match
+
+            update_config(cached_tag, cached_match, tag, match, options)
             result.append('L%s\n' % tag)
         elif line and not line.startswith('L'):  # overwrite previous tags
             result.append(line)
         if line.startswith('^'):
             delimiter = '-' * 3
             if not options['batch']:
-                print overwrite(delimiter) if options['audit'] else delimiter
+                print overwrite(delimiter) if tag else delimiter
     if options['batch']:
         print ''.join(result).strip()
     return result
