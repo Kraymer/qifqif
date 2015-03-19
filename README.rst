@@ -31,7 +31,7 @@ Features
   completion
 - **Auditing mode:** review your transactions one by one
 - **Quiet mode (no interactive):** for easy integration with scripts
-- **Easy-going workflow:** dealing with large files? Press ``<Ctrl+C>`` to exit
+- **Easy-going workflow:** dealing with large time-consuming files? Press ``<Ctrl+C>`` to exit
   anytime ; on next run, editing will resume right where you left it.
 
 
