@@ -172,15 +172,15 @@ def main(argv=None):
     parser.add_argument('src', metavar='QIF_FILE',
                         help='.QIF file to process', default='')
     parser.add_argument('-a', '--audit-mode', dest='audit',
-                        action='store_true', help=('pause after'
+                        action='store_true', help=('pause after '
                                                    'each transaction'))
     parser.add_argument('-c', '--config', dest='config',
-                        help='Configuration filename in json format. '
+                        help='configuration filename in json format. '
                         'DEFAULT: ~/.qifqif.json',
                         default=os.path.join(os.path.expanduser('~'),
                                              '.qifqif.json'))
     parser.add_argument('-o', '--output', dest='dest',
-                        help='Output filename. '
+                        help='output filename. '
                         'DEFAULT: edit input file in-place', default='')
     parser.add_argument('-b', '--batch-mode', action='store_true',
                         dest='batch', help=('skip transactions that require '
