@@ -18,7 +18,7 @@ if sys.argv[-1] == "publish":
     sys.exit()
 
 setup(name='qifqif',
-    version='0.1.0.post1',
+    version='0.2.0',
     description='QIF file editing tool',
     long_description=open('README.rst').read(),
     author='Fabrice Laporte',
@@ -37,6 +37,9 @@ setup(name='qifqif',
       ],
     },
 
+    install_requires=[
+        'clint',
+    ],
 
     classifiers=[
       'License :: OSI Approved :: MIT License',
