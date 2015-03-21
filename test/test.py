@@ -4,12 +4,11 @@
 """Units tests"""
 
 import os
-import tempfile
 import shutil
+import tempfile
 import unittest
-import json
 
-import qifqif
+from qifqif import tags
 
 CONFIG_FILE = os.path.join(os.path.realpath(os.path.dirname(__file__)),
                            'rsrc', 'config.json')
@@ -18,22 +17,19 @@ CONFIG_FILE = os.path.join(os.path.realpath(os.path.dirname(__file__)),
 class TestQifQif(unittest.TestCase):
 
     def setUp(self):
-        with open(CONFIG_FILE, 'r') as cfg:
-            tags = json.load(cfg)
-        self.tags = tags
+        tags.load(CONFIG_FILE)
         self.payee = 'CARTE 16/02/2014 Sully bar'
 
     def test_find_tag(self):
-        self.assertTrue(qifqif.find_tag(self.tags, 'Sully'), 'Bars')
+        self.assertTrue(tags.find_tag_for('Sully'), 'Bars')
 
     def test_is_match(self):
-        self.assertTrue(qifqif.is_match('sully bar', self.payee))
+        self.assertTrue(tags.is_match('sully bar', self.payee))
 
     def test_update_config(self):
         dest = os.path.join(tempfile.mkdtemp(), os.path.basename(CONFIG_FILE))
         shutil.copy2(CONFIG_FILE, dest)
-        qifqif.update_config('Bars', 'Sully', 'Drink', 'Sully',
-                             {'config': dest})
+        tags.save(dest, 'Bars', 'Sully', 'Drink', 'Sully')
 
 
 if __name__ == '__main__':
