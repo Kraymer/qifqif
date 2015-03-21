@@ -24,9 +24,9 @@ def ink(text, magic=False):
         feature aka *print that turns invisible*.
         Note: Use ANSI terminal codes, not supported on Windows
 
-        If magic is True, text is returned as-is, yet the print will turn
-        invisible and be overwritten by next ink() print.
-        If magic is False, text is printed permanently.
+        If magic is True, text will be overwritten by next ink() print.
+        If magic is False, text is printed permanently (like any other
+        print-like call).
         If the previous ink call was magic, then ANSI code is prepended to text
         so as to overwrite previous terminal line.
     """
