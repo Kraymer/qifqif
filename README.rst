@@ -6,6 +6,7 @@ qifqif
 
 CLI tool to *enrich* your QIF files transactions with category information.
 
+.. image:: docs/qifqif_demo.gif
 
 Description
 -----------
