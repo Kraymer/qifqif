@@ -31,9 +31,10 @@ Features
   completion
 - **Auditing mode:** review your transactions one by one
 - **Quiet mode (no interactive):** for easy integration with scripts
-- **Easy-going workflow:** importing years of accounting in a single file? No worries: just press ``<Ctrl+C>`` to exit
-  anytime. On next run, editing will resume right where you left it.
-
+- **Easy-going workflow:** dreading the behemoth task of importing years of 
+  accounting from a single file? Don't be. Go at your own pace and press 
+  ``<Ctrl+C>`` to exit anytime. On next run, editing will resume right where
+  you left it.
 
 Usage
 -----
