@@ -11,7 +11,7 @@ qifqif
 Description
 -----------
 
-CLI tool to *enrich* your QIF files transactions with category information, hence cutting down import time from minutes to mere seconds.
+CLI tool to *enrich* your QIF files transactions with category information, hence **cutting down import time from minutes to mere seconds**.
 
 .. image:: docs/qifqif_demo.gif
 
