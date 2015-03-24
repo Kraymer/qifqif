@@ -4,12 +4,16 @@
 qifqif
 ======
 
-CLI tool to *enrich* your QIF files transactions with category information.
-
-.. image:: docs/qifqif_demo.gif
+    /kĭf kĭf/ 
+        1. *adj. inv.* arabic phrase (كيف) for "it's all the same"
+        2. *n.* CLI tool for .qif files. It can make all the difference.
 
 Description
 -----------
+
+CLI tool to *enrich* your QIF files transactions with category information, hence cutting down import time from minutes to mere seconds.
+
+.. image:: docs/qifqif_demo.gif
 
 QIF is a format widely used by personal money management software such as
 `GnuCash`_ to import information. Yet, the import process is particularly
