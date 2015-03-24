@@ -4,7 +4,7 @@
 qifqif
 ======
 
-/kĭf kĭf/ 
+    /kĭf kĭf/ 
      1. *adj. inv.* arabic slang (كيف) for "it's all the same".
      2. *n.* CLI tool for *categorizing* qif files. It can make all the difference.
 
