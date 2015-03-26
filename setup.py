@@ -18,7 +18,7 @@ if sys.argv[-1] == "publish":
     sys.exit()
 
 setup(name='qifqif',
-    version='0.2.0',
+    version='0.2.1',
     description='QIF file editing tool',
     long_description=open('README.rst').read(),
     author='Fabrice Laporte',
