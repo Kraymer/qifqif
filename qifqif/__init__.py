@@ -60,8 +60,23 @@ def process_transaction(amount, payee, cached_tag, cached_match, options):
     return tag or cached_tag, match
 
 
+def print_bad_transaction(lines):
+    try:
+        idx = list(reversed(lines[:-1])).index('^\n')
+    except ValueError:
+        idx = -1
+    last_transaction = lines[-1 - idx:-1]
+    for line in last_transaction:
+        if line.startswith('P'):
+            break
+    else:
+        print ''.join(last_transaction)
+        puts(colored.red('Error: no payee line defined for transaction'))
+
+
 def process_file(lines, options):
     result = []
+    tag = None
     for line in lines:
         if line.startswith('T'):
             amount = line[1:].strip()
@@ -81,6 +96,7 @@ def process_file(lines, options):
             result.append(line)
         if line.startswith('^'):
             delimiter = '-' * 3
+            print_bad_transaction(result)
             if not options['batch']:
                 print ink(delimiter) if tag else delimiter
     if options['batch']:
