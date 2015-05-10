@@ -8,6 +8,7 @@ import argparse
 import os
 import sys
 from clint.textui import puts, colored
+from collections import OrderedDict
 
 from qifqif import tags
 
@@ -60,48 +61,66 @@ def process_transaction(amount, payee, cached_tag, cached_match, options):
     return tag or cached_tag, match
 
 
-def print_bad_transaction(lines):
-    try:
-        idx = list(reversed(lines[:-1])).index('^\n')
-    except ValueError:
-        idx = -1
-    last_transaction = lines[-1 - idx:-1]
-    for line in last_transaction:
-        if line.startswith('P'):
-            break
-    else:
-        print ''.join(last_transaction)
-        puts(colored.red('Error: no payee line defined for transaction'))
-
-
-def process_file(lines, options):
-    result = []
+def process_file(transactions, options):
     tag = None
-    for line in lines:
-        if line.startswith('T'):
-            amount = line[1:].strip()
-        payee = line[1:].strip() if line.startswith('P') else None
-        if payee:  # write payee line and find tag to write on next line
-            result.append(line)
-            cached_tag, cached_match = tags.find_tag_for(payee)
+
+    for t in transactions:
+        if 'payee' in t:
+            cached_tag, cached_match = tags.find_tag_for(t['payee'])
             if not options['batch']:
-                tag, match = process_transaction(amount, payee, cached_tag,
-                                                 cached_match, options)
+                tag, match = process_transaction(t['amount'], t['payee'],
+                                                 cached_tag, cached_match,
+                                                 options)
             else:
                 tag, match = cached_tag, cached_match
-
             tags.save(options['config'], cached_tag, cached_match, tag, match)
-            result.append('L%s\n' % tag)
-        elif line and not line.startswith('L'):  # overwrite previous tags
-            result.append(line)
-        if line.startswith('^'):
-            delimiter = '-' * 3
-            print_bad_transaction(result)
-            if not options['batch']:
-                print ink(delimiter) if tag else delimiter
+            t['category'] = tag
+        else:
+            print('Skip transaction: no payee')
+        if not options['batch']:
+            separator = '-' * 3
+            print ink(separator) if tag else separator
+    return transactions
+
+
+FIELDS = {'D': 'date', 'T': 'amount', 'P': 'payee', 'L': 'category'}
+
+
+def parse_file(lines):
+    """Return list of transactions as ordered dicts with fields save in same
+       order as they appear in input file.
+    """
+    res = []
+    transaction = OrderedDict()
+
+    for (idx, line) in enumerate(lines):
+        field_id = line[0]
+        if field_id == '^':
+            res.append(transaction)
+            transaction = OrderedDict()
+        elif field_id in ('D', 'T', 'P'):
+            transaction[FIELDS[field_id]] = line[1:].strip()
+        else:
+            transaction[idx] = line
+    if transaction:
+        res.append(transaction)
+    return res
+
+
+def dump_to_file(dest, transactions, options):
+    reverse_fields = {v: k for k, v in FIELDS.items()}
+    lines = []
+    for t in transactions:
+        for key in t:
+            try:
+                lines.append('%s%s\n' % (reverse_fields[key], t[key]))
+            except KeyError:  # Unrecognized field
+                lines.append(t[key])
+        lines.append('^\n')
+    with open(dest, 'w') as f:
+        f.writelines(lines)
     if options['batch']:
-        print ''.join(result).strip()
-    return result
+        print ''.join(lines).strip()
 
 
 def main(argv=None):
@@ -138,9 +157,11 @@ def main(argv=None):
 
     with open(args['src'], 'r') as f:
         lines = f.readlines()
-        result = process_file(lines, options=args)
-    with open(args['dest'], 'w') as f:
-        f.writelines(result)
+
+    transactions = parse_file(lines)
+    transactions = process_file(transactions, options=args)
+
+    dump_to_file(args['dest'], transactions, options=args)
 
 
 if __name__ == "__main__":
