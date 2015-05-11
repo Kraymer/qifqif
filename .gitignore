@@ -2,3 +2,4 @@ qifqif.egg-info/
 build/
 dist/
 *.pyc
+.tox

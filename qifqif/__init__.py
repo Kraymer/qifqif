@@ -108,7 +108,7 @@ def parse_file(lines):
 
 
 def dump_to_file(dest, transactions, options):
-    reverse_fields = {v: k for k, v in FIELDS.items()}
+    reverse_fields = {v: k for (k, v) in FIELDS.items()}
     lines = []
     for t in transactions:
         for key in t:
