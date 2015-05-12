@@ -7,20 +7,23 @@
 import argparse
 import os
 import sys
-from clint.textui import puts, colored
 from collections import OrderedDict
+from blessed import Terminal
 
 from qifqif import tags
 
-from qifqif.ui import ink, diff, set_completer
+from qifqif.ui import diff, set_completer
+
+term = Terminal()
 
 
 def query_tag(cached_cat):
     set_completer(sorted(tags.TAGS.keys()))
-    tag = raw_input(ink('Category: ', magic=True))
+    with term.location():
+        tag = raw_input('Category: ')
     if not tag and cached_cat:
-        erase = raw_input(ink("Remove existing tag [y,N]? ",
-                          magic=True)) or 'N'
+        with term.location():
+            erase = raw_input("Remove existing tag [y,N]? ") or 'N'
         if erase.upper() == 'N':
             tag = cached_cat
     set_completer()
@@ -29,35 +32,38 @@ def query_tag(cached_cat):
 
 def query_match(cached_match, payee):
     while True:
-        match = raw_input(ink("Match: ", magic=True))
+        with term.location():
+            match = raw_input("Match: ")
         if not tags.is_match(match, payee):
-            puts(ink('%s Match rejected: %s') %
-                 (colored.red('✖'), diff(payee, match, as_error=True)))
+            print('%s Match rejected: %s') % \
+                (term.red('✖'), diff(payee, match, as_error=True))
         else:
-            puts(ink("%s Match accepted: %s" % (colored.green('✔'),
-                 str(match) if match else colored.red('<none>'))))
+            print("%s Match accepted: %s" %
+                  (term.green('✔'), str(match) if match else
+                   term.red('<none>')))
             break
     return match
 
 
 def process_transaction(amount, payee, cached_tag, cached_match, options):
-    puts(ink('Amount..: %s' % (colored.green(amount) if float(amount) > 0
-         else colored.red(amount))))
-    puts(ink('Payee...: %s' % (diff(cached_match, payee) if cached_match
-         else payee)))
+    print('Amount..: %s' % (term.green(str(amount)) if
+          (amount and float(amount) > 0) else term.red(str(amount))))
+    print('Payee...: %s' % (diff(cached_match, payee) if cached_match
+                            else payee))
     tag, match = cached_tag, cached_match
-    edit = False
-    if cached_tag:
-        if options['audit']:
-            msg = ink("Edit '%s' category [y/N]? " % colored.green(cached_tag),
-                      magic=True)
-            edit = (raw_input(msg) or 'N').lower() == 'y'
-    if not cached_tag or edit:
-        tag = query_tag(cached_tag)
-    puts(ink('Category: %s') % (colored.green(tag) if tag else
-         colored.red('<none>')))
-    if tag and (not cached_match or edit):
-        match = query_match(cached_match, payee)
+    if not options['batch']:
+        edit = False
+        if cached_tag:
+            if options['audit']:
+                with term.location():
+                    msg = "Edit '%s' category [y/N]? " % term.green(cached_tag)
+                    edit = (raw_input(msg) or 'N').lower() == 'y'
+        if payee and (not cached_tag or edit):
+            tag = query_tag(cached_tag)
+        print('Category: %s') % (term.green(tag) if tag
+                                 else term.red('<none>'))
+        if tag and (not cached_match or edit):
+            match = query_match(cached_match, payee)
     return tag or cached_tag, match
 
 
@@ -65,25 +71,24 @@ def process_file(transactions, options):
     tag = None
 
     for t in transactions:
-        if 'payee' in t:
-            cached_tag, cached_match = tags.find_tag_for(t['payee'])
-            if not options['batch']:
-                tag, match = process_transaction(t['amount'], t['payee'],
-                                                 cached_tag, cached_match,
-                                                 options)
-            else:
-                tag, match = cached_tag, cached_match
-            tags.save(options['config'], cached_tag, cached_match, tag, match)
-            t['category'] = tag
-        else:
+        cached_tag, cached_match = tags.find_tag_for(t['payee'])
+
+        tag, match = process_transaction(t['amount'], t['payee'],
+                                         cached_tag, cached_match,
+                                         options)
+
+        tags.save(options['config'], cached_tag, cached_match, tag, match)
+        t['category'] = tag
+        if 'payee' not in t:
             print('Skip transaction: no payee')
         if not options['batch']:
             separator = '-' * 3
-            print ink(separator) if tag else separator
+            print(separator)
     return transactions
 
 
-FIELDS = {'D': 'date', 'T': 'amount', 'P': 'payee', 'L': 'category'}
+FIELDS = {'D': 'date', 'T': 'amount', 'P': 'payee', 'L': 'category',
+          'N': 'number'}
 
 
 def parse_file(lines):
@@ -92,7 +97,6 @@ def parse_file(lines):
     """
     res = []
     transaction = OrderedDict()
-
     for (idx, line) in enumerate(lines):
         field_id = line[0]
         if field_id == '^':
@@ -104,21 +108,29 @@ def parse_file(lines):
             transaction[idx] = line
     if transaction:
         res.append(transaction)
+    # post-check to not interfere with present keys order
+    for t in res:
+        for field in FIELDS.values():
+            if field not in t:
+                t[field] = None
     return res
 
 
 def dump_to_file(dest, transactions, options):
-    reverse_fields = {v: k for (k, v) in FIELDS.items()}
+    reverse_fields = {}
+    for (k, v) in FIELDS.items():
+        reverse_fields[v] = k
     lines = []
     for t in transactions:
         for key in t:
-            try:
-                lines.append('%s%s\n' % (reverse_fields[key], t[key]))
-            except KeyError:  # Unrecognized field
-                lines.append(t[key])
+            if t[key]:
+                try:
+                    lines.append('%s%s\n' % (reverse_fields[key], t[key]))
+                except KeyError:  # Unrecognized field
+                    lines.append(t[key])
         lines.append('^\n')
     with open(dest, 'w') as f:
-        f.writelines(lines)
+        f.writelines(lines[:-1])
     if options['batch']:
         print ''.join(lines).strip()
 

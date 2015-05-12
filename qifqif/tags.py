@@ -22,10 +22,11 @@ def find_tag_for(payee):
        (tag, keyword).
     """
     global TAGS
-    for (tag, keywords) in TAGS.items():
-        for k in keywords:
-            if is_match(k, payee):
-                return tag, k
+    if payee:
+        for (tag, keywords) in TAGS.items():
+            for k in keywords:
+                if is_match(k, payee):
+                    return tag, k
     return None, None
 
 
