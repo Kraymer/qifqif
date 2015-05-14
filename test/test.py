@@ -17,6 +17,11 @@ QIF_FILE = os.path.join(os.path.realpath(os.path.dirname(__file__)),
                         'rsrc', 'transac01.qif')
 
 
+def qif_sample_path(num):
+    return os.path.join(os.path.realpath(os.path.dirname(__file__)),
+                        'rsrc', 'transac%02d.qif' % num)
+
+
 class TestQifQif(unittest.TestCase):
 
     def setUp(self):
@@ -39,13 +44,26 @@ class TestQifQif(unittest.TestCase):
         self.assertTrue(tags.find_tag_for('Sully'), 'Drink')
 
     def test_dump_to_file(self):
-        dest = os.path.join(tempfile.mkdtemp(), os.path.basename(CONFIG_FILE))
-        qifqif.dump_to_file(dest, [self.transaction])
+        dest = os.path.join(tempfile.mkdtemp(),
+                            str(tempfile._get_candidate_names()))
+        res = qifqif.dump_to_file(dest, [self.transaction], {'batch': True})
         with open(dest) as dst:
             dest_content = dst.read().strip()
         with open(QIF_FILE) as qif:
             qif_content = qif.read().strip()
         self.assertEqual(dest_content, qif_content)
+        self.assertEqual(res, qif_content)
+
+    def test_parse_file(self):
+        res = qifqif.parse_file(qif_sample_path(2), {'batch': True})
+        self.assertEqual(len(res), 2)
+        self.assertEqual(res[1].keys()[0:2], ['payee', 'date'])
+
+    def test_process_file(self):
+        lines = qifqif.parse_file(qif_sample_path(2), {'batch': True})
+        res = qifqif.process_file(lines, {'batch': True, 'config': CONFIG_FILE})
+        self.assertEqual(len(res), 2)
+        self.assertEqual(res[1]['category'], 'Bars')
 
 if __name__ == '__main__':
     unittest.main()

@@ -107,11 +107,13 @@ def create_transaction(content=[]):
     return OrderedDict(content)
 
 
-def parse_file(lines):
+def parse_file(filepath, options=None):
     """Return list of transactions as ordered dicts with fields save in same
        order as they appear in input file.
     """
     res = []
+    with open(filepath, 'r') as f:
+        lines = f.readlines()
     transaction = create_transaction()
     for (idx, line) in enumerate(lines):
         field_id = line[0]
@@ -132,7 +134,7 @@ def parse_file(lines):
                 t[field] = None
                 if field == 'payee':
                     no_payee_count += 1
-    if no_payee_count:
+    if (not options or not options['batch']) and no_payee_count:
         with term.location():
             msg = ("%s of %s transactions have no 'Payee': field. "
                    "Continue? [Y,n]? ")
@@ -157,10 +159,12 @@ def dump_to_file(dest, transactions, options=None):
                 except KeyError:  # Unrecognized field
                     lines.append(t[key])
         lines.append('^\n')
+    res = ''.join(lines[:-1]).strip()
     with open(dest, 'w') as f:
-        f.writelines(lines[:-1])
+        f.write(res)
     if options and options['batch']:
-        print(''.join(lines).strip())
+        print(res)
+    return res
 
 
 def highlight_char(word, n=0):
@@ -197,6 +201,7 @@ def build_parser():
 def main(argv=None):
     if argv is None:
         argv = sys.argv
+
     parser = build_parser()
 
     args = vars(parser.parse_args())
@@ -209,10 +214,7 @@ def main(argv=None):
 
     original_tags = tags.load(args['config'])
 
-    with open(args['src'], 'r') as f:
-        lines = f.readlines()
-
-    transactions = parse_file(lines)
+    transactions = parse_file(args['src'], options=args)
     save = True
     try:
         transactions = process_file(transactions, options=args)
