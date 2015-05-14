@@ -135,9 +135,9 @@ def dump_to_file(dest, transactions, options):
         print ''.join(lines).strip()
 
 
-def main(argv=None):
-    if argv is None:
-        argv = sys.argv
+def build_parser():
+    """Build application argument parser
+    """
     parser = argparse.ArgumentParser(
         description='Enrich your .QIF files with tags. '
         'See https://github.com/Kraymer/qifqif for more infos.')
@@ -157,12 +157,20 @@ def main(argv=None):
     parser.add_argument('-b', '--batch-mode', action='store_true',
                         dest='batch', help=('skip transactions that require '
                                             'user input'))
+    return parser
+
+
+def main(argv=None):
+    if argv is None:
+        argv = sys.argv
+    parser = build_parser()
 
     args = vars(parser.parse_args())
     if not args['dest']:
         args['dest'] = args['src']
     if args['audit'] and args['batch']:
-        print 'Error: cannot activate batch-mode when audit-mode is already on'
+        print(('Error: cannot activate batch-mode when audit-mode is already ',
+              'on'))
         exit(1)
 
     tags.load(args['config'])
