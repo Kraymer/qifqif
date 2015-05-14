@@ -13,13 +13,10 @@ before_install:
 # To install dependencies, tell tox to do everything but actually running the
 # test.
 install:
-    - travis_retry pip install tox
+    - travis_retry pip install -r requirements.txt
     - travis_retry tox -e $TOX_ENV --notest
 
 script: tox -e $TOX_ENV
-
-# command to install dependencies
-install: "pip install -r requirements.txt"
 
 # coveralls.io reporting, using https://github.com/coagulant/coveralls-python
 # Only report coverage for one version.
