@@ -108,17 +108,21 @@ FIELDS = {'D': 'date', 'T': 'amount', 'P': 'payee', 'L': 'category',
           'N': 'number', 'M': 'memo'}
 
 
+def create_transaction(content=[]):
+    return OrderedDict(content)
+
+
 def parse_file(lines):
     """Return list of transactions as ordered dicts with fields save in same
        order as they appear in input file.
     """
     res = []
-    transaction = OrderedDict()
+    transaction = create_transaction()
     for (idx, line) in enumerate(lines):
         field_id = line[0]
         if field_id == '^':
             res.append(transaction)
-            transaction = OrderedDict()
+            transaction = create_transaction()
         elif field_id in FIELDS.keys():
             transaction[FIELDS[field_id]] = line[1:].strip()
         else:
@@ -145,7 +149,7 @@ def parse_file(lines):
     return res
 
 
-def dump_to_file(dest, transactions, options):
+def dump_to_file(dest, transactions, options=None):
     reverse_fields = {}
     for (k, v) in FIELDS.items():
         reverse_fields[v] = k
@@ -160,7 +164,7 @@ def dump_to_file(dest, transactions, options):
         lines.append('^\n')
     with open(dest, 'w') as f:
         f.writelines(lines[:-1])
-    if options['batch']:
+    if options and options['batch']:
         print(''.join(lines).strip())
 
 
