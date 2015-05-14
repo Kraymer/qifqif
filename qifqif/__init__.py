@@ -122,10 +122,22 @@ def parse_file(lines):
     if transaction:
         res.append(transaction)
     # post-check to not interfere with present keys order
+    no_payee_count = 0
     for t in res:
         for field in FIELDS.values():
             if field not in t:
                 t[field] = None
+                if field == 'payee':
+                    no_payee_count += 1
+    if no_payee_count:
+        with term.location():
+            msg = ("%s of %s transactions have no 'Payee': field. "
+                   "Continue? [Y,n]? ")
+            ok = raw_input(msg % (no_payee_count, len(res))) or 'Y'
+            if ok.upper() != 'Y':
+                exit(1)
+            else:
+                print(CLEAR)
     return res
 
 
