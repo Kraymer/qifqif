@@ -41,7 +41,7 @@ def query_match(cached_match, payee):
         match = raw_input("Match: ")
         if not tags.is_match(match, payee):
             print(CLEAR + '%s Match rejected: %s' %
-                  (term.red('✖'), diff(payee, match, as_error=True)))
+                  (term.red('✖'), diff(payee, match, term, as_error=True)))
         else:
             print(CLEAR + "%s Match accepted: %s" %
                   (term.green('✔'), str(match) if match else
@@ -63,7 +63,8 @@ def process_transaction(t, cached_tag, cached_match, options):
     print('Amount..: %s' % (term.green(str(t['amount'])) if
           (t['amount'] and float(t['amount']) > 0)
           else term.red(str(t['amount']))))
-    print('Payee...: %s' % (diff(cached_match, t['payee']) if cached_match
+    print('Payee...: %s' % (diff(cached_match, t['payee'], term)
+                            if cached_match
                             else t['payee'] or term.red('<none>')))
     for field in ('memo', 'number'):
         if t[field]:
