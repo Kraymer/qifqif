@@ -29,7 +29,7 @@ class TestQifQif(unittest.TestCase):
     def test_update_config(self):
         dest = os.path.join(tempfile.mkdtemp(), os.path.basename(CONFIG_FILE))
         shutil.copy2(CONFIG_FILE, dest)
-        tags.save(dest, 'Bars', 'Sully', 'Drink', 'Sully')
+        tags.edit(dest, 'Bars', 'Sully', 'Drink', 'Sully')
 
 
 if __name__ == '__main__':

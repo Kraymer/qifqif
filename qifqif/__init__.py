@@ -9,11 +9,14 @@ from __future__ import (print_function, unicode_literals)
 import argparse
 import os
 import sys
-from collections import OrderedDict
+
 from blessed import Terminal
+try:
+    from collections import OrderedDict
+except ImportError:  # python 2.6
+    from ordereddict import OrderedDict
 
 from qifqif import tags
-
 from qifqif.ui import diff, set_completer
 
 term = Terminal()
@@ -90,7 +93,7 @@ def process_file(transactions, options):
 
         tag, match = process_transaction(t, cached_tag, cached_match, options)
 
-        tags.save(options['config'], cached_tag, cached_match, tag, match)
+        tags.edit(options['config'], cached_tag, cached_match, tag, match)
         t['category'] = tag
         if 'payee' not in t:
             print('Skip transaction: no payee')
