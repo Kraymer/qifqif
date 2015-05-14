@@ -39,9 +39,21 @@ def load(filepath):
             TAGS = json.load(cfg)
     else:
         TAGS = {}
+    return TAGS
 
 
-def save(filepath, cached_tag, cached_match, tag, match):
+def save(filepath, tags=None):
+    """Save tags dictionary on disk
+    """
+    global TAGS
+    if not tags:
+        tags = TAGS
+    with open(filepath, 'w+') as cfg:
+        cfg.write(json.dumps(tags,
+                  sort_keys=True, indent=4, separators=(',', ': ')))
+
+
+def edit(filepath, cached_tag, cached_match, tag, match):
     """Save a tag modification into dictionary and save the latter on file.
     """
     global TAGS
@@ -63,6 +75,4 @@ def save(filepath, cached_tag, cached_match, tag, match):
         return
 
     TAGS = tags
-    with open(filepath, 'w+') as cfg:
-        cfg.write(json.dumps(TAGS,
-                  sort_keys=True, indent=4, separators=(',', ': ')))
+    save(filepath)

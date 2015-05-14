@@ -4,6 +4,8 @@
 # Copyright (c) 2015 Fabrice Laporte - kray.me
 # The MIT License http://www.opensource.org/licenses/mit-license.php
 
+from __future__ import (print_function, unicode_literals)
+
 import argparse
 import os
 import sys
@@ -15,6 +17,7 @@ from qifqif import tags
 from qifqif.ui import diff, set_completer
 
 term = Terminal()
+CLEAR = term.move_up + term.move_x(0) + term.clear_eol
 
 
 def query_tag(cached_cat):
@@ -50,6 +53,13 @@ def process_transaction(amount, payee, cached_tag, cached_match, options):
           (amount and float(amount) > 0) else term.red(str(amount))))
     print('Payee...: %s' % (diff(cached_match, payee) if cached_match
                             else payee))
+def query_save():
+    choices = [highlight_char(x) for x in
+               ('Categories', 'destination', 'both', 'nothing')]
+    print(term.move_down * 3 + '(save %s, %s, %s or %s)' %
+          tuple(choices), end='')
+    print(term.move_up + CLEAR, end='')
+    return raw_input('---\nSave [C,d,b,n]? ').upper()
     tag, match = cached_tag, cached_match
     if not options['batch']:
         edit = False
@@ -132,7 +142,13 @@ def dump_to_file(dest, transactions, options):
     with open(dest, 'w') as f:
         f.writelines(lines[:-1])
     if options['batch']:
-        print ''.join(lines).strip()
+        print(''.join(lines).strip())
+
+
+def highlight_char(word, n=0):
+    """Return word with n-th letter highlighted
+    """
+    return word[:n] + term.reverse(word[n]) + word[n + 1:]
 
 
 def build_parser():
@@ -173,15 +189,22 @@ def main(argv=None):
               'on'))
         exit(1)
 
-    tags.load(args['config'])
+    original_tags = tags.load(args['config'])
 
     with open(args['src'], 'r') as f:
         lines = f.readlines()
 
     transactions = parse_file(lines)
-    transactions = process_file(transactions, options=args)
+    save = True
+    try:
+        transactions = process_file(transactions, options=args)
+    except KeyboardInterrupt:
+        save = query_save()
 
-    dump_to_file(args['dest'], transactions, options=args)
+    if save is True or save in 'DB':
+        dump_to_file(args['dest'], transactions, options=args)
+    if save in 'DN':  # restore original tags
+        tags.save(args['config'], original_tags)
 
 
 if __name__ == "__main__":
