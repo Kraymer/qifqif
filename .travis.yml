@@ -1,13 +1,26 @@
 language: python
-python:
-  - "2.6"
-  - "2.7"
+
+matrix:
+    include:
+        - python: 2.6
+          env: {TOX_ENV: py26}
+        - python: 2.7
+          env: {TOX_ENV: py27cov, COVERAGE: 1}
+
+before_install:
+    - "[ ! -z $COVERAGE ] && travis_retry pip install coveralls || true"
+
+# To install dependencies, tell tox to do everything but actually running the
+# test.
+install:
+    - travis_retry tox -e $TOX_ENV --notest
+
+script: tox -e $TOX_ENV
 
 # command to install dependencies
-install:
-    - pip install blessed
-    - pip install argparse
-    - pip install ordereddict
+install: "pip install -r requirements.txt"
 
-# command to run tests
-script: nosetests
+# coveralls.io reporting, using https://github.com/coagulant/coveralls-python
+# Only report coverage for one version.
+after_success:
+    - "[ ! -z $COVERAGE ] && coveralls || true"
