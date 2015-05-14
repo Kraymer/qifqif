@@ -22,11 +22,11 @@ CLEAR = term.move_up + term.move_x(0) + term.clear_eol
 
 def query_tag(cached_cat):
     set_completer(sorted(tags.TAGS.keys()))
-    with term.location():
-        tag = raw_input('Category: ')
+    tag = raw_input('Category: ')
+    print(CLEAR, end='')
+
     if not tag and cached_cat:
-        with term.location():
-            erase = raw_input("Remove existing tag [y,N]? ") or 'N'
+        erase = raw_input("Remove existing tag [y,N]? ") or 'N'
         if erase.upper() == 'N':
             tag = cached_cat
     set_completer()
@@ -35,24 +35,18 @@ def query_tag(cached_cat):
 
 def query_match(cached_match, payee):
     while True:
-        with term.location():
-            match = raw_input("Match: ")
+        match = raw_input("Match: ")
         if not tags.is_match(match, payee):
-            print('%s Match rejected: %s') % \
-                (term.red('✖'), diff(payee, match, as_error=True))
+            print(CLEAR + '%s Match rejected: %s' %
+                  (term.red('✖'), diff(payee, match, as_error=True)))
         else:
-            print("%s Match accepted: %s" %
+            print(CLEAR + "%s Match accepted: %s" %
                   (term.green('✔'), str(match) if match else
                    term.red('<none>')))
             break
     return match
 
 
-def process_transaction(amount, payee, cached_tag, cached_match, options):
-    print('Amount..: %s' % (term.green(str(amount)) if
-          (amount and float(amount) > 0) else term.red(str(amount))))
-    print('Payee...: %s' % (diff(cached_match, payee) if cached_match
-                            else payee))
 def query_save():
     choices = [highlight_char(x) for x in
                ('Categories', 'destination', 'both', 'nothing')]
@@ -60,20 +54,31 @@ def query_save():
           tuple(choices), end='')
     print(term.move_up + CLEAR, end='')
     return raw_input('---\nSave [C,d,b,n]? ').upper()
+
+
+def process_transaction(t, cached_tag, cached_match, options):
+    print('Amount..: %s' % (term.green(str(t['amount'])) if
+          (t['amount'] and float(t['amount']) > 0)
+          else term.red(str(t['amount']))))
+    print('Payee...: %s' % (diff(cached_match, t['payee']) if cached_match
+                            else t['payee'] or term.red('<none>')))
+    for field in ('memo', 'number'):
+        if t[field]:
+            pad_width = 8
+            print('%s: %s' % (field.title().ljust(pad_width, '.'), t[field]))
     tag, match = cached_tag, cached_match
     if not options['batch']:
         edit = False
         if cached_tag:
             if options['audit']:
-                with term.location():
-                    msg = "Edit '%s' category [y/N]? " % term.green(cached_tag)
-                    edit = (raw_input(msg) or 'N').lower() == 'y'
-        if payee and (not cached_tag or edit):
+                msg = "Edit '%s' category [y/N]? " % term.green(cached_tag)
+                edit = (raw_input(msg) or 'N').lower() == 'y'
+        if t['payee'] and (not cached_tag or edit):
             tag = query_tag(cached_tag)
-        print('Category: %s') % (term.green(tag) if tag
-                                 else term.red('<none>'))
+        print('Category: %s' % (term.green(tag) if tag
+                                else term.red('<none>')))
         if tag and (not cached_match or edit):
-            match = query_match(cached_match, payee)
+            match = query_match(cached_match, t['payee'])
     return tag or cached_tag, match
 
 
@@ -83,9 +88,7 @@ def process_file(transactions, options):
     for t in transactions:
         cached_tag, cached_match = tags.find_tag_for(t['payee'])
 
-        tag, match = process_transaction(t['amount'], t['payee'],
-                                         cached_tag, cached_match,
-                                         options)
+        tag, match = process_transaction(t, cached_tag, cached_match, options)
 
         tags.save(options['config'], cached_tag, cached_match, tag, match)
         t['category'] = tag
@@ -98,7 +101,7 @@ def process_file(transactions, options):
 
 
 FIELDS = {'D': 'date', 'T': 'amount', 'P': 'payee', 'L': 'category',
-          'N': 'number'}
+          'N': 'number', 'M': 'memo'}
 
 
 def parse_file(lines):
@@ -112,7 +115,7 @@ def parse_file(lines):
         if field_id == '^':
             res.append(transaction)
             transaction = OrderedDict()
-        elif field_id in ('D', 'T', 'P'):
+        elif field_id in FIELDS.keys():
             transaction[FIELDS[field_id]] = line[1:].strip()
         else:
             transaction[idx] = line
