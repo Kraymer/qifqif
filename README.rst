@@ -1,5 +1,5 @@
-.. image:: https://travis-ci.org/Kraymer/qifqif.svg?branch=master
-    :target: https://travis-ci.org/Kraymer/qifqif
+.. image:: https://travis-ci.org/Kraymer/qifqif.svg?branch=master :target: https://travis-ci.org/Kraymer/qifqif
+.. image:: https://coveralls.io/repos/Kraymer/qifqif/badge.png :target: https://coveralls.io/r/Kraymer/qifqif
 
 qifqif
 ======
