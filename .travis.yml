@@ -13,6 +13,7 @@ before_install:
 # To install dependencies, tell tox to do everything but actually running the
 # test.
 install:
+    - travis_retry pip install tox
     - travis_retry tox -e $TOX_ENV --notest
 
 script: tox -e $TOX_ENV
