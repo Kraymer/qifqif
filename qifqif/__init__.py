@@ -51,12 +51,7 @@ def query_match(cached_match, payee):
 
 
 def query_save():
-    choices = [highlight_char(x) for x in
-               ('Categories', 'destination', 'both', 'nothing')]
-    print(term.move_down * 3 + '(save %s, %s, %s or %s)' %
-          tuple(choices), end='')
-    print(term.move_up + CLEAR, end='')
-    return raw_input('---\nSave [C,d,b,n]? ').upper()
+    return raw_input('---\nSave [Y,n]? ').upper() in ('Y', '')
 
 
 def process_transaction(t, cached_tag, cached_match, options):
@@ -224,10 +219,11 @@ def main(argv=None):
     except KeyboardInterrupt:
         save = query_save()
 
-    if save is True or save in 'DB':
+    if save is True:
         dump_to_file(args['dest'], transactions, options=args)
-    if save in 'DN':  # restore original tags
+    else:  # restore original tags
         tags.save(args['config'], original_tags)
+    exit(0)
 
 
 if __name__ == "__main__":
