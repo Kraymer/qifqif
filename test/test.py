@@ -36,6 +36,8 @@ def mock_input_edit_category(prompt, choices=''):
         return 'Drink'
     if prompt.startswith('Match'):
         return 'Sully'
+    if prompt.endswith('Continue'):
+        return 'Y'
 
 
 class TestQifQif(unittest.TestCase):
@@ -96,7 +98,7 @@ class TestQifQif(unittest.TestCase):
 
     @patch('qifqif.quick_input', side_effect=mock_input_edit_category)
     def test_audit_mode(self, mock_quick_input):
-        lines = qifqif.parse_file(qif_sample_path(2), {'batch': True})
+        lines = qifqif.parse_file(qif_sample_path(2))
         res = qifqif.process_file(lines,
                                   {'config': CONFIG_FILE, 'audit': True,
                                    'dry-run': True})
