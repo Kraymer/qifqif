@@ -1,5 +1,6 @@
 argparse
 blessed
 coveralls
+mock
 ordereddict
 tox
