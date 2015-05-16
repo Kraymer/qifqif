@@ -53,7 +53,7 @@ def save(filepath, tags=None):
                   sort_keys=True, indent=4, separators=(',', ': ')))
 
 
-def edit(filepath, cached_tag, cached_match, tag, match):
+def edit(cached_tag, cached_match, tag, match, options):
     """Save a tag modification into dictionary and save the latter on file.
     """
     global TAGS
@@ -75,4 +75,5 @@ def edit(filepath, cached_tag, cached_match, tag, match):
         return
 
     TAGS = tags
-    save(filepath)
+    if not options.get('dry-run', False):
+        save(options['config'])

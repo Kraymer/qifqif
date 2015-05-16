@@ -163,7 +163,7 @@ def parse_file(filepath, options=None):
     return res
 
 
-def dump_to_file(dest, transactions, options=None):
+def dump_to_file(dest, transactions, options={}):
     reverse_fields = {}
     for (k, v) in FIELDS.items():
         reverse_fields[v] = k
@@ -177,9 +177,10 @@ def dump_to_file(dest, transactions, options=None):
                     lines.append(t[key])
         lines.append('^\n')
     res = ''.join(lines[:-1]).strip()
-    with open(dest, 'w') as f:
-        f.write(res)
-    if options and options['batch']:
+    if not options.get('dry-run', False):
+        with open(dest, 'w') as f:
+            f.write(res)
+    if options.get('batch', False) or options.get('dry-run', False):
         print(res)
     return res
 
@@ -206,6 +207,9 @@ def build_parser():
                         'DEFAULT: ~/.qifqif.json',
                         default=os.path.join(os.path.expanduser('~'),
                                              '.qifqif.json'))
+    parser.add_argument('-d', '--dry-run', dest='dry-run',
+                        action='store_true', help=('dry-run mode: just print'
+                                                   'instead of write file'))
     parser.add_argument('-o', '--output', dest='dest',
                         help='output filename. '
                         'DEFAULT: edit input file in-place', default='')
