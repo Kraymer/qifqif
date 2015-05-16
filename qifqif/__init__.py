@@ -27,7 +27,6 @@ def quick_input(prompt, choices=''):
     """Reads a line from input, converts it to a string (stripping a trailing
        newline), and returns that. If no input, returns default choice.
     """
-
     default = [x for x in choices if x.isupper()]
     default = default[0] if default else ''
     _input = raw_input('%s%s' % (prompt,
@@ -38,6 +37,9 @@ def quick_input(prompt, choices=''):
 
 
 def query_tag(cached_cat):
+    """Query category. If empty string entered then prompt to remove existing
+       category, if any.
+    """
     set_completer(sorted(tags.TAGS.keys()))
     tag = quick_input('Category')
     print(CLEAR, end='')
@@ -164,6 +166,8 @@ def parse_file(filepath, options=None):
 
 
 def dump_to_file(dest, transactions, options={}):
+    """Output transactions to file of terminal.
+    """
     reverse_fields = {}
     for (k, v) in FIELDS.items():
         reverse_fields[v] = k
