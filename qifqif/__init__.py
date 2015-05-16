@@ -23,13 +23,27 @@ term = Terminal()
 CLEAR = term.move_up + term.move_x(0) + term.clear_eol
 
 
+def quick_input(prompt, choices=''):
+    """Reads a line from input, converts it to a string (stripping a trailing
+       newline), and returns that. If no input, returns default choice.
+    """
+
+    default = [x for x in choices if x.isupper()]
+    default = default[0] if default else ''
+    _input = raw_input('%s%s' % (prompt,
+                       (' [%s] ?' % ','.join(choices)) if choices else ':'))
+    if _input in choices:
+        _input = _input.upper()
+    return _input or default
+
+
 def query_tag(cached_cat):
     set_completer(sorted(tags.TAGS.keys()))
-    tag = raw_input('Category: ')
+    tag = quick_input('Category')
     print(CLEAR, end='')
 
     if not tag and cached_cat:
-        erase = raw_input("Remove existing tag [y,N]? ") or 'N'
+        erase = quick_input('Remove existing tag', 'yn')
         if erase.upper() == 'N':
             tag = cached_cat
     set_completer()
@@ -38,7 +52,7 @@ def query_tag(cached_cat):
 
 def query_match(cached_match, payee):
     while True:
-        match = raw_input("Match: ")
+        match = quick_input('Match')
         if not tags.is_match(match, payee):
             print(CLEAR + '%s Match rejected: %s' %
                   (term.red('✖'), diff(payee, match, term, as_error=True)))
@@ -51,10 +65,10 @@ def query_match(cached_match, payee):
 
 
 def query_save():
-    return raw_input('---\nSave [Y,n]? ').upper() in ('Y', '')
+    return quick_input('---\nSave', 'yn') == 'Y'
 
 
-def process_transaction(t, cached_tag, cached_match, options):
+def process_transaction(t, cached_tag, cached_match, options={}):
     print('Amount..: %s' % (term.green(str(t['amount'])) if
           (t['amount'] and float(t['amount']) > 0)
           else term.red(str(t['amount']))))
@@ -66,12 +80,15 @@ def process_transaction(t, cached_tag, cached_match, options):
             pad_width = 8
             print('%s: %s' % (field.title().ljust(pad_width, '.'), t[field]))
     tag, match = cached_tag, cached_match
-    if not options['batch']:
+
+    if not options.get('batch', False):
         edit = False
+        print('cached %s' % cached_tag)
         if cached_tag:
-            if options['audit']:
-                msg = "Edit '%s' category [y/N]? " % term.green(cached_tag)
-                edit = (raw_input(msg) or 'N').lower() == 'y'
+            if options.get('audit', False):
+                msg = "Edit '%s' category" % term.green(cached_tag)
+                edit = quick_input(msg, 'yN') == 'Y'
+                print('Edit ?=> %s' % edit)
         if t['payee'] and (not cached_tag or edit):
             tag = query_tag(cached_tag)
         print('Category: %s' % (term.green(tag) if tag
@@ -81,7 +98,7 @@ def process_transaction(t, cached_tag, cached_match, options):
     return tag or cached_tag, match
 
 
-def process_file(transactions, options):
+def process_file(transactions, options={}):
     tag = None
 
     for t in transactions:
@@ -89,11 +106,11 @@ def process_file(transactions, options):
 
         tag, match = process_transaction(t, cached_tag, cached_match, options)
 
-        tags.edit(options['config'], cached_tag, cached_match, tag, match)
+        tags.edit(cached_tag, cached_match, tag, match, options)
         t['category'] = tag
         if 'payee' not in t:
             print('Skip transaction: no payee')
-        if not options['batch']:
+        if not options.get('batch', False):
             separator = '-' * 3
             print(separator)
     return transactions
@@ -137,9 +154,9 @@ def parse_file(filepath, options=None):
     if (not options or not options['batch']) and no_payee_count:
         with term.location():
             msg = ("%s of %s transactions have no 'Payee': field. "
-                   "Continue? [Y,n]? ")
-            ok = raw_input(msg % (no_payee_count, len(res))) or 'Y'
-            if ok.upper() != 'Y':
+                   "Continue")
+            ok = quick_input(msg % (no_payee_count, len(res)), 'Yn')
+            if ok != 'Y':
                 exit(1)
             else:
                 print(CLEAR)
