@@ -59,6 +59,11 @@ class TestQifQif(unittest.TestCase):
         tags.load(dest)
         self.assertTrue(tags.find_tag_for('Sully'), 'Drink')
 
+    def test_parse_args(self):
+        self.assertEqual(qifqif.parse_args([__name__, '-a', '-b']), False)
+        args = qifqif.parse_args([QIF_FILE])
+        self.assertTrue(args['dest'], args['src'])
+
     def test_dump_to_file(self):
         dest = os.path.join(tempfile.mkdtemp(),
                             str(tempfile._get_candidate_names()))

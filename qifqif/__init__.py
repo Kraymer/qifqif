@@ -195,8 +195,8 @@ def highlight_char(word, n=0):
     return word[:n] + term.reverse(word[n]) + word[n + 1:]
 
 
-def build_parser():
-    """Build application argument parser
+def parse_args(argv):
+    """Build application argument parser and parse command line.
     """
     parser = argparse.ArgumentParser(
         description='Enrich your .QIF files with tags. '
@@ -220,25 +220,24 @@ def build_parser():
     parser.add_argument('-b', '--batch-mode', action='store_true',
                         dest='batch', help=('skip transactions that require '
                                             'user input'))
-    return parser
+    args = vars(parser.parse_args(argv))
+    if not args['dest']:
+        args['dest'] = args['src']
+    if args['audit'] and args['batch']:
+        print(('Error: cannot activate batch-mode when audit-mode is already ',
+              'on'))
+        return False
+    return args
 
 
 def main(argv=None):
     if argv is None:
         argv = sys.argv
 
-    parser = build_parser()
-
-    args = vars(parser.parse_args())
-    if not args['dest']:
-        args['dest'] = args['src']
-    if args['audit'] and args['batch']:
-        print(('Error: cannot activate batch-mode when audit-mode is already ',
-              'on'))
+    args = parse_args(argv)
+    if not args:
         exit(1)
-
     original_tags = tags.load(args['config'])
-
     transactions = parse_file(args['src'], options=args)
     save = True
     try:
