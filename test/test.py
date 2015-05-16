@@ -8,6 +8,8 @@ import shutil
 import tempfile
 import unittest
 
+from mock import patch
+
 import qifqif
 from qifqif import tags
 
@@ -20,6 +22,20 @@ QIF_FILE = os.path.join(os.path.realpath(os.path.dirname(__file__)),
 def qif_sample_path(num):
     return os.path.join(os.path.realpath(os.path.dirname(__file__)),
                         'rsrc', 'transac%02d.qif' % num)
+
+
+def mock_input_default(prompt, choices=''):
+    res = [x for x in choices if x.isupper()][0]
+    return res
+
+
+def mock_input_edit_category(prompt, choices=''):
+    if prompt.startswith('Edit'):
+        return 'Y'
+    if prompt.startswith('Category'):
+        return 'Drink'
+    if prompt.startswith('Match'):
+        return 'Sully'
 
 
 class TestQifQif(unittest.TestCase):
@@ -39,7 +55,7 @@ class TestQifQif(unittest.TestCase):
         dest = os.path.join(tempfile.mkdtemp(), os.path.basename(CONFIG_FILE))
         shutil.copy2(CONFIG_FILE, dest)
         # Replace 'Sully' match tag from 'Bars' to 'Drink'
-        tags.edit(dest, 'Bars', 'Sully', 'Drink', 'Sully')
+        tags.edit('Bars', 'Sully', 'Drink', 'Sully', {'config': dest})
         tags.load(dest)
         self.assertTrue(tags.find_tag_for('Sully'), 'Drink')
 
@@ -61,9 +77,26 @@ class TestQifQif(unittest.TestCase):
 
     def test_process_file(self):
         lines = qifqif.parse_file(qif_sample_path(2), {'batch': True})
-        res = qifqif.process_file(lines, {'batch': True, 'config': CONFIG_FILE})
+        res = qifqif.process_file(lines, {'config': CONFIG_FILE})
         self.assertEqual(len(res), 2)
         self.assertEqual(res[1]['category'], 'Bars')
+
+    @patch('qifqif.quick_input', side_effect=mock_input_default)
+    def test_audit_mode_no_edit(self, mock_quick_input):
+        lines = qifqif.parse_file(qif_sample_path(2), {'batch': True})
+        res = qifqif.process_file(lines, {'config': CONFIG_FILE,
+                                  'audit': True})
+        self.assertEqual(len(res), 2)
+        self.assertEqual(res[1]['category'], 'Bars')
+
+    @patch('qifqif.quick_input', side_effect=mock_input_edit_category)
+    def test_audit_mode(self, mock_quick_input):
+        lines = qifqif.parse_file(qif_sample_path(2), {'batch': True})
+        res = qifqif.process_file(lines,
+                                  {'config': CONFIG_FILE, 'audit': True,
+                                   'dry-run': True})
+        self.assertEqual(len(res), 2)
+        self.assertEqual(res[1]['category'], 'Drink')
 
 if __name__ == '__main__':
     unittest.main()
