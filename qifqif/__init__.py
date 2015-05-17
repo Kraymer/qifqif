@@ -220,7 +220,7 @@ def parse_args(argv):
     parser.add_argument('-b', '--batch-mode', action='store_true',
                         dest='batch', help=('skip transactions that require '
                                             'user input'))
-    args = vars(parser.parse_args(argv))
+    args = vars(parser.parse_args(args=argv[1:]))
     if not args['dest']:
         args['dest'] = args['src']
     if args['audit'] and args['batch']:
@@ -249,8 +249,7 @@ def main(argv=None):
         dump_to_file(args['dest'], transactions, options=args)
     else:  # restore original tags
         tags.save(args['config'], original_tags)
-    exit(0)
-
+    return 0
 
 if __name__ == "__main__":
     sys.exit(main())

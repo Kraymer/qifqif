@@ -62,8 +62,9 @@ class TestQifQif(unittest.TestCase):
         self.assertTrue(tags.find_tag_for('Sully'), 'Drink')
 
     def test_parse_args(self):
-        self.assertEqual(qifqif.parse_args([__name__, '-a', '-b']), False)
-        args = qifqif.parse_args([QIF_FILE])
+        self.assertEqual(qifqif.parse_args(['qifqif', '-a', '-b', 'in.qif']),
+                         False)
+        args = qifqif.parse_args(['qifqif', QIF_FILE])
         self.assertTrue(args['dest'], args['src'])
 
     def test_dump_to_file(self):
@@ -104,6 +105,11 @@ class TestQifQif(unittest.TestCase):
                                    'dry-run': True})
         self.assertEqual(len(res), 2)
         self.assertEqual(res[1]['category'], 'Drink')
+
+    @patch('sys.argv', ['qifqif', qif_sample_path(2), '-c', CONFIG_FILE, '-b'])
+    def test_main(self):
+        res = qifqif.main()
+        self.assertEqual(res, 0)
 
 if __name__ == '__main__':
     unittest.main()
