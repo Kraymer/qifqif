@@ -69,7 +69,8 @@ def edit(cached_tag, cached_match, tag, match, options):
             else:
                 tags[tag].append(match)
     elif match and match != cached_match:
-        tags[tag].remove(cached_match)
+        if cached_match:
+            tags[tag].remove(cached_match)
         tags[tag].append(match)
     else:  # no diff
         return
