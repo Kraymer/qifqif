@@ -101,18 +101,24 @@ def process_transaction(t, cached_tag, cached_match, options={}):
 def process_file(transactions, options={}):
     tag = None
 
-    for t in transactions:
-        cached_tag, cached_match = tags.find_tag_for(t['payee'])
+    try:
+        for (i, t) in enumerate(transactions):
+            cached_tag, cached_match = tags.find_tag_for(t['payee'])
+            cached_tag = cached_tag or t['category']
 
-        tag, match = process_transaction(t, cached_tag, cached_match, options)
+            tag, match = process_transaction(t, cached_tag, cached_match,
+                                             options)
+            tags.edit(cached_tag, cached_match, tag, match, options)
+            t['category'] = tag
+            if 'payee' not in t:
+                print('Skip transaction: no payee')
+            if not options.get('batch', False):
+                separator = '-' * 3
+                print(separator)
+    except KeyboardInterrupt:
+        pass
 
-        tags.edit(cached_tag, cached_match, tag, match, options)
-        t['category'] = tag
-        if 'payee' not in t:
-            print('Skip transaction: no payee')
-        if not options.get('batch', False):
-            separator = '-' * 3
-            print(separator)
+    return transactions[:i]
 
 
 FIELDS = {'D': 'date', 'T': 'amount', 'P': 'payee', 'L': 'category',
@@ -123,13 +129,11 @@ def create_transaction(content=[]):
     return OrderedDict(content)
 
 
-def parse_file(filepath, options=None):
+def parse_file(lines, options=None):
     """Return list of transactions as ordered dicts with fields save in same
        order as they appear in input file.
     """
     res = []
-    with open(filepath, 'r') as f:
-        lines = f.readlines()
     transaction = create_transaction()
     for (idx, line) in enumerate(lines):
         field_id = line[0]
@@ -181,8 +185,6 @@ def dump_to_file(dest, transactions, options={}):
     if not options.get('dry-run', False):
         with open(dest, 'w') as f:
             f.write(res)
-    if options.get('batch', False) or options.get('dry-run', False):
-        print(res)
     return res
 
 
@@ -209,8 +211,12 @@ def parse_args(argv):
                         default=os.path.join(os.path.expanduser('~'),
                                              '.qifqif.json'))
     parser.add_argument('-d', '--dry-run', dest='dry-run',
-                        action='store_true', help=('dry-run mode: just print'
+                        action='store_true', help=('dry-run mode: just print '
                                                    'instead of write file'))
+    parser.add_argument('-s', '--always-save', dest='always-save',
+                        action='store_true',
+                        help=('edited transactions are written on file when '
+                              'killing the application before the EOF'))
     parser.add_argument('-o', '--output', dest='dest',
                         help='output filename. '
                         'DEFAULT: edit input file in-place', default='')
@@ -235,17 +241,23 @@ def main(argv=None):
     if not args:
         exit(1)
     original_tags = tags.load(args['config'])
-    transactions = parse_file(args['src'], options=args)
-    save = True
-    try:
-        transactions = process_file(transactions, options=args)
-    except KeyboardInterrupt:
-        save = query_save()
+    with open(args['src'], 'r') as f:
+        lines = f.readlines()
+        transacs_orig = parse_file(lines, options=args)
 
-    if save is True:
-        dump_to_file(args['dest'], transactions, options=args)
-    else:  # restore original tags
-        tags.save(args['config'], original_tags)
+    transacs = process_file(transacs_orig, options=args)
+    if len(transacs) < len(transacs_orig):  # early exit
+        if not args['always-save']:  # restore original tags
+            tags.save(args['config'], original_tags)
+            exit(1)
+
+    dump_to_file(args['dest'],
+                 transacs + transacs_orig[len(transacs):],
+                 options=args)
+
+    if args.get('batch', False) or args.get('dry-run', False):
+        with open(args['dest'], 'r') as f:
+            print(f.read())
     return 0
 
 if __name__ == "__main__":
