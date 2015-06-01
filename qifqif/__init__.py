@@ -45,7 +45,7 @@ def query_tag(cached_cat):
     print(CLEAR, end='')
 
     if not tag and cached_cat:
-        erase = quick_input('Remove existing tag', 'yn')
+        erase = quick_input('Remove existing tag', 'yN')
         if erase.upper() == 'N':
             tag = cached_cat
     set_completer()
