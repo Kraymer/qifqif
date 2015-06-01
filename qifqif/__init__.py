@@ -85,19 +85,17 @@ def process_transaction(t, cached_tag, cached_match, options={}):
 
     if not options.get('batch', False):
         edit = False
-        print('cached %s' % cached_tag)
-        if cached_tag:
-            if options.get('audit', False):
-                msg = "Edit '%s' category" % term.green(cached_tag)
-                edit = quick_input(msg, 'yN') == 'Y'
-                print('Edit ?=> %s' % edit)
-        if t['payee'] and (not cached_tag or edit):
+        audit = options.get('audit', False)
+        if cached_tag and audit:
+            msg = "Edit '%s' category" % term.green(cached_tag)
+            edit = quick_input(msg, 'yN') == 'Y'
+        if t['payee'] and (cached_tag is None or edit):
             tag = query_tag(cached_tag)
         print('Category: %s' % (term.green(tag) if tag
                                 else term.red('<none>')))
-        if tag and (not cached_match or edit):
+        if tag and edit:
             match = query_match(cached_match, t['payee'])
-    return tag or cached_tag, match
+    return tag, match
 
 
 def process_file(transactions, options={}):
@@ -115,7 +113,6 @@ def process_file(transactions, options={}):
         if not options.get('batch', False):
             separator = '-' * 3
             print(separator)
-    return transactions
 
 
 FIELDS = {'D': 'date', 'T': 'amount', 'P': 'payee', 'L': 'category',
@@ -174,7 +171,7 @@ def dump_to_file(dest, transactions, options={}):
     lines = []
     for t in transactions:
         for key in t:
-            if t[key]:
+            if t[key] is not None:
                 try:
                     lines.append('%s%s\n' % (reverse_fields[key], t[key]))
                 except KeyError:  # Unrecognized field
