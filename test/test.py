@@ -9,6 +9,7 @@ import tempfile
 import unittest
 
 from mock import patch
+from yaml import load
 
 import qifqif
 from qifqif import tags
@@ -16,12 +17,15 @@ from qifqif import tags
 CONFIG_FILE = os.path.join(os.path.realpath(os.path.dirname(__file__)),
                            'rsrc', 'config.json')
 QIF_FILE = os.path.join(os.path.realpath(os.path.dirname(__file__)),
-                        'rsrc', 'transac01.qif')
+                        'rsrc', 'transac.qif')
+with open(os.path.join(os.path.realpath(os.path.dirname(__file__)),
+          'rsrc', 'transac.yaml')) as f:
+    TEST_DATA = load(f)
 
 
-def qif_sample_path(num):
+def rsrc_path(fname):
     return os.path.join(os.path.realpath(os.path.dirname(__file__)),
-                        'rsrc', 'transac%02d.qif' % num)
+                        'rsrc', fname)
 
 
 def mock_input_default(prompt, choices=''):
@@ -40,18 +44,18 @@ def mock_input_edit_category(prompt, choices=''):
         return 'Y'
 
 
-class TestQifQif(unittest.TestCase):
+class TestPayeeTransaction(unittest.TestCase):
 
     def setUp(self):
         tags.load(CONFIG_FILE)
-        self.transaction = qifqif.create_transaction(
-            zip(['payee'], ['CARTE 16/02/2014 Sully bar']))
+        self.transaction = qifqif.parse_file(TEST_DATA['t01_notag']['raw'])
 
     def test_find_tag(self):
         self.assertTrue(tags.find_tag_for('Sully'), 'Bars')
 
     def test_is_match(self):
-        self.assertTrue(tags.is_match('sully bar', self.transaction['payee']))
+        self.assertTrue(tags.is_match('sully bar',
+                                      self.transaction[0]['payee']))
 
     def test_update_config(self):
         dest = os.path.join(tempfile.mkdtemp(), os.path.basename(CONFIG_FILE))
@@ -67,10 +71,28 @@ class TestQifQif(unittest.TestCase):
         args = qifqif.parse_args(['qifqif', QIF_FILE])
         self.assertTrue(args['dest'], args['src'])
 
+    def test_parse_file(self):
+        self.assertEqual(len(self.transaction), 1)
+        self.assertEqual(self.transaction[0]['payee'],
+                         TEST_DATA['t01_notag']['fields']['payee'])
+
+
+class TestFullTransaction(unittest.TestCase):
+
+    def setUp(self):
+        tags.load(CONFIG_FILE)
+        self.transactions = qifqif.parse_file(TEST_DATA['t02']['raw'],
+                                              {'batch': True})
+
+    def test_process_file(self):
+        res = qifqif.process_file(self.transactions, {'config': CONFIG_FILE})
+        self.assertEqual(len(res), 2)
+        self.assertEqual(res[1]['category'], 'Bars')
+
     def test_dump_to_file(self):
         dest = os.path.join(tempfile.mkdtemp(),
                             str(tempfile._get_candidate_names()))
-        res = qifqif.dump_to_file(dest, [self.transaction], {'batch': True})
+        res = qifqif.dump_to_file(dest, self.transactions, {'batch': True})
         with open(dest) as dst:
             dest_content = dst.read().strip()
         with open(QIF_FILE) as qif:
@@ -78,35 +100,24 @@ class TestQifQif(unittest.TestCase):
         self.assertEqual(dest_content, qif_content)
         self.assertEqual(res, qif_content)
 
-    def test_parse_file(self):
-        res = qifqif.parse_file(qif_sample_path(2), {'batch': True})
-        self.assertEqual(len(res), 2)
-        self.assertEqual(res[1].keys()[0:2], ['payee', 'date'])
-
-    def test_process_file(self):
-        lines = qifqif.parse_file(qif_sample_path(2), {'batch': True})
-        res = qifqif.process_file(lines, {'config': CONFIG_FILE})
-        self.assertEqual(len(res), 2)
-        self.assertEqual(res[1]['category'], 'Bars')
-
     @patch('qifqif.quick_input', side_effect=mock_input_default)
     def test_audit_mode_no_edit(self, mock_quick_input):
-        lines = qifqif.parse_file(qif_sample_path(2), {'batch': True})
-        res = qifqif.process_file(lines, {'config': CONFIG_FILE,
+        res = qifqif.process_file(self.transactions, {'config': CONFIG_FILE,
                                   'audit': True})
         self.assertEqual(len(res), 2)
         self.assertEqual(res[1]['category'], 'Bars')
 
     @patch('qifqif.quick_input', side_effect=mock_input_edit_category)
     def test_audit_mode(self, mock_quick_input):
-        lines = qifqif.parse_file(qif_sample_path(2))
-        res = qifqif.process_file(lines,
+        res = qifqif.process_file(self.transactions,
                                   {'config': CONFIG_FILE, 'audit': True,
                                    'dry-run': True})
         self.assertEqual(len(res), 2)
         self.assertEqual(res[1]['category'], 'Drink')
 
-    @patch('sys.argv', ['qifqif', qif_sample_path(2), '-c', CONFIG_FILE, '-b'])
+    @patch('sys.argv', ['qifqif', '-c', CONFIG_FILE, '-b',
+           os.path.join(os.path.realpath(os.path.dirname(__file__)), 'rsrc',
+                        'transac.qif')])
     def test_main(self):
         res = qifqif.main()
         self.assertEqual(res, 0)
