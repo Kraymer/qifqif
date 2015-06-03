@@ -213,10 +213,6 @@ def parse_args(argv):
     parser.add_argument('-d', '--dry-run', dest='dry-run',
                         action='store_true', help=('dry-run mode: just print '
                                                    'instead of write file'))
-    parser.add_argument('-s', '--always-save', dest='always-save',
-                        action='store_true',
-                        help=('edited transactions are written on file when '
-                              'killing the application before the EOF'))
     parser.add_argument('-o', '--output', dest='dest',
                         help='output filename. '
                         'DEFAULT: edit input file in-place', default='')
@@ -246,10 +242,6 @@ def main(argv=None):
         transacs_orig = parse_file(lines, options=args)
 
     transacs = process_file(transacs_orig, options=args)
-    if len(transacs) < len(transacs_orig):  # early exit
-        if not args['always-save']:  # restore original tags
-            tags.save(args['config'], original_tags)
-            exit(1)
 
     dump_to_file(args['dest'],
                  transacs + transacs_orig[len(transacs):],
