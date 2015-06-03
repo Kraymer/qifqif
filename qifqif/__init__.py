@@ -240,8 +240,11 @@ def main(argv=None):
     with open(args['src'], 'r') as f:
         lines = f.readlines()
         transacs_orig = parse_file(lines, options=args)
-
-    transacs = process_file(transacs_orig, options=args)
+    try:
+        transacs = process_file(transacs_orig, options=args)
+    except EOFError:  # exit on Ctrl + D: restore original tags
+        tags.save(args['config'], original_tags)
+        exit(1)
 
     dump_to_file(args['dest'],
                  transacs + transacs_orig[len(transacs):],
