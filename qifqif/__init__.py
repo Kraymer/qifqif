@@ -118,7 +118,7 @@ def process_file(transactions, options={}):
     except KeyboardInterrupt:
         pass
 
-    return transactions[:i]
+    return transactions[:i + 1]
 
 
 FIELDS = {'D': 'date', 'T': 'amount', 'P': 'payee', 'L': 'category',
