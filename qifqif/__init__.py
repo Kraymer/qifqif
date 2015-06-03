@@ -179,7 +179,7 @@ def dump_to_file(dest, transactions, options={}):
                 try:
                     lines.append('%s%s\n' % (reverse_fields[key], t[key]))
                 except KeyError:  # Unrecognized field
-                    lines.append(t[key])
+                    lines.append(t[key] + '\n')
         lines.append('^\n')
     res = ''.join(lines[:-1]).strip()
     if not options.get('dry-run', False):
