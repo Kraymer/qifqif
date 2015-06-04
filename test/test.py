@@ -115,7 +115,7 @@ class TestFullTransaction(unittest.TestCase):
         self.assertEqual(len(res), 2)
         self.assertEqual(res[1]['category'], 'Drink')
 
-    @patch('sys.argv', ['qifqif', '-c', CONFIG_FILE, '-b',
+    @patch('sys.argv', ['qifqif', '-c', CONFIG_FILE, '-b', '-d',
            os.path.join(os.path.realpath(os.path.dirname(__file__)), 'rsrc',
                         'transac.qif')])
     def test_main(self):
