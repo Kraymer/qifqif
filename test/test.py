@@ -84,6 +84,11 @@ class TestFullTransaction(unittest.TestCase):
         self.transactions = qifqif.parse_file(TEST_DATA['t02']['raw'],
                                               {'batch': True})
 
+    @patch('qifqif.quick_input', side_effect=mock_input_default)
+    def test_parse_file_continue(self, mock_quick_input):
+        transactions = qifqif.parse_file(TEST_DATA['t02']['raw'])
+        self.assertEqual(len(transactions), 2)
+
     def test_process_file(self):
         res = qifqif.process_file(self.transactions, {'config': CONFIG_FILE})
         self.assertEqual(len(res), 2)

@@ -66,10 +66,6 @@ def query_match(cached_match, payee):
     return match
 
 
-def query_save():
-    return quick_input('---\nSave', 'yn') == 'Y'
-
-
 def process_transaction(t, cached_tag, cached_match, options={}):
     print('Amount..: %s' % (term.green(str(t['amount'])) if
           (t['amount'] and float(t['amount']) > 0)
