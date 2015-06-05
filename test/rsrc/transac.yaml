@@ -10,4 +10,8 @@ t02:
         'PCARTE 16/02/2014 Sully bar',
         'D16/02/2014',
         'Mchouffe',
-        'LBars']
+        '^',
+        'PCARTE 16/02/2014 L Abri',
+        'LRestaurant'
+        ]
+
