@@ -112,10 +112,12 @@ def process_file(transactions, options={}):
             if not options.get('batch', False):
                 separator = '-' * 3
                 print(separator)
+        else:
+            i += 1  # last transaction is not returned in case of Ctrl + C
     except KeyboardInterrupt:
         pass
 
-    return transactions[:i + 1]
+    return transactions[:i]
 
 
 FIELDS = {'D': 'date', 'T': 'amount', 'P': 'payee', 'L': 'category',
