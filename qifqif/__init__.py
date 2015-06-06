@@ -68,16 +68,18 @@ def query_match(cached_match, payee):
 
 
 def process_transaction(t, cached_tag, cached_match, options={}):
-    print('Amount..: %s' % (term.green(str(t['amount'])) if
-          (t['amount'] and float(t['amount']) > 0)
-          else term.red(str(t['amount']))))
-    print('Payee...: %s' % (diff(cached_match, t['payee'], term)
-                            if cached_match
-                            else t['payee'] or term.red('<none>')))
-    for field in ('memo', 'number'):
-        if t[field]:
-            pad_width = 8
-            print('%s: %s' % (field.title().ljust(pad_width, '.'), t[field]))
+    if not options.get('batch', False):
+        print('Amount..: %s' % (term.green(str(t['amount'])) if
+              (t['amount'] and float(t['amount']) > 0)
+              else term.red(str(t['amount']))))
+        print('Payee...: %s' % (diff(cached_match, t['payee'], term)
+                                if cached_match
+                                else t['payee'] or term.red('<none>')))
+        for field in ('memo', 'number'):
+            if t[field]:
+                pad_width = 8
+                print('%s: %s' % (field.title().ljust(pad_width, '.'),
+                      t[field]))
     tag, match = cached_tag, cached_match
 
     if not options.get('batch', False):
