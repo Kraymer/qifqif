@@ -7,6 +7,7 @@
 from __future__ import (print_function, unicode_literals)
 
 import argparse
+import copy
 import os
 import sys
 
@@ -232,7 +233,7 @@ def main(argv=None):
     args = parse_args(argv)
     if not args:
         exit(1)
-    original_tags = tags.load(args['config'])
+    original_tags = copy.deepcopy(tags.load(args['config']))
     with open(args['src'], 'r') as f:
         lines = f.readlines()
         transacs_orig = parse_file(lines, options=args)
@@ -240,16 +241,14 @@ def main(argv=None):
         transacs = process_file(transacs_orig, options=args)
     except EOFError:  # exit on Ctrl + D: restore original tags
         tags.save(args['config'], original_tags)
-        exit(1)
-
+        return 1
     dump_to_file(args['dest'],
                  transacs + transacs_orig[len(transacs):],
                  options=args)
-
     if args.get('batch', False) or args.get('dry-run', False):
         with open(args['dest'], 'r') as f:
             print(f.read())
-    return 0
+    return 0 if len(transacs) == len(transacs_orig) else 1
 
 if __name__ == "__main__":
     sys.exit(main())
