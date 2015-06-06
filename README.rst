@@ -49,13 +49,10 @@ Usage
     usage: qifqif.py [-h] [-a] [-c CONFIG] [-o DEST] [-b] QIF_FILE      
 
     optional arguments:
-      -a, --audit-mode      pause after each transaction
-      -c CONFIG, --config CONFIG
-                            configuration filename in json format. DEFAULT:
-                            ~/.qifqif.json
-      -o DEST, --output DEST
-                            output filename. DEFAULT: edit input file in-place
-      -b, --batch-mode      skip transactions that require user input
+    -a, --audit-mode            pause after each transaction
+    -c CONFIG, --config CONFIG  configuration filename in json format. DEFAULT: ~/.qifqif.json
+    -o DEST, --output DEST      output filename. DEFAULT: edit input file in-place
+    -b, --batch-mode            skip transactions that require user input
 
 More infos on the `wiki`_ page
 
