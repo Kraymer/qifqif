@@ -31,7 +31,7 @@ def quick_input(prompt, choices=''):
     default = [x for x in choices if x.isupper()]
     default = default[0] if default else ''
     _input = raw_input('%s%s' % (prompt,
-                       (' [%s] ?' % ','.join(choices)) if choices else ':'))
+                       (' [%s] ? ' % ','.join(choices)) if choices else ': '))
     if _input in choices:
         _input = _input.upper()
     return _input or default
