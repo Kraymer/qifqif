@@ -92,7 +92,7 @@ def process_transaction(t, cached_tag, cached_match, options={}):
             tag = query_tag(cached_tag)
         print('Category: %s' % (term.green(tag) if tag
                                 else term.red('<none>')))
-        if tag and edit:
+        if tag and (not cached_tag or edit):
             match = query_match(cached_match, t['payee'])
     return tag, match
 
