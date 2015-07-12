@@ -74,7 +74,7 @@ if sys.argv[-1] == "publish":
 
 readme_lines = open('README.rst').readlines()
 setup(name='qifqif',
-      version='0.3.0',
+      version='0.3.1',
       description='QIF file editing tool',
       long_description=''.join(yield_sphinx_only_markup(readme_lines)),
       author='Fabrice Laporte',
