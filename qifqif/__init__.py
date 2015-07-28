@@ -10,6 +10,7 @@ import argparse
 import copy
 import os
 import sys
+import io
 
 from blessed import Terminal
 try:
@@ -184,7 +185,7 @@ def dump_to_file(dest, transactions, options={}):
         lines.append('^\n')
     res = ''.join(lines[:-1]).strip()
     if not options.get('dry-run', False):
-        with open(dest, 'w') as f:
+        with io.open(dest, 'w', encoding='utf-8') as f:
             f.write(res)
     return res
 
@@ -238,7 +239,7 @@ def main(argv=None):
     if not args:
         exit(1)
     original_tags = copy.deepcopy(tags.load(args['config']))
-    with open(args['src'], 'r') as f:
+    with io.open(args['src'], 'r', encoding='utf-8', errors='ignore') as f:
         lines = f.readlines()
         transacs_orig = parse_file(lines, options=args)
     try:
@@ -250,7 +251,7 @@ def main(argv=None):
                  transacs + transacs_orig[len(transacs):],
                  options=args)
     if args.get('batch', False) or args.get('dry-run', False):
-        with open(args['dest'], 'r') as f:
+        with io.open(args['dest'], 'r', encoding='utf-8') as f:
             print(f.read())
     return 0 if len(transacs) == len(transacs_orig) else 1
 
