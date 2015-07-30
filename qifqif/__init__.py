@@ -144,7 +144,7 @@ def parse_file(lines, options=None):
             transaction = create_transaction()
         elif field_id in FIELDS.keys():
             transaction[FIELDS[field_id]] = line[1:].strip()
-        else:
+        elif line.strip('\n'):
             transaction[idx] = line
     if transaction:
         res.append(transaction)
