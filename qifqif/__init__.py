@@ -23,6 +23,8 @@ from qifqif.ui import diff, set_completer
 
 term = Terminal()
 CLEAR = term.move_up + term.move_x(0) + term.clear_eol
+ENCODING = 'utf-8' if sys.stdin.encoding in (None, 'ascii') else \
+    sys.stdin.encoding
 
 
 def quick_input(prompt, choices=''):
@@ -31,8 +33,8 @@ def quick_input(prompt, choices=''):
     """
     default = [x for x in choices if x.isupper()]
     default = default[0] if default else ''
-    _input = raw_input('%s%s' % (prompt,
-                       (' [%s] ? ' % ','.join(choices)) if choices else ': '))
+    _input = raw_input('%s%s' % (prompt, (' [%s] ? ' % ','.join(choices)) if
+                       choices else ': ')).decode(ENCODING)
     if _input in choices:
         _input = _input.upper()
     return _input or default
