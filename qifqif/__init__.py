@@ -106,10 +106,8 @@ def process_file(transactions, options={}):
     try:
         for (i, t) in enumerate(transactions):
             cached_tag, cached_match = tags.find_tag_for(t['payee'])
-            cached_tag = cached_tag or t['category']
-
-            tag, match = process_transaction(t, cached_tag, cached_match,
-                                             options)
+            tag, match = process_transaction(t, cached_tag or t['category'],
+                                             cached_match, options)
             tags.edit(cached_tag, cached_match, tag, match, options)
             t['category'] = tag
             if 'payee' not in t:
