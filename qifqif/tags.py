@@ -14,7 +14,7 @@ TAGS = dict()
 def is_match(keyword, payee):
     """Returns True if payee line contains keyword.
     """
-    return re.search(r'\b%s\b' % keyword, payee, re.I) is not None
+    return re.search(r'\b%s\b' % re.escape(keyword), payee, re.I) is not None
 
 
 def find_tag_for(payee):
