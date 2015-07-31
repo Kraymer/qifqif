@@ -22,11 +22,14 @@ def find_tag_for(payee):
        (tag, keyword).
     """
     global TAGS
+    res = []
     if payee:
         for (tag, keywords) in TAGS.items():
             for k in keywords:
                 if is_match(k, payee):
-                    return tag, k
+                    res.append((tag, k))
+    if res:
+        return max(res, key=lambda x: len(x[1]))
     return None, None
 
 
