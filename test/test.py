@@ -51,7 +51,10 @@ class TestPayeeTransaction(unittest.TestCase):
         self.transaction = qifqif.parse_file(TEST_DATA['t01_notag']['raw'])
 
     def test_find_tag(self):
-        self.assertTrue(tags.find_tag_for('Sully'), 'Bars')
+        self.assertEqual(tags.find_tag_for('Sully')[0], 'Bars')
+        self.assertEqual(tags.find_tag_for('Sullyz')[0], None)
+        self.assertEqual(tags.find_tag_for('Shop Art Brut Denim')[0],
+                         'Clothes')
 
     def test_is_match(self):
         self.assertTrue(tags.is_match('sully bar',
@@ -63,13 +66,12 @@ class TestPayeeTransaction(unittest.TestCase):
         # Replace 'Sully' match tag from 'Bars' to 'Drink'
         tags.edit('Bars', 'Sully', 'Drink', 'Sully', {'config': dest})
         tags.load(dest)
-        self.assertTrue(tags.find_tag_for('Sully'), 'Drink')
+        self.assertEqual(tags.find_tag_for('Sully')[0], 'Drink')
 
     def test_parse_args(self):
-        self.assertEqual(qifqif.parse_args(['qifqif', '-a', '-b', 'in.qif']),
-                         False)
+        self.assertFalse(qifqif.parse_args(['qifqif', '-a', '-b', 'in.qif']))
         args = qifqif.parse_args(['qifqif', QIF_FILE])
-        self.assertTrue(args['dest'], args['src'])
+        self.assertEqual(args['dest'], args['src'])
 
     def test_parse_file(self):
         self.assertEqual(len(self.transaction), 1)
