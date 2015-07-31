@@ -37,7 +37,7 @@ Features
 - **Blazing fast edits:** thanks to well-thought-out defaults and ``<TAB>``
   completion
 - **Auditing mode:** review your transactions one by one
-- **Quiet mode (no interactive):** for easy integration with scripts
+- **Batch mode (no interactive):** for easy integration with scripts
 - **Easy-going workflow:** dreading the behemoth task of importing years of 
   accounting from a single file? Don't be. Go at your own pace and press 
   ``<Ctrl+C>`` to exit anytime. On next run, editing will resume right where
