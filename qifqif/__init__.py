@@ -138,13 +138,14 @@ def parse_file(lines, options=None):
     res = []
     transaction = create_transaction()
     for (idx, line) in enumerate(lines):
+        line = line.strip()
         field_id = line[0]
         if field_id == '^':
             res.append(transaction)
             transaction = create_transaction()
         elif field_id in FIELDS.keys():
-            transaction[FIELDS[field_id]] = line[1:].strip()
-        elif line.strip('\n'):
+            transaction[FIELDS[field_id]] = line[1:]
+        elif line:
             transaction[idx] = line
     if transaction:
         res.append(transaction)
