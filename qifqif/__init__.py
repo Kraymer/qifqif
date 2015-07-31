@@ -178,13 +178,13 @@ def dump_to_file(dest, transactions, options={}):
     lines = []
     for t in transactions:
         for key in t:
-            if t[key] is not None:
+            if t[key]:
                 try:
                     lines.append('%s%s\n' % (reverse_fields[key], t[key]))
                 except KeyError:  # Unrecognized field
                     lines.append(t[key] + '\n')
         lines.append('^\n')
-    res = ''.join(lines[:-1]).strip()
+    res = ''.join(lines).strip()
     if not options.get('dry-run', False):
         with io.open(dest, 'w', encoding='utf-8') as f:
             f.write(res)
