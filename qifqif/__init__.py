@@ -171,7 +171,7 @@ def parse_file(lines, options=None):
     return res
 
 
-def dump_to_file(dest, transactions, options={}):
+def dump_to_buffer(transactions):
     """Output transactions to file of terminal.
     """
     reverse_fields = {}
@@ -187,9 +187,6 @@ def dump_to_file(dest, transactions, options={}):
                     lines.append(t[key] + '\n')
         lines.append('^\n')
     res = ''.join(lines).strip() + '\n'
-    if not options.get('dry-run', False):
-        with io.open(dest, 'w', encoding='utf-8') as f:
-            f.write(res)
     return res
 
 
@@ -225,37 +222,41 @@ def parse_args(argv):
                         dest='batch', help=('skip transactions that require '
                                             'user input'))
     args = vars(parser.parse_args(args=argv[1:]))
-    if not args['dest']:
-        args['dest'] = args['src']
+    if args['dry-run'] and args['dest']:
+        print('Error: cannot activate dry-run mode when output is set')
+        return False
     if args['audit'] and args['batch']:
-        print(('Error: cannot activate batch-mode when audit-mode is already ',
+        print(('Error: cannot activate batch mode when audit mode is already '
               'on'))
         return False
+    if not args['dest']:
+        args['dest'] = args['src']
     return args
 
 
 def main(argv=None):
     if argv is None:
         argv = sys.argv
-
     args = parse_args(argv)
     if not args:
         exit(1)
-    original_tags = copy.deepcopy(tags.load(args['config']))
-    with io.open(args['src'], 'r', encoding='utf-8', errors='ignore') as f:
-        lines = f.readlines()
-        transacs_orig = parse_file(lines, options=args)
-    try:
-        transacs = process_file(transacs_orig, options=args)
-    except EOFError:  # exit on Ctrl + D: restore original tags
-        tags.save(args['config'], original_tags)
-        return 1
-    dump_to_file(args['dest'],
-                 transacs + transacs_orig[len(transacs):],
-                 options=args)
+    with term.fullscreen():
+
+        original_tags = copy.deepcopy(tags.load(args['config']))
+        with io.open(args['src'], 'r', encoding='utf-8', errors='ignore') as f:
+            lines = f.readlines()
+            transacs_orig = parse_file(lines, options=args)
+        try:
+            transacs = process_file(transacs_orig, options=args)
+        except EOFError:  # exit on Ctrl + D: restore original tags
+            tags.save(args['config'], original_tags)
+            return 1
+        res = dump_to_buffer(transacs + transacs_orig[len(transacs):])
+        if not args.get('dry-run', False):
+            with io.open(args['dest'], 'w', encoding='utf-8') as f:
+                f.write(res)
     if args.get('batch', False) or args.get('dry-run', False):
-        with io.open(args['dest'], 'r', encoding='utf-8') as f:
-            print(f.read())
+        print(res)
     return 0 if len(transacs) == len(transacs_orig) else 1
 
 if __name__ == "__main__":

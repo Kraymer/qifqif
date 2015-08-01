@@ -102,16 +102,10 @@ class TestFullTransaction(unittest.TestCase):
         self.assertEqual(len(res), 3)
         self.assertEqual(res[1]['category'], 'Bars')
 
-    def test_dump_to_file(self):
+    def test_dump_to_buffer(self):
         dest = os.path.join(tempfile.mkdtemp(),
                             str(tempfile._get_candidate_names()))
-        qifqif.dump_to_file(dest, self.transactions, {'batch': True})
-        self.assertEqual(get_data(dest), get_data(QIF_FILE))
-
-    def test_batch_output(self):
-        dest = os.path.join(tempfile.mkdtemp(),
-                            str(tempfile._get_candidate_names()))
-        res = qifqif.dump_to_file(dest, self.transactions, {'batch': True})
+        res = qifqif.dump_to_buffer(self.transactions)
         self.assertEqual(res, get_data(QIF_FILE))
 
     @patch('qifqif.quick_input', side_effect=mock_input_default)
