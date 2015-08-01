@@ -139,6 +139,8 @@ def parse_file(lines, options=None):
     transaction = create_transaction()
     for (idx, line) in enumerate(lines):
         line = line.strip()
+        if not line:
+            continue
         field_id = line[0]
         if field_id == '^':
             res.append(transaction)
