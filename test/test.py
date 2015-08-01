@@ -40,7 +40,7 @@ def get_data(fpath, as_lines=False):
         if as_lines:
             content = f.readlines()
         else:
-            content = f.read().strip('\n')
+            content = f.read()
     return content
 
 

@@ -186,7 +186,7 @@ def dump_to_file(dest, transactions, options={}):
                 except KeyError:  # Unrecognized field
                     lines.append(t[key] + '\n')
         lines.append('^\n')
-    res = ''.join(lines).strip()
+    res = ''.join(lines).strip() + '\n'
     if not options.get('dry-run', False):
         with io.open(dest, 'w', encoding='utf-8') as f:
             f.write(res)
