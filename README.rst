@@ -67,6 +67,10 @@ Installation
 ------------
 
     pip install qifqif
+    
+    Changelog `here`_
+    
+    .. _here: https://github.com/Kraymer/qifqif/wiki/Changelog
 
 Feedbacks
 ---------
