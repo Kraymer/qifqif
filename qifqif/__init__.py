@@ -74,30 +74,35 @@ def query_match(cached_match, payee):
 
 
 def process_transaction(t, cached_tag, cached_match, options={}):
-    if not options.get('batch', False):
-        print('Amount..: %s' % (term.green(str(t['amount'])) if
-              (t['amount'] and float(t['amount']) > 0)
-              else term.red(str(t['amount']))))
-        print('Payee...: %s' % (diff(cached_match, t['payee'], term)
-                                if cached_match
-                                else t['payee'] or term.red('<none>')))
-        for field in ('memo', 'number'):
-            if t[field]:
-                pad_width = 8
-                print('%s: %s' % (field.title().ljust(pad_width, '.'),
-                      t[field]))
+    tag = cached_tag
+    match = cached_match
+    pad_width = 8
 
-    if not options.get('batch', False):
-        edit = False
-        audit = options.get('audit', False)
-        if cached_tag and audit:
+    print('Amount..: %s' % (term.green(str(t['amount'])) if
+          (t['amount'] and float(t['amount']) > 0)
+          else term.red(str(t['amount']))))
+    print('Payee...: %s' % (diff(cached_match, t['payee'], term)
+                            if cached_match
+                            else t['payee'] or term.red('<none>')))
+    for field in ('memo', 'number'):
+        if t[field]:
+            print('%s: %s' % (field.title().ljust(pad_width, '.'),
+                  t[field]))
+
+    edit = False
+    audit = options.get('audit', False)
+    if cached_tag:
+        if audit:
             msg = "Edit '%s' category" % term.green(cached_tag)
             edit = quick_input(msg, 'yN') == 'Y'
-        tag = cached_tag
-        match = ' '
+        else:
+            print('%s: %s' % ('Category'.ljust(pad_width, '.'),
+                  t['category']))
+    match = ' '
+    if t['payee']:
         while match.isspace():
             # Query for tag if no cached tag or edit
-            if t['payee'] and (not cached_tag or edit):
+            if not cached_tag or edit:
                 tag = query_tag(cached_tag)
                 print('Category: %s' % (term.green(tag) if tag
                                         else term.red('<none>')))
@@ -106,7 +111,7 @@ def process_transaction(t, cached_tag, cached_match, options={}):
                 match = query_match(cached_match, t['payee'])
             else:
                 break
-    return tag, match or cached_match
+    return tag, match
 
 
 def process_file(transactions, options={}):
