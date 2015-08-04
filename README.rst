@@ -70,7 +70,7 @@ Installation
 
 Changelog `here`_
 
-.. _here: https://github.com/Kraymer/qifqif/wiki/Changelog
+.. _here: https://github.com/Kraymer/qifqif/releases
 
 Feedbacks
 ---------
