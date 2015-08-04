@@ -40,7 +40,7 @@ def quick_input(prompt, choices=''):
     return _input or default
 
 
-def query_tag(cached_cat):
+def query_tag(cached_tag):
     """Query category. If empty string entered then prompt to remove existing
        category, if any.
     """
@@ -48,10 +48,10 @@ def query_tag(cached_cat):
     tag = quick_input('Category')
     print(CLEAR, end='')
 
-    if not tag and cached_cat:
+    if not tag and cached_tag:
         erase = quick_input('Remove existing tag', 'yN')
         if erase.upper() == 'N':
-            tag = cached_cat
+            tag = cached_tag
     set_completer()
     return tag
 
@@ -59,6 +59,9 @@ def query_tag(cached_cat):
 def query_match(cached_match, payee):
     while True:
         match = quick_input('Match')
+        if match.isspace():  # Go back, discard entered category
+            print(CLEAR, end='')
+            break
         if not tags.is_match(match, payee):
             print(CLEAR + '%s Match rejected: %s' %
                   (term.red('✖'), diff(payee, match, term, as_error=True)))
@@ -83,7 +86,6 @@ def process_transaction(t, cached_tag, cached_match, options={}):
                 pad_width = 8
                 print('%s: %s' % (field.title().ljust(pad_width, '.'),
                       t[field]))
-    tag, match = cached_tag, cached_match
 
     if not options.get('batch', False):
         edit = False
@@ -91,13 +93,20 @@ def process_transaction(t, cached_tag, cached_match, options={}):
         if cached_tag and audit:
             msg = "Edit '%s' category" % term.green(cached_tag)
             edit = quick_input(msg, 'yN') == 'Y'
-        if t['payee'] and (cached_tag is None or edit):
-            tag = query_tag(cached_tag)
-        print('Category: %s' % (term.green(tag) if tag
-                                else term.red('<none>')))
-        if tag and (not cached_tag or edit):
-            match = query_match(cached_match, t['payee'])
-    return tag, match
+        tag = cached_tag
+        match = ' '
+        while match.isspace():
+            # Query for tag if no cached tag or edit
+            if t['payee'] and (not cached_tag or edit):
+                tag = query_tag(cached_tag)
+                print('Category: %s' % (term.green(tag) if tag
+                                        else term.red('<none>')))
+            # Query match if tag entered or edit
+            if (tag != cached_tag) or edit:
+                match = query_match(cached_match, t['payee'])
+            else:
+                break
+    return tag, match or cached_match
 
 
 def process_file(transactions, options={}):
@@ -115,11 +124,10 @@ def process_file(transactions, options={}):
             if not options.get('batch', False):
                 separator = '-' * 3
                 print(separator)
-        else:
-            i += 1  # last transaction is not returned in case of Ctrl + C
     except KeyboardInterrupt:
-        pass
+        return transactions[:i]
 
+    raw_input('Press any key to continue (Ctrl+D to discard edits)')
     return transactions[:i]
 
 
@@ -255,8 +263,8 @@ def main(argv=None):
         if not args.get('dry-run', False):
             with io.open(args['dest'], 'w', encoding='utf-8') as f:
                 f.write(res)
-    if args.get('batch', False) or args.get('dry-run', False):
-        print(res)
+
+    print(res)
     return 0 if len(transacs) == len(transacs_orig) else 1
 
 if __name__ == "__main__":
