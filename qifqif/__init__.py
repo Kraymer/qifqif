@@ -115,19 +115,23 @@ def process_file(transactions, options={}):
     try:
         for (i, t) in enumerate(transactions):
             cached_tag, cached_match = tags.find_tag_for(t['payee'])
+
             tag, match = process_transaction(t, cached_tag or t['category'],
                                              cached_match, options)
-            tags.edit(cached_tag, cached_match, tag, match, options)
+            if tag:
+                tags.edit(cached_tag, cached_match, tag, match, options)
             t['category'] = tag
-            if 'payee' not in t:
+            if not t['payee']:
                 print('Skip transaction: no payee')
-            if not options.get('batch', False):
-                separator = '-' * 3
-                print(separator)
+            separator = '-' * 3
+            print(separator)
+        else:
+            i = i + 1
+        if not options.get('batch', False):
+            quick_input('Press any key to continue (Ctrl+D to discard edits)')
+
     except KeyboardInterrupt:
         return transactions[:i]
-
-    raw_input('Press any key to continue (Ctrl+D to discard edits)')
     return transactions[:i]
 
 
@@ -249,7 +253,6 @@ def main(argv=None):
     if not args:
         exit(1)
     with term.fullscreen():
-
         original_tags = copy.deepcopy(tags.load(args['config']))
         with io.open(args['src'], 'r', encoding='utf-8', errors='ignore') as f:
             lines = f.readlines()
@@ -263,7 +266,6 @@ def main(argv=None):
         if not args.get('dry-run', False):
             with io.open(args['dest'], 'w', encoding='utf-8') as f:
                 f.write(res)
-
     print(res)
     return 0 if len(transacs) == len(transacs_orig) else 1
 
