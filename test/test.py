@@ -31,8 +31,8 @@ def rsrc_path(fname):
 
 
 def mock_input_default(prompt, choices=''):
-    res = [x for x in choices if x.isupper()][0]
-    return res
+    res = [x for x in choices if x.isupper()]
+    return res[0] if res else ''
 
 
 def get_data(fpath, as_lines=False):
@@ -97,25 +97,24 @@ class TestFullTransaction(unittest.TestCase):
         transactions = qifqif.parse_file(TEST_DATA['t02']['raw'])
         self.assertEqual(len(transactions), 3)
 
-    def test_process_file(self):
-        res = qifqif.process_file(self.transactions, {'config': CONFIG_FILE})
+    @patch('qifqif.quick_input', side_effect=[''])
+    def test_process_file(self, mock_quick_input):
+        res = qifqif.process_file(self.transactions, {'config': CONFIG_TEST_FILE})
         self.assertEqual(len(res), 3)
         self.assertEqual(res[1]['category'], 'Bars')
 
     def test_dump_to_buffer(self):
-        dest = os.path.join(tempfile.mkdtemp(),
-                            str(tempfile._get_candidate_names()))
         res = qifqif.dump_to_buffer(self.transactions)
         self.assertEqual(res, get_data(QIF_FILE))
 
     @patch('qifqif.quick_input', side_effect=mock_input_default)
     def test_audit_mode_no_edit(self, mock_quick_input):
-        res = qifqif.process_file(self.transactions, {'config': CONFIG_FILE,
+        res = qifqif.process_file(self.transactions, {'config': CONFIG_TEST_FILE,
                                   'audit': True})
         self.assertEqual(len(res), 3)
         self.assertEqual(res[1]['category'], 'Bars')
 
-    @patch('qifqif.quick_input', side_effect=KEYBOARD_INPUTS + [''])
+    @patch('qifqif.quick_input', side_effect=KEYBOARD_INPUTS + ['', ''])
     def test_audit_mode(self, mock_quick_input):
         res = qifqif.process_file(self.transactions,
                                   {'config': CONFIG_FILE, 'audit': True,
@@ -123,7 +122,7 @@ class TestFullTransaction(unittest.TestCase):
         self.assertEqual(len(res), 3)
         self.assertEqual(res[1]['category'], 'Drink')
 
-    @patch('sys.argv', ['qifqif', '-c', CONFIG_FILE, '-b', '-d', QIF_FILE])
+    @patch('sys.argv', ['qifqif', '-c', CONFIG_TEST_FILE, '-b', '-d', QIF_FILE])
     def test_main(self):
         res = qifqif.main()
         self.assertEqual(res, 0)
