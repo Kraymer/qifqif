@@ -266,13 +266,13 @@ def main(argv=None):
             transacs = process_file(transacs_orig, options=args)
         except EOFError:  # exit on Ctrl + D: restore original tags
             tags.save(args['config'], original_tags)
-            return 1
+            exit(1)
         res = dump_to_buffer(transacs + transacs_orig[len(transacs):])
         if not args.get('dry-run', False):
             with io.open(args['dest'], 'w', encoding='utf-8') as f:
                 f.write(res)
     print(res)
-    return 0 if len(transacs) == len(transacs_orig) else 1
+    exit(0)
 
 if __name__ == "__main__":
     sys.exit(main())
