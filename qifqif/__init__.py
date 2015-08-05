@@ -105,9 +105,8 @@ def process_transaction(t, cached_tag, cached_match, options):
         else:
             print('%s: %s' % ('Category'.ljust(pad_width, '.'),
                   t['category']))
-    match = ' '
     if t['payee']:
-        while match.isspace():
+        while True:
             # Query for tag if no cached tag or edit
             if not cached_tag or edit:
                 tag = query_tag(cached_tag)
@@ -116,6 +115,8 @@ def process_transaction(t, cached_tag, cached_match, options):
             # Query match if tag entered or edit
             if (tag != cached_tag) or edit:
                 match = query_match(t['payee'])
+                if not match.isspace():
+                    break
             else:
                 break
     return tag, match
