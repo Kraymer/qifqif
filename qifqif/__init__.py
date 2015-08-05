@@ -65,7 +65,7 @@ def query_match(payee):
     while True:
         match = quick_input('Match')
         if match.isspace():  # Go back, discard entered category
-            print(CLEAR, end='')
+            print(2 * CLEAR, end='')
             break
         if not tags.is_match(match, payee):
             print(CLEAR + '%s Match rejected: %s' %
