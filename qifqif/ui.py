@@ -42,7 +42,7 @@ class InputCompleter(object):
         if state == 0:
             if text:
                 self.matches = [s for s in self.options
-                                if s and s.startswith(text)]
+                                if s and s.lower().startswith(text.lower())]
             else:
                 self.matches = self.options[:]
         try:
