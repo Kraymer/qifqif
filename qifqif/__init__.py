@@ -4,6 +4,9 @@
 # Copyright (c) 2015 Fabrice Laporte - kray.me
 # The MIT License http://www.opensource.org/licenses/mit-license.php
 
+"""Enrich your QIF files with categories.
+"""
+
 from __future__ import (print_function, unicode_literals)
 
 import argparse
@@ -21,8 +24,8 @@ except ImportError:  # python 2.6
 from qifqif import tags
 from qifqif.ui import diff, set_completer
 
-term = Terminal()
-CLEAR = term.move_up + term.move_x(0) + term.clear_eol
+TERM = Terminal()
+CLEAR = TERM.move_up + TERM.move_x(0) + TERM.clear_eol
 ENCODING = 'utf-8' if sys.stdin.encoding in (None, 'ascii') else \
     sys.stdin.encoding
 
@@ -56,7 +59,9 @@ def query_tag(cached_tag):
     return tag
 
 
-def query_match(cached_match, payee):
+def query_match(payee):
+    """Query a match for payee line as long as a correct one is not entered.
+    """
     while True:
         match = quick_input('Match')
         if match.isspace():  # Go back, discard entered category
@@ -64,26 +69,28 @@ def query_match(cached_match, payee):
             break
         if not tags.is_match(match, payee):
             print(CLEAR + '%s Match rejected: %s' %
-                  (term.red('✖'), diff(payee, match, term, as_error=True)))
+                  (TERM.red('✖'), diff(payee, match, TERM, as_error=True)))
         else:
             print(CLEAR + "%s Match accepted: %s" %
-                  (term.green('✔'), str(match) if match else
-                   term.red('<none>')))
+                  (TERM.green('✔'), str(match) if match else
+                   TERM.red('<none>')))
             break
     return match
 
 
-def process_transaction(t, cached_tag, cached_match, options={}):
+def process_transaction(t, cached_tag, cached_match, options):
+    """Print transaction. Tag it if it's untagged or if audit mode is True.
+    """
     tag = cached_tag
     match = cached_match
     pad_width = 8
 
-    print('Amount..: %s' % (term.green(str(t['amount'])) if
+    print('Amount..: %s' % (TERM.green(str(t['amount'])) if
           (t['amount'] and float(t['amount']) > 0)
-          else term.red(str(t['amount']))))
-    print('Payee...: %s' % (diff(cached_match, t['payee'], term)
+          else TERM.red(str(t['amount']))))
+    print('Payee...: %s' % (diff(cached_match, t['payee'], TERM)
                             if cached_match
-                            else t['payee'] or term.red('<none>')))
+                            else t['payee'] or TERM.red('<none>')))
     for field in ('memo', 'number'):
         if t[field]:
             print('%s: %s' % (field.title().ljust(pad_width, '.'),
@@ -93,7 +100,7 @@ def process_transaction(t, cached_tag, cached_match, options={}):
     audit = options.get('audit', False)
     if cached_tag:
         if audit:
-            msg = "Edit '%s' category" % term.green(cached_tag)
+            msg = "Edit '%s' category" % TERM.green(cached_tag)
             edit = quick_input(msg, 'yN') == 'Y'
         else:
             print('%s: %s' % ('Category'.ljust(pad_width, '.'),
@@ -104,48 +111,44 @@ def process_transaction(t, cached_tag, cached_match, options={}):
             # Query for tag if no cached tag or edit
             if not cached_tag or edit:
                 tag = query_tag(cached_tag)
-                print('Category: %s' % (term.green(tag) if tag
-                                        else term.red('<none>')))
+                print('Category: %s' % (TERM.green(tag) if tag
+                                        else TERM.red('<none>')))
             # Query match if tag entered or edit
             if (tag != cached_tag) or edit:
-                match = query_match(cached_match, t['payee'])
+                match = query_match(t['payee'])
             else:
                 break
     return tag, match
 
 
-def process_file(transactions, options={}):
+def process_file(transactions, options):
+    """Process file's transactions. Operate in a dedicated edit screen."""
     tag = None
+    with TERM.fullscreen():
+        try:
+            for (i, t) in enumerate(transactions):
+                cached_tag, cached_match = tags.find_tag_for(t['payee'])
 
-    try:
-        for (i, t) in enumerate(transactions):
-            cached_tag, cached_match = tags.find_tag_for(t['payee'])
-
-            tag, match = process_transaction(t, cached_tag or t['category'],
-                                             cached_match, options)
-            if tag:
-                tags.edit(cached_tag, cached_match, tag, match, options)
-            t['category'] = tag
-            if not t['payee']:
-                print('Skip transaction: no payee')
-            separator = '-' * 3
-            print(separator)
-        else:
+                tag, match = process_transaction(t,
+                    cached_tag or t['category'], cached_match, options)
+                if tag:
+                    tags.edit(cached_tag, cached_match, tag, match, options)
+                t['category'] = tag
+                if not t['payee']:
+                    print('Skip transaction: no payee')
+                separator = '-' * 3
+                print(separator)
             i = i + 1
-        if not options.get('batch', False):
-            quick_input('Press any key to continue (Ctrl+D to discard edits)')
-
-    except KeyboardInterrupt:
+            if not options.get('batch', False):
+                quick_input('Press any key to continue (Ctrl+D to discard '
+                            'edits)')
+        except KeyboardInterrupt:
+            return transactions[:i]
         return transactions[:i]
-    return transactions[:i]
 
 
 FIELDS = {'D': 'date', 'T': 'amount', 'P': 'payee', 'L': 'category',
           'N': 'number', 'M': 'memo'}
-
-
-def create_transaction(content=[]):
-    return OrderedDict(content)
 
 
 def parse_file(lines, options=None):
@@ -153,7 +156,7 @@ def parse_file(lines, options=None):
        order as they appear in input file.
     """
     res = []
-    transaction = create_transaction()
+    transaction = OrderedDict([])
     for (idx, line) in enumerate(lines):
         line = line.strip()
         if not line:
@@ -161,7 +164,7 @@ def parse_file(lines, options=None):
         field_id = line[0]
         if field_id == '^':
             res.append(transaction)
-            transaction = create_transaction()
+            transaction = OrderedDict([])
         elif field_id in FIELDS.keys():
             transaction[FIELDS[field_id]] = line[1:]
         elif line:
@@ -177,7 +180,7 @@ def parse_file(lines, options=None):
                 if field == 'payee':
                     no_payee_count += 1
     if (not options or not options['batch']) and no_payee_count:
-        with term.location():
+        with TERM.location():
             msg = ("%s of %s transactions have no 'Payee': field. "
                    "Continue")
             ok = quick_input(msg % (no_payee_count, len(res)), 'Yn')
@@ -189,11 +192,11 @@ def parse_file(lines, options=None):
 
 
 def dump_to_buffer(transactions):
-    """Output transactions to file of terminal.
+    """Output transactions to file of TERMinal.
     """
     reverse_fields = {}
-    for (k, v) in FIELDS.items():
-        reverse_fields[v] = k
+    for (key, val) in FIELDS.items():
+        reverse_fields[val] = key
     lines = []
     for t in transactions:
         for key in t:
@@ -207,10 +210,10 @@ def dump_to_buffer(transactions):
     return res
 
 
-def highlight_char(word, n=0):
+def highlight_char(word, index=0):
     """Return word with n-th letter highlighted
     """
-    return word[:n] + term.reverse(word[n]) + word[n + 1:]
+    return word[:index] + TERM.reverse(word[index]) + word[index + 1:]
 
 
 def parse_args(argv):
@@ -252,25 +255,25 @@ def parse_args(argv):
 
 
 def main(argv=None):
+    """Main function: Parse, process, print"""
     if argv is None:
         argv = sys.argv
     args = parse_args(argv)
     if not args:
         exit(1)
-    with term.fullscreen():
-        original_tags = copy.deepcopy(tags.load(args['config']))
-        with io.open(args['src'], 'r', encoding='utf-8', errors='ignore') as f:
-            lines = f.readlines()
-            transacs_orig = parse_file(lines, options=args)
-        try:
-            transacs = process_file(transacs_orig, options=args)
-        except EOFError:  # exit on Ctrl + D: restore original tags
-            tags.save(args['config'], original_tags)
-            return 1
-        res = dump_to_buffer(transacs + transacs_orig[len(transacs):])
-        if not args.get('dry-run', False):
-            with io.open(args['dest'], 'w', encoding='utf-8') as f:
-                f.write(res)
+    original_tags = copy.deepcopy(tags.load(args['config']))
+    with io.open(args['src'], 'r', encoding='utf-8', errors='ignore') as fin:
+        lines = fin.readlines()
+        transacs_orig = parse_file(lines, options=args)
+    try:
+        transacs = process_file(transacs_orig, options=args)
+    except EOFError:  # exit on Ctrl + D: restore original tags
+        tags.save(args['config'], original_tags)
+        return 1
+    res = dump_to_buffer(transacs + transacs_orig[len(transacs):])
+    if not args.get('dry-run', False):
+        with io.open(args['dest'], 'w', encoding='utf-8') as f:
+            f.write(res)
     print(res)
     return 0 if len(transacs) == len(transacs_orig) else 1
 
