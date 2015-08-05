@@ -16,26 +16,29 @@ from qifqif import tags
 readline.parse_and_bind('tab: complete')
 
 
-def diff(a, b, term, as_error=False):
-    """ Return a string representing how well b matches a string : matching
+def diff(_str, candidate, term, as_error=False):
+    """ Return a string representing how well candidate matches str : matching
         words are green, partial matches (chars) are orange.
         If as_error is True, non matching chars are red.
     """
 
-    s = SequenceMatcher(None, a.lower(), b.lower())
-    match_indexes = s.find_longest_match(0, len(a), 0, len(b))
-    _, x, y = match_indexes
-    match = b[x:x + y]
+    match = SequenceMatcher(None, _str.lower(), candidate.lower())
+    match_indexes = match.find_longest_match(0, len(_str), 0, len(candidate))
+    _, beg, end = match_indexes
+    match = candidate[beg:beg + end]
     words = match.split(' ')
-    res = term.red(b[:x]) if as_error else b[:x]
+    res = term.red(candidate[:beg]) if as_error else candidate[:beg]
     for w in words:
-        res += (term.green(w) if tags.is_match(w, a)
+        res += (term.green(w) if tags.is_match(w, _str)
                 else term.yellow(w)) + ' '
-    res += '\b' + (term.red(b[x + y:]) if as_error else b[x + y:])
+    res += '\b' + (term.red(candidate[beg + end:]) if as_error
+        else candidate[beg + end:])
     return res
 
 
 class InputCompleter(object):
+    """Input completer for categories"""
+
     def __init__(self, options):
         self.options = options
 
@@ -43,12 +46,12 @@ class InputCompleter(object):
         readline.redisplay()
         if state == 0:
             if text:
-                self.matches = [s for s in self.options
-                                if s and s.lower().startswith(text.lower())]
+                matches = [s for s in self.options
+                           if s and s.lower().startswith(text.lower())]
             else:
-                self.matches = self.options[:]
+                matches = self.options[:]
         try:
-            return self.matches[state]
+            return matches[state]
         except IndexError:
             return None
 
