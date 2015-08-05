@@ -272,7 +272,7 @@ def main(argv=None):
             with io.open(args['dest'], 'w', encoding='utf-8') as f:
                 f.write(res)
     print(res)
-    return 0
+    return 0 if len(transacs) == len(transacs_orig) else 1
 
 if __name__ == "__main__":
     sys.exit(main())
