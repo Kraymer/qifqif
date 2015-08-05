@@ -4,6 +4,8 @@
 # Copyright (c) 2015 Fabrice Laporte - kray.me
 # The MIT License http://www.opensource.org/licenses/mit-license.php
 
+"""Cache mapping categories with associated keywords"""
+
 import json
 import os
 import re
@@ -21,7 +23,6 @@ def find_tag_for(payee):
     """If payee contains a saved keyword, returns corresponding tuple
        (tag, keyword).
     """
-    global TAGS
     res = []
     if payee:
         for (tag, keywords) in TAGS.items():
@@ -48,7 +49,6 @@ def load(filepath):
 def save(filepath, tags=None):
     """Save tags dictionary on disk
     """
-    global TAGS
     if not tags:
         tags = TAGS
     with open(filepath, 'w+') as cfg:
