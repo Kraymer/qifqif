@@ -52,7 +52,7 @@ def query_tag(cached_tag):
     print(CLEAR, end='')
 
     if not tag and cached_tag:
-        erase = quick_input('Remove existing tag', 'yN')
+        erase = quick_input('Remove existing category', 'yN')
         if erase.upper() == 'N':
             tag = cached_tag
     set_completer()
