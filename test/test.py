@@ -13,6 +13,7 @@ from yaml import load
 
 import qifqif
 from qifqif import tags
+from qifqif import ui
 
 CONFIG_FILE = os.path.join(os.path.realpath(os.path.dirname(__file__)),
                            'rsrc', 'config.json')
@@ -78,6 +79,10 @@ class TestPayeeTransaction(unittest.TestCase):
         self.assertEqual(self.transaction[0]['payee'],
                          TEST_DATA['t01_notag']['fields']['payee'])
 
+    def test_completer(self):
+        self.assertEqual(set(ui.complete_matches('A: B,C')), set(['A',
+                         'A: B,C', 'B', 'B,C', 'C']))
+
 TEMP_DIR = tempfile.mkdtemp()
 CONFIG_TEST_FILE = os.path.join(TEMP_DIR, 'config.json')
 QIF_TEST_FILE = os.path.join(TEMP_DIR, 'transac.qif')
@@ -99,7 +104,8 @@ class TestFullTransaction(unittest.TestCase):
 
     @patch('qifqif.quick_input', side_effect=[''])
     def test_process_file(self, mock_quick_input):
-        res = qifqif.process_file(self.transactions, {'config': CONFIG_TEST_FILE})
+        res = qifqif.process_file(self.transactions, {'config':
+                                  CONFIG_TEST_FILE})
         self.assertEqual(len(res), 3)
         self.assertEqual(res[1]['category'], 'Bars')
 
@@ -109,7 +115,8 @@ class TestFullTransaction(unittest.TestCase):
 
     @patch('qifqif.quick_input', side_effect=mock_input_default)
     def test_audit_mode_no_edit(self, mock_quick_input):
-        res = qifqif.process_file(self.transactions, {'config': CONFIG_TEST_FILE,
+        res = qifqif.process_file(self.transactions, {'config':
+                                  CONFIG_TEST_FILE,
                                   'audit': True})
         self.assertEqual(len(res), 3)
         self.assertEqual(res[1]['category'], 'Bars')
@@ -122,7 +129,8 @@ class TestFullTransaction(unittest.TestCase):
         self.assertEqual(len(res), 3)
         self.assertEqual(res[1]['category'], 'Drink')
 
-    @patch('sys.argv', ['qifqif', '-c', CONFIG_TEST_FILE, '-b', '-d', QIF_FILE])
+    @patch('sys.argv', ['qifqif', '-c', CONFIG_TEST_FILE, '-b', '-d',
+           QIF_FILE])
     def test_main(self):
         res = qifqif.main()
         self.assertEqual(res, 0)

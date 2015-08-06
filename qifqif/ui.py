@@ -33,7 +33,7 @@ def diff(_str, candidate, term, as_error=False):
         res += (term.green(w) if tags.is_match(w, _str)
                 else term.yellow(w)) + ' '
     res += '\b' + (term.red(candidate[beg + end:]) if as_error
-        else candidate[beg + end:])
+                   else candidate[beg + end:])
     return res
 
 
@@ -61,20 +61,18 @@ def set_completer(options=None):
     if options:
         completer = InputCompleter(options)
         readline.set_completer(completer.complete)
+        readline.set_completer_delims('')
     else:
         readline.set_completer(None)
 
 
 def complete_matches(payee):
     """Generate a limited set of matches for payee line"""
-    matches = [re.sub(r"^\W+|\W+$", "", x) for x in payee.split(' ')]
-    matches = [m for m in matches if m]
 
-    cut = False
+    matches = [m for m in re.findall(r"\w+", payee) if m]
+    select = True
     for (i, c) in enumerate(payee):
-        if not c.isalnum():
-            cut = True
-        elif cut:
+        if c.isalnum() and select:
             matches.append(payee[i:])
-            cut = False
+        select = not c.isalnum()
     return matches
