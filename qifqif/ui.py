@@ -7,6 +7,7 @@
 """Utilities functions related to terminal display"""
 
 import readline
+import re
 
 from difflib import SequenceMatcher
 
@@ -46,12 +47,12 @@ class InputCompleter(object):
         readline.redisplay()
         if state == 0:
             if text:
-                matches = [s for s in self.options
-                           if s and s.lower().startswith(text.lower())]
+                self.matches = [s for s in self.options
+                                if s and s.lower().startswith(text.lower())]
             else:
-                matches = self.options[:]
+                self.matches = self.options[:]
         try:
-            return matches[state]
+            return self.matches[state]
         except IndexError:
             return None
 
@@ -62,3 +63,18 @@ def set_completer(options=None):
         readline.set_completer(completer.complete)
     else:
         readline.set_completer(None)
+
+
+def complete_matches(payee):
+    """Generate a limited set of matches for payee line"""
+    matches = [re.sub(r"^\W+|\W+$", "", x) for x in payee.split(' ')]
+    matches = [m for m in matches if m]
+
+    cut = False
+    for (i, c) in enumerate(payee):
+        if not c.isalnum():
+            cut = True
+        elif cut:
+            matches.append(payee[i:])
+            cut = False
+    return matches

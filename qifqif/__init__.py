@@ -22,7 +22,7 @@ except ImportError:  # python 2.6
     from ordereddict import OrderedDict
 
 from qifqif import tags
-from qifqif.ui import diff, set_completer
+from qifqif.ui import diff, set_completer, complete_matches
 
 TERM = Terminal()
 CLEAR = TERM.move_up + TERM.move_x(0) + TERM.clear_eol
@@ -62,6 +62,7 @@ def query_tag(cached_tag):
 def query_match(payee):
     """Query a match for payee line as long as a correct one is not entered.
     """
+    set_completer(sorted(complete_matches(payee)))
     while True:
         match = quick_input('Match')
         if match.isspace():  # Go back, discard entered category
@@ -75,6 +76,7 @@ def query_match(payee):
                   (TERM.green('✔'), str(match) if match else
                    TERM.red('<none>')))
             break
+    set_completer()
     return match
 
 
