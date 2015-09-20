@@ -94,7 +94,7 @@ setup(name='qifqif',
       },
 
       install_requires=[
-          'clint',
+          'blessed',
       ],
 
       classifiers=[
