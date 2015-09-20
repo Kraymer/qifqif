@@ -100,13 +100,12 @@ def process_transaction(t, cached_tag, cached_match, options):
 
     edit = False
     audit = options.get('audit', False)
-    if cached_tag:
+    if tag:
         if audit:
             msg = "Edit '%s' category" % TERM.green(cached_tag)
             edit = quick_input(msg, 'yN') == 'Y'
         else:
-            print('%s: %s' % ('Category'.ljust(pad_width, '.'),
-                  t['category']))
+            print('%s: %s' % ('Category'.ljust(pad_width, '.'), tag))
     if t['payee']:
         while True:
             # Query for tag if no cached tag or edit
