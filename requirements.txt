@@ -4,4 +4,4 @@ coveralls
 mock
 ordereddict
 tox
-yaml
+pyyaml
