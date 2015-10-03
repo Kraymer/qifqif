@@ -48,7 +48,8 @@ def query_tag(cached_tag):
        category, if any.
     """
     set_completer(sorted(tags.TAGS.keys()))
-    tag = quick_input('Category')
+
+    tag = quick_input('Category').strip()
     print(CLEAR, end='')
 
     if not tag and cached_tag:
