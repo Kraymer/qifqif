@@ -40,7 +40,11 @@ def load(filepath):
     global TAGS
     if os.path.isfile(filepath):
         with open(filepath, 'r') as cfg:
-            TAGS = json.load(cfg)
+            try:
+                TAGS = json.load(cfg)
+            except Exception as e:
+                print("Error loading '%s'.\n%s" % (filepath, e))
+                exit(1)
     else:
         TAGS = {}
     return TAGS
