@@ -62,7 +62,10 @@ def publish():
 
 def get_version():
     import subprocess
-    return subprocess.check_output(['git', 'describe', '--tags'])[1:-1]
+    try:
+        return subprocess.check_output(['git', 'describe', '--tags'])[1:-1]
+    except Exception:
+        return None
 
 
 if sys.argv[-1] == "publish":
