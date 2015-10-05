@@ -62,13 +62,12 @@ def publish():
 
 def get_version():
     import subprocess
-    return subprocess.check_output(['git', 'describe', '--tags'])
+    return subprocess.check_output(['git', 'describe', '--tags'])[1:-1]
 
 
 if sys.argv[-1] == "publish":
     publish()
     sys.exit()
-
 
 readme_lines = open('README.rst').readlines()
 setup(name='qifqif',
