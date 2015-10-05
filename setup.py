@@ -18,30 +18,21 @@ def yield_sphinx_only_markup(lines):
     """
     substs = [
         # Selected Sphinx-only Roles.
-        #
         (r':abbr:`([^`]+)`', r'\1'),
         (r':ref:`([^`]+)`', r'`\1`_'),
         (r':term:`([^`]+)`', r'**\1**'),
         (r':dfn:`([^`]+)`', r'**\1**'),
         (r':(samp|guilabel|menuselection):`([^`]+)`', r'``\2``'),
 
-
         # Sphinx-only roles:
-        #        :foo:`bar`   --> foo(``bar``)
-        #        :a:foo:`bar` XXX afoo(``bar``)
-        #
-        # (r'(:(\w+))?:(\w+):`([^`]*)`', r'\2\3(``\4``)'),
         (r':(\w+):`([^`]*)`', r'\1(``\2``)'),
 
-
         # Sphinx-only Directives.
-        #
         (r'\.\. doctest', r'code-block'),
         (r'\.\. plot::', r'.. '),
         (r'\.\. seealso', r'info'),
         (r'\.\. glossary', r'rubric'),
         (r'\.\. figure::', r'.. '),
-
 
         # Other
         (r'\|version\|', r'x.x.x'),
@@ -68,13 +59,20 @@ def publish():
     """Publish to PyPi"""
     os.system("python setup.py sdist upload")
 
+
+def get_version():
+    import subprocess
+    return subprocess.check_output(['git', 'describe', '--tags'])
+
+
 if sys.argv[-1] == "publish":
     publish()
     sys.exit()
 
+
 readme_lines = open('README.rst').readlines()
 setup(name='qifqif',
-      version='0.3.2',
+      version=get_version(),
       description='QIF file editing tool',
       long_description=''.join(yield_sphinx_only_markup(readme_lines)),
       author='Fabrice Laporte',
