@@ -15,7 +15,7 @@ Description
 
 CLI tool to *enrich* your QIF files transactions with category information, hence **cutting down import time from minutes to mere seconds**.
 
-.. image:: docs/qifqif_demo.gif
+.. image:: https://github.com/Kraymer/qifqif/blob/master/docs/qifqif_demo.gif
 
 QIF is a format widely used by personal money management software such as
 `GnuCash`_ to import information. Yet, the import process is particularly
