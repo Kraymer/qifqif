@@ -15,7 +15,6 @@ import os
 import sys
 import io
 
-from blessed import Terminal
 try:
     from collections import OrderedDict
 except ImportError:  # python 2.6
@@ -23,9 +22,8 @@ except ImportError:  # python 2.6
 
 from qifqif import tags
 from qifqif.ui import diff, set_completer, complete_matches
+from qifqif.terminal import TERM
 
-TERM = Terminal()
-CLEAR = TERM.move_up + TERM.move_x(0) + TERM.clear_eol
 ENCODING = 'utf-8' if sys.stdin.encoding in (None, 'ascii') else \
     sys.stdin.encoding
 
@@ -50,7 +48,7 @@ def query_tag(cached_tag):
     set_completer(sorted(tags.TAGS.keys()))
 
     tag = quick_input('Category').strip()
-    print(CLEAR, end='')
+    print(TERM.clear, end='')
 
     if not tag and cached_tag:
         erase = quick_input('Remove existing category', 'yN')
@@ -67,13 +65,13 @@ def query_match(payee):
     while True:
         match = quick_input('Match')
         if match.isspace():  # Go back, discard entered category
-            print(2 * CLEAR, end='')
+            print(2 * TERM.clear, end='')
             break
         if not tags.is_match(match, payee):
-            print(CLEAR + '%s Match rejected: %s' %
+            print(TERM.clear + '%s Match rejected: %s' %
                   (TERM.red('✖'), diff(payee, match, TERM, as_error=True)))
         else:
-            print(CLEAR + "%s Match accepted: %s" %
+            print(TERM.clear + "%s Match accepted: %s" %
                   (TERM.green('✔'), str(match) if match else
                    TERM.red('<none>')))
             break
@@ -187,10 +185,10 @@ def parse_file(lines, options=None):
             msg = ("%s of %s transactions have no 'Payee': field. "
                    "Continue")
             ok = quick_input(msg % (no_payee_count, len(res)), 'Yn')
-            if ok != 'Y':
+            if ok.upper() != 'Y':
                 exit(1)
             else:
-                print(CLEAR)
+                print(TERM.clear)
     return res
 
 
