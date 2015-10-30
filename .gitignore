@@ -4,4 +4,3 @@ dist/
 *.pyc
 .tox
 .coverage
-version.py
