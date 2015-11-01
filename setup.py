@@ -83,32 +83,31 @@ if sys.argv[-1] == "publish":
 
 readme_lines = open('README.rst').readlines()
 setup(name='qifqif',
-      version="{ver}".format(ver=version_git),
-      description='QIF file editing tool',
-      long_description=''.join(yield_sphinx_only_markup(readme_lines)),
-      author='Fabrice Laporte',
-      author_email='kraymer@gmail.com',
-      url='https://github.com/KraYmer/qifqif',
-      license='MIT',
-      platforms='ALL',
+    version="{ver}".format(ver=version_git),
+    description='QIF file editing tool',
+    long_description=''.join(yield_sphinx_only_markup(readme_lines)),
+    author='Fabrice Laporte',
+    author_email='kraymer@gmail.com',
+    url='https://github.com/KraYmer/qifqif',
+    license='MIT',
+    platforms='ALL',
 
-      packages=[
-        'qifqif',
-      ],
+    packages=['qifqif', ],
 
-      entry_points={
+    entry_points={
         'console_scripts': [
             'qifqif = qifqif:main',
         ],
-      },
+    },
 
-      install_requires=[
-          'blessed',
-      ],
+    install_requires=[] + (
+        ['pyreadline'] if sys.platform == 'win32' else
+        ['blessed']),
 
-      classifiers=[
+    classifiers=[
         'License :: OSI Approved :: MIT License',
         'Programming Language :: Python',
         'Environment :: Console',
         'Topic :: Office/Business :: Financial :: Accounting'
-      ])
+    ]
+)
