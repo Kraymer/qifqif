@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import sys
 from contextlib import contextmanager
 
 
@@ -35,3 +36,8 @@ try:
 
 except ImportError:
     TERM = Terminus()
+
+    if sys.platform == 'win32':
+        import codecs
+        codecs.register(lambda name: codecs.lookup('utf-8')
+                        if name == 'cp65001' else None)
