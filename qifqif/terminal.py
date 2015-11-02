@@ -41,3 +41,11 @@ except ImportError:
         import codecs
         codecs.register(lambda name: codecs.lookup('utf-8')
                         if name == 'cp65001' else None)
+
+        # use colorama to support "ANSI" terminal colors.
+        try:
+            import colorama
+        except ImportError:
+            pass
+        else:
+            colorama.init()

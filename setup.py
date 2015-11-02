@@ -101,7 +101,7 @@ setup(name='qifqif',
     },
 
     install_requires=[] + (
-        ['pyreadline'] if sys.platform == 'win32' else
+        ['pyreadline', 'colorama'] if sys.platform == 'win32' else
         ['blessed']),
 
     classifiers=[
