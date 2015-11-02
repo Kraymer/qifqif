@@ -66,17 +66,16 @@ More infos on the `wiki`_ page
 Installation
 ------------
 
-qiqif is written for [Python 2.7](https://www.python.org/downloads/) and is 
-tested on Linux, Mac OS X and Windows.
+qiqif is written for `Python 2.7`_ and is tested on Linux, Mac OS X and Windows.
 
-Install with [pip](https://pip.pypa.io/en/stable/) via ``pip install qifqif`` 
-command.
+Install with `pip`_ via ``pip install qifqif`` command.
 
 If you're on Windows and don't have pip yet, follow 
-[this guide](https://pip.pypa.io/en/latest/installing/) to install it.
+`this guide`_ to install it.
 
-Changelog `here`_
-
+.. _Python 2.7: ttps://www.python.org/downloads/
+.. _pip: https://pip.pypa.io/en/stable/
+.. _this guide: https://pip.pypa.io/en/latest/installing/
 .. _here: https://github.com/Kraymer/qifqif/releases
 
 Feedbacks
