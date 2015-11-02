@@ -30,8 +30,13 @@ try:
 
     class Terminal(BlessedTerminal):
         @property
-        def clear(self):
+        def clear_last(self):
             return self.move_up + self.move_x(0) + self.clear_eol
+
+        @property
+        def undo(self):
+            return 2 * self.clear
+
     TERM = Terminal()
 
 except ImportError:

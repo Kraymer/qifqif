@@ -11,18 +11,34 @@ import re
 
 from difflib import SequenceMatcher
 
-from qifqif import tags
-
 
 readline.parse_and_bind('tab: complete')
 
 
-def diff(_str, candidate, term, as_error=False):
-    """ Return a string representing how well candidate matches str : matching
-        words are green, partial matches (chars) are orange.
-        If as_error is True, non matching chars are red.
-    """
+def sub_re(pattern):
+    for offset in range(len(pattern) + 1, 0, -1):
+        try:
+            re_obj = re.compile(pattern[:offset])
+        except re.error:  # syntax error in re part
+            continue
+        yield offset, re_obj
 
+
+def partial_pattern_match(pattern, text):
+    print('%s/%s' % (pattern, text))
+    good_pattern_offset = 0
+    good_text_offset = 0
+    for re_offset, re_obj in sub_re(pattern):
+        print('match %s?' % text)
+        match = re_obj.search(text)
+        if match:
+            good_pattern_offset = re_offset
+            good_text_offset = match.start()
+            return good_pattern_offset, good_text_offset
+    return good_pattern_offset, good_text_offset
+
+
+def diff(_str, candidate, term, as_error=False):
     match = SequenceMatcher(None, _str.lower(), candidate.lower())
     match_indexes = match.find_longest_match(0, len(_str), 0, len(candidate))
     _, beg, end = match_indexes
@@ -30,7 +46,7 @@ def diff(_str, candidate, term, as_error=False):
     words = match.split(' ')
     res = term.red(candidate[:beg]) if as_error else candidate[:beg]
     for w in words:
-        res += (term.green(w) if tags.is_match(w, _str)
+        res += (term.green(w) if re.search(r'\b%s\b' % re.escape(w), _str, re.I)
                 else term.yellow(w)) + ' '
     res += '\b' + (term.red(candidate[beg + end:]) if as_error
                    else candidate[beg + end:])

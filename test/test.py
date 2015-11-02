@@ -31,7 +31,7 @@ def rsrc_path(fname):
                         'rsrc', fname)
 
 
-def mock_input_default(prompt, choices=''):
+def mock_input_default(prompt, choices='', vanish=False):
     res = [x for x in choices if x.isupper()]
     return res[0] if res else ''
 
@@ -52,22 +52,23 @@ class TestPayeeTransaction(unittest.TestCase):
         self.transaction = qifqif.parse_file(TEST_DATA['t01_notag']['raw'])
 
     def test_find_tag(self):
-        self.assertEqual(tags.find_tag_for('Sully')[0], 'Bars')
-        self.assertEqual(tags.find_tag_for('Sullyz')[0], None)
-        self.assertEqual(tags.find_tag_for('Shop Art Brut Denim')[0],
+        self.assertEqual(tags.find_tag_for({'payee': 'Sully'})[0], 'Bars')
+        self.assertEqual(tags.find_tag_for({'payee': 'Sullyz'})[0], None)
+        self.assertEqual(tags.find_tag_for({'payee': 'Foo Art Brut Shop'})[0],
                          'Clothes')
 
     def test_is_match(self):
-        self.assertTrue(tags.is_match('sully bar',
-                                      self.transaction[0]['payee']))
+        print('transec %s' % self.transaction[0]['payee'])
+        self.assertTrue(tags.match('sully bar',
+                            self.transaction[0]))
 
     def test_update_config(self):
         dest = os.path.join(tempfile.mkdtemp(), os.path.basename(CONFIG_FILE))
         shutil.copy2(CONFIG_FILE, dest)
         # Replace 'Sully' match tag from 'Bars' to 'Drink'
-        tags.edit('Bars', 'Sully', 'Drink', 'Sully', {'config': dest})
+        tags.edit({'payee': 'Sully'}, 'Drink', 'Sully', {'config': dest})
         tags.load(dest)
-        self.assertEqual(tags.find_tag_for('Sully')[0], 'Drink')
+        self.assertEqual(tags.find_tag_for({'payee': 'Sully'})[0], 'Drink')
 
     def test_parse_args(self):
         self.assertFalse(qifqif.parse_args(['qifqif', '-a', '-b', 'in.qif']))
@@ -102,7 +103,7 @@ class TestFullTransaction(unittest.TestCase):
         transactions = qifqif.parse_file(TEST_DATA['t02']['raw'])
         self.assertEqual(len(transactions), 3)
 
-    @patch('qifqif.quick_input', side_effect=[''])
+    @patch('qifqif.quick_input', side_effect=['', 'c'])
     def test_process_file(self, mock_quick_input):
         res = qifqif.process_file(self.transactions, {'config':
                                   CONFIG_TEST_FILE})
@@ -121,7 +122,7 @@ class TestFullTransaction(unittest.TestCase):
         self.assertEqual(len(res), 3)
         self.assertEqual(res[1]['category'], 'Bars')
 
-    @patch('qifqif.quick_input', side_effect=KEYBOARD_INPUTS + ['', ''])
+    @patch('qifqif.quick_input', side_effect=[''] + KEYBOARD_INPUTS + ['', ''])
     def test_audit_mode(self, mock_quick_input):
         res = qifqif.process_file(self.transactions,
                                   {'config': CONFIG_FILE, 'audit': True,
@@ -138,7 +139,7 @@ class TestFullTransaction(unittest.TestCase):
     @patch('sys.argv', ['qifqif', '-c', CONFIG_TEST_FILE,
            '-a', QIF_TEST_FILE])
     @patch('qifqif.quick_input',
-           side_effect=['Y'] + KEYBOARD_INPUTS + [EOFError])
+           side_effect=['Y', ''] + KEYBOARD_INPUTS + [EOFError])
     def test_revert_on_eof(self, mock_quick_input):
         """Check that config and dest files are not edited when exiting on EOF.
         """
@@ -148,7 +149,7 @@ class TestFullTransaction(unittest.TestCase):
         self.assertEqual(res, 1)
 
     @patch('qifqif.quick_input',
-           side_effect=KEYBOARD_INPUTS + [KeyboardInterrupt])
+           side_effect=[''] + KEYBOARD_INPUTS + [KeyboardInterrupt])
     def test_sigint(self, mock_quick_input):
         """Check that processed transactions are not lost on interruption.
         """
@@ -159,7 +160,7 @@ class TestFullTransaction(unittest.TestCase):
     @patch('sys.argv', ['qifqif', '-c', CONFIG_TEST_FILE,
            '-a', QIF_TEST_FILE])
     @patch('qifqif.quick_input',
-           side_effect=['Y'] + KEYBOARD_INPUTS + [KeyboardInterrupt])
+           side_effect=['Y', ''] + KEYBOARD_INPUTS + [KeyboardInterrupt])
     def test_save_on_sigint(self, mock_quick_input):
         """Check that dest file has all transactions and has been edited.
         """

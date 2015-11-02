@@ -14,6 +14,7 @@ import copy
 import os
 import sys
 import io
+import re
 
 try:
     from collections import OrderedDict
@@ -21,143 +22,231 @@ except ImportError:  # python 2.6
     from ordereddict import OrderedDict
 
 from qifqif import tags
-from qifqif.ui import diff, set_completer, complete_matches
+from qifqif.ui import set_completer, complete_matches
 from qifqif.terminal import TERM
 
 ENCODING = 'utf-8' if sys.stdin.encoding in (None, 'ascii') else \
     sys.stdin.encoding
+FIELDS = {'D': 'date', 'T': 'amount', 'P': 'payee', 'L': 'category',
+          'N': 'number', 'M': 'memo'}
+EXTRA_FIELDS = {'F': 'filename'}
+FIELDS_FULL = dict(FIELDS.items() + EXTRA_FIELDS.items())
 
 
-def quick_input(prompt, choices=''):
-    """Reads a line from input, converts it to a string (stripping a trailing
-       newline), and returns that. If no input, returns default choice.
+def quick_input(prompt, choices='', vanish=False):
+    """raw_input wrapper that automates display of choices and return default
+    choice when empty string entered.
+    The prompt line(s) get cleared when done if vanish is True.
     """
     default = [x for x in choices if x.isupper()]
     default = default[0] if default else ''
+    print(TERM.clear_eol, end='')
     _input = raw_input('%s%s' % (prompt, (' [%s] ? ' % ','.join(choices)) if
                        choices else ': ')).decode(ENCODING)
     if _input in choices:
         _input = _input.upper()
+    if vanish:
+        for _ in range(0, prompt.count('\n') + 1):
+            print(TERM.clear_last, end='')
     return _input or default
 
 
-def query_tag(cached_tag):
+def query_cat(cached_cat):
     """Query category. If empty string entered then prompt to remove existing
        category, if any.
     """
     set_completer(sorted(tags.TAGS.keys()))
 
-    tag = quick_input('Category').strip()
-    print(TERM.clear, end='')
+    cat = quick_input('\nCategory', vanish=True).strip()
 
-    if not tag and cached_tag:
+    if not cat and cached_cat:
         erase = quick_input('Remove existing category', 'yN')
         if erase.upper() == 'N':
-            tag = cached_tag
+            cat = cached_cat
     set_completer()
-    return tag
+    return cat
 
 
-def query_match(payee):
-    """Query a match for payee line as long as a correct one is not entered.
+def query_guru_ruler(t):
+    """Define rules on a combination of fields. All rules must match
+       corresponding fields for the ruler to be valid.
     """
-    set_completer(sorted(complete_matches(payee)))
-    while True:
-        match = quick_input('Match')
-        if match.isspace():  # Go back, discard entered category
-            print(2 * TERM.clear, end='')
-            break
-        if not tags.is_match(match, payee):
-            print(TERM.clear + '%s Match rejected: %s' %
-                  (TERM.red('✖'), diff(payee, match, TERM, as_error=True)))
-        else:
-            print(TERM.clear + "%s Match accepted: %s" %
-                  (TERM.green('✔'), str(match) if match else
-                   TERM.red('<none>')))
-            break
+    extras = sorted([k for (k, v) in t.iteritems() if (
+                     v and not k.isdigit())])
+    set_completer(extras)
+    guru_ruler = {}
+    extras = {}
+    field = True
+    while field:
+        # Enter field
+        while True:
+            # Update fields match indicators
+            print(TERM.move_y(0))
+            print_transaction(t, short=False, extras=extras)
+            field = quick_input('\nMatch on field', vanish=True).lower()
+            regex = '*' in field
+            field = field.strip('*')
+            if not field or field in set(FIELDS_FULL.values()) - {'category'}:
+                break
+        # Enter match
+        while field:
+            print(TERM.move_y(0))
+            print_transaction(t, short=False, extras=extras)
+            existing_match = guru_ruler.get(field, '')
+            ruler = quick_input('\n%s match (%s)%s' % (field.title(),
+                    'regex' if regex else 'chars',
+                    ' [%s]' % existing_match if existing_match else ''),
+                vanish=True)
+            if ruler.isspace():  # remove field rule from ruler
+                extras.pop(field, None)
+                guru_ruler.pop(field, None)
+                # break
+            elif ruler:
+                guru_ruler[field] = r'%s' % ruler if regex else re.escape(
+                    ruler)
+            match, extras = check_ruler(guru_ruler, t)
+            if match:
+                break
+    return guru_ruler
+
+
+def query_basic_ruler(t, default_ruler):
+    """Defines basic rule consisting of matching full words on payee field.
+    """
+    default_field = 'payee'
+    set_completer(sorted(complete_matches(t[default_field])))
+    ruler = quick_input('\n%s match %s' % (default_field.title(),
+            '[%s]' % default_ruler if default_ruler else ''))
+    ruler = tags.rulify(ruler)
     set_completer()
-    return match
+    return ruler
 
 
-def process_transaction(t, cached_tag, cached_match, options):
-    """Print transaction. Tag it if it's untagged or if audit mode is True.
+def check_ruler(ruler, t):
+    """Build fields status dict obtained by applying ruler to transaction.
     """
-    tag = cached_tag
-    match = cached_match
-    pad_width = 8
+    extras = {}
+    match, field_ko = tags.match(ruler, t)
+    if not match:
+        extras[field_ko] = TERM.red('✖ %s' % field_ko.title())
+        extras['category'] = TERM.red('✖ Category')
+    else:
+        for field in ruler:
+            extras[field] = TERM.green('✔ %s' % field.title())
+        extras['category'] = TERM.green('✔ Category')
+    return match, extras
 
-    print('Amount..: %s' % (TERM.green(str(t['amount'])) if
-          (t['amount'] and float(t['amount']) > 0)
-          else TERM.red(str(t['amount']))))
-    print('Payee...: %s' % (diff(cached_match, t['payee'], TERM)
-                            if cached_match
-                            else t['payee'] or TERM.red('<none>')))
-    for field in ('memo', 'number'):
-        if t[field]:
-            print('%s: %s' % (field.title().ljust(pad_width, '.'),
-                  t[field]))
 
+def query_ruler(t):
+    """Prompt user to enter a valid matching ruler for transaction.
+       First prompt is used to enter a basic ruler aka successive words to look
+       for on payee line.
+       This prompt can be skipped by pressing <Enter> to have access to guru
+       ruler prompt, where ruler is a list of field/match to validate.
+    """
+    with TERM.fullscreen():
+        extras = {'category': '? Category'}
+        ok = False
+        ruler = {}
+        while True:
+            print(TERM.move_y(0))
+            print_transaction(t, extras=extras)
+            if ok:
+                break
+            ruler = query_basic_ruler(t, tags.unrulify(ruler)) or \
+                query_guru_ruler(t)
+
+            ok, extras = check_ruler(ruler, t)
+
+    return ruler
+
+
+def print_transaction(t, short=True, extras=None):
+    """Print transaction fields values and indicators about matchings status.
+       If short is True, a limited set of fields is printed.
+       extras dict can be used to add leading character to fields lines:
+       - '✖' when the field don't match the prompted rule
+       - '✔' when the field match the prompted rule
+       - '+' when the category is fetched from .json matches file
+       - ' ' when the category is present in input file
+    """
+    if not extras:
+        extras = {}
+    pad_width = 12
+    keys = ('date', 'amount', 'payee', 'category') if short else t.keys()
+    category = ''
+    for field in keys:
+        if t[field] and not field.isdigit():
+            line = TERM.clear_eol + '%s: %s' % (TERM.ljust(extras.get(field,
+                  '  %s' % field.title()), pad_width, '.'),
+                t[field] or TERM.red('<none>'))
+            if field != 'category':
+                print(line)
+            else:
+                category = line + '\n'
+    print(category + TERM.clear_eos, end='')
+
+
+def process_transaction(t, options):
+    """Assign a category to a transaction.
+    """
+    if not t['category']:
+        cat, match = tags.find_tag_for(t)
+        t['category'] = cat
+    else:
+        cat, match = t['category'], None
+    extras = {'category': '+ Category'} if (cat and match) else {}
+    print('---\n' + TERM.clear_eol, end='')
+    print_transaction(t, extras=extras)
     edit = False
     audit = options.get('audit', False)
-    if tag:
+    if t['category']:
         if audit:
-            msg = "Edit '%s' category" % TERM.green(cached_tag)
-            edit = quick_input(msg, 'yN') == 'Y'
-        else:
-            print('%s: %s' % ('Category'.ljust(pad_width, '.'), tag))
-    if t['payee']:
-        while True:
-            # Query for tag if no cached tag or edit
-            if not cached_tag or edit:
-                tag = query_tag(cached_tag)
-                print('Category: %s' % (TERM.green(tag) if tag
-                                        else TERM.red('<none>')))
-            # Query match if tag entered or edit
-            if (tag != cached_tag) or edit:
-                match = query_match(t['payee'])
-                if not match.isspace():
-                    break
-            else:
-                break
-    return tag, match
+            msg = "\nEdit '%s' category" % TERM.green(t['category'])
+            edit = quick_input(msg, 'yN', vanish=True) == 'Y'
+        if not edit:
+            return t['category'], match
+
+    # Query for category if no cached one or edit is True
+    if (not cat or edit) and not options.get('batch', False):
+        t['category'] = query_cat(cat)
+        print(TERM.green('✔ Category..: ') + t['category'])
+    # Query match if category entered or edit
+    if t['category']:
+        match = query_ruler(t)
+    else:  # remove category
+        if cat:
+            print_transaction(t)
+
+    return t['category'], match
 
 
 def process_file(transactions, options):
     """Process file's transactions. Operate in a dedicated edit screen."""
-    tag = None
-    with TERM.fullscreen():
-        try:
-            for (i, t) in enumerate(transactions):
-                cached_tag, cached_match = tags.find_tag_for(t['payee'])
-
-                tag, match = process_transaction(t,
-                    cached_tag or t['category'], cached_match, options)
-                if tag:
-                    tags.edit(cached_tag, cached_match, tag, match, options)
-                t['category'] = tag
-                if not t['payee']:
-                    print('Skip transaction: no payee')
-                separator = '-' * 3
-                print(separator)
-            i = i + 1
-            if not options.get('batch', False):
-                quick_input('Press any key to continue (Ctrl+D to discard '
-                            'edits)')
-        except KeyboardInterrupt:
-            return transactions[:i]
+    cat = None
+    try:
+        for (i, t) in enumerate(transactions):
+            cat, match = process_transaction(t, options)
+            tags.edit(t, cat, match, options)
+            if not t['payee']:
+                print('Skip transaction: no payee')
+        i = i + 1
+        if not options.get('batch', False):
+            quick_input('Press any key to continue (Ctrl+D to discard '
+                        'edits)')
+    except KeyboardInterrupt:
         return transactions[:i]
-
-
-FIELDS = {'D': 'date', 'T': 'amount', 'P': 'payee', 'L': 'category',
-          'N': 'number', 'M': 'memo'}
+    return transactions[:i]
 
 
 def parse_file(lines, options=None):
     """Return list of transactions as ordered dicts with fields save in same
        order as they appear in input file.
     """
+    if not options:
+        options = {}
     res = []
-    transaction = OrderedDict([])
+    transaction = OrderedDict()
     for (idx, line) in enumerate(lines):
         line = line.strip()
         if not line:
@@ -169,9 +258,11 @@ def parse_file(lines, options=None):
         elif field_id in FIELDS.keys():
             transaction[FIELDS[field_id]] = line[1:]
         elif line:
-            transaction[idx] = line
-    if transaction:
+            transaction['%s' % idx] = line
+
+    if len(transaction.keys()):
         res.append(transaction)
+
     # post-check to not interfere with present keys order
     no_payee_count = 0
     for t in res:
@@ -180,6 +271,7 @@ def parse_file(lines, options=None):
                 t[field] = None
                 if field == 'payee':
                     no_payee_count += 1
+        t['filename'] = options.get('src', '')
     if (not options or not options['batch']) and no_payee_count:
         with TERM.location():
             msg = ("%s of %s transactions have no 'Payee': field. "
@@ -188,12 +280,12 @@ def parse_file(lines, options=None):
             if ok.upper() != 'Y':
                 exit(1)
             else:
-                print(TERM.clear)
+                print(TERM.clear_last)
     return res
 
 
 def dump_to_buffer(transactions):
-    """Output transactions to file of TERMinal.
+    """Output transactions to file or terminal.
     """
     reverse_fields = {}
     for (key, val) in FIELDS.items():
@@ -201,7 +293,7 @@ def dump_to_buffer(transactions):
     lines = []
     for t in transactions:
         for key in t:
-            if t[key]:
+            if t[key] and key not in EXTRA_FIELDS.values():
                 try:
                     lines.append('%s%s\n' % (reverse_fields[key], t[key]))
                 except KeyError:  # Unrecognized field
@@ -273,8 +365,8 @@ def main(argv=None):
         return 1
     res = dump_to_buffer(transacs + transacs_orig[len(transacs):])
     if not args.get('dry-run', False):
-        with io.open(args['dest'], 'w', encoding='utf-8') as f:
-            f.write(res)
+        with io.open(args['dest'], 'w', encoding='utf-8') as dest:
+            dest.write(res)
     print(res)
     return 0 if len(transacs) == len(transacs_orig) else 1
 
