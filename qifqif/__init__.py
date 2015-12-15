@@ -253,7 +253,8 @@ def parse_file(lines, options=None):
             continue
         field_id = line[0]
         if field_id == '^':
-            res.append(transaction)
+            if transaction:
+                res.append(transaction)
             transaction = OrderedDict([])
         elif field_id in FIELDS.keys():
             transaction[FIELDS[field_id]] = line[1:]
