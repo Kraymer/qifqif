@@ -239,7 +239,7 @@ def process_file(transactions, options):
     return transactions[:i]
 
 
-def parse_file(lines, options=None):
+def parse_lines(lines, options=None):
     """Return list of transactions as ordered dicts with fields save in same
        order as they appear in input file.
     """
@@ -358,7 +358,7 @@ def main(argv=None):
     original_tags = copy.deepcopy(tags.load(args['config']))
     with io.open(args['src'], 'r', encoding='utf-8', errors='ignore') as fin:
         lines = fin.readlines()
-        transacs_orig = parse_file(lines, options=args)
+        transacs_orig = parse_lines(lines, options=args)
     try:
         transacs = process_file(transacs_orig, options=args)
     except EOFError:  # exit on Ctrl + D: restore original tags
