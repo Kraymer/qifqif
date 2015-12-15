@@ -83,42 +83,39 @@ def load(filepath):
     return TAGS
 
 
-def save(filepath, tags=None):
+def save(filepath, tags):
     """Save tags dictionary on disk
     """
-    if not tags:
-        tags = TAGS
     with open(filepath, 'w+') as cfg:
         cfg.write(json.dumps(tags,
                   sort_keys=True, indent=4, separators=(',', ': ')) + '\n')
 
 
-def edit(t, tag, match, options):
+def edit(t, tag, match, options={}):
     """Save a tag modification into dictionary and save the latter on file.
     """
 
     global TAGS
-    tags = TAGS.copy()
     match = unrulify(match)
     cached_tag, cached_match = find_tag_for(t)
     if tag != cached_tag:
         if cached_tag:
-            tags[cached_tag].remove(cached_match)
-            if not tags[cached_tag]:
-                del tags[cached_tag]
+            TAGS[cached_tag].remove(cached_match)
+            if not TAGS[cached_tag]:
+                del TAGS[cached_tag]
         if tag and match:
-            if tag not in tags:
-                tags[tag] = [match]
+            if tag not in TAGS:
+                TAGS[tag] = [match]
             else:
-                tags[tag].append(match)
+                TAGS[tag].append(match)
     elif match != cached_match:
         if cached_match:
-            tags[tag].remove(cached_match)
+            TAGS[tag].remove(cached_match)
         if tag and match:
-            tags[tag].append(match)
+            TAGS[tag].append(match)
     else:  # no diff
         return
 
-    TAGS = tags
     if not options.get('dry-run', False):
-        save(options['config'])
+        save(options['config'], TAGS)
+    return TAGS
