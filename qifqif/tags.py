@@ -24,7 +24,10 @@ def unrulify(ruler):
     """Convert regex payee rule to string"""
     if ruler and not isinstance(ruler, basestring):
         field = ruler.keys()[0]
-        if field.isupper():  # basic match, store regex as string
+        if field.isupper():
+            # Basic rulers entered at first prompt are recognizable by the
+            # uppercase dict key and should be unrulified to a string for the
+            # sake of json readability.
             return ruler[field].strip(r'\b')
     return ruler
 

@@ -222,7 +222,7 @@ def process_transaction(t, options):
 
 
 def process_file(transactions, options):
-    """Process file's transactions. Operate in a dedicated edit screen."""
+    """Process file's transactions."""
     cat = None
     try:
         for (i, t) in enumerate(transactions):
