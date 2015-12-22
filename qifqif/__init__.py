@@ -38,7 +38,7 @@ def quick_input(prompt, choices='', vanish=False):
     choice when empty string entered.
     The prompt line(s) get cleared when done if vanish is True.
     """
-    default = [x for x in choices if x.isupper()]
+    default = [x for x in choices if x[0].isupper()]
     default = default[0] if default else ''
     print(TERM.clear_eol, end='')
     _input = raw_input('%s%s' % (prompt, (' [%s] ? ' % ','.join(choices)) if

@@ -6,6 +6,8 @@ import os
 import io
 import unittest
 
+from mock import patch
+
 import qifqif
 from testdata import generate_lines
 
@@ -14,6 +16,11 @@ QIF_FILE = os.path.join(os.path.realpath(os.path.dirname(__file__)),
 
 
 class TestInit(unittest.TestCase):
+    @patch('__builtin__.raw_input', return_value='')
+    def test_quick_input(self, mock_raw_input):
+        self.assertEqual(qifqif.quick_input('', 'Yn'), 'Y')
+        self.assertEqual(qifqif.quick_input('', ('no', 'Yes', 'maybe')), 'Yes')
+
     def test_parse_args(self):
         self.assertFalse(qifqif.parse_args(['qifqif', '-a', '-b', 'in.qif']))
         args = qifqif.parse_args(['qifqif', 'file.qif'])
