@@ -114,6 +114,8 @@ def query_basic_ruler(t, default_ruler):
     """Defines basic rule consisting of matching full words on payee field.
     """
     default_field = 'payee'
+    if not t[default_field]:
+        return
     set_completer(sorted(complete_matches(t[default_field])))
     ruler = quick_input('\n%s match %s' % (default_field.title(),
             '[%s]' % default_ruler if default_ruler else ''))
@@ -228,8 +230,6 @@ def process_file(transactions, options):
         for (i, t) in enumerate(transactions):
             cat, match = process_transaction(t, options)
             tags.edit(t, cat, match, options)
-            if not t['payee']:
-                print('Skip transaction: no payee')
         i = i + 1
         if not options.get('batch', False):
             quick_input('Press any key to continue (Ctrl+D to discard '
@@ -265,23 +265,11 @@ def parse_lines(lines, options=None):
         res.append(transaction)
 
     # post-check to not interfere with present keys order
-    no_payee_count = 0
     for t in res:
         for field in FIELDS.values():
             if field not in t:
                 t[field] = None
-                if field == 'payee':
-                    no_payee_count += 1
         t['filename'] = options.get('src', '')
-    if (not options or not options['batch']) and no_payee_count:
-        with TERM.location():
-            msg = ("%s of %s transactions have no 'Payee': field. "
-                   "Continue")
-            ok = quick_input(msg % (no_payee_count, len(res)), 'Yn')
-            if ok.upper() != 'Y':
-                exit(1)
-            else:
-                print(TERM.clear_last)
     return res
 
 
