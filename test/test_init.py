@@ -25,11 +25,6 @@ class TestInit(unittest.TestCase):
         self.assertEqual(qifqif.quick_input('', 'Yn'), 'Y')
         self.assertEqual(qifqif.quick_input('', ('no', 'Yes', 'maybe')), 'Yes')
 
-    def test_parse_args(self):
-        self.assertFalse(qifqif.parse_args(['qifqif', '-a', '-b', 'in.qif']))
-        args = qifqif.parse_args(['qifqif', 'file.qif'])
-        self.assertEqual(args['dest'], args['src'])
-
     def test_parse_default_transaction(self):
         res = qifqif.parse_lines(testdata.generate_lines('PDM'))
         self.assertEqual(len(res), 1)
