@@ -25,6 +25,9 @@ from qifqif import tags
 from qifqif.ui import set_completer, complete_matches
 from qifqif.terminal import TERM
 
+__version__ = '0.5.1'
+__author__ = 'Fabrice Laporte <kraymer@gmail.com>'
+
 ENCODING = 'utf-8' if sys.stdin.encoding in (None, 'ascii') else \
     sys.stdin.encoding
 FIELDS = {'D': 'date', 'T': 'amount', 'P': 'payee', 'L': 'category',
@@ -325,6 +328,9 @@ def parse_args(argv):
     audit_group.add_argument('-b', '--batch-mode', action='store_true',
                         dest='batch', help=('skip transactions that require '
                                             'user input'))
+    parser.add_argument('-v', '--version', action='version',
+                        version='%(prog)s ' + __version__,
+                        help='display version information and exit')
     args = vars(parser.parse_args(args=argv[1:]))
 
     if not args['dest']:
