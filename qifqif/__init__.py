@@ -306,7 +306,8 @@ def parse_args(argv):
         'See https://github.com/Kraymer/qifqif for more infos.')
     parser.add_argument('src', metavar='QIF_FILE',
                         help='.QIF file to process', default='')
-    parser.add_argument('-a', '--audit-mode', dest='audit',
+    audit_group = parser.add_mutually_exclusive_group()
+    audit_group.add_argument('-a', '--audit-mode', dest='audit',
                         action='store_true', help=('pause after '
                                                    'each transaction'))
     parser.add_argument('-c', '--config', dest='config',
@@ -314,23 +315,18 @@ def parse_args(argv):
                         'DEFAULT: ~/.qifqif.json',
                         default=os.path.join(os.path.expanduser('~'),
                                              '.qifqif.json'))
-    parser.add_argument('-d', '--dry-run', dest='dry-run',
+    dest_group = parser.add_mutually_exclusive_group()
+    dest_group.add_argument('-d', '--dry-run', dest='dry-run',
                         action='store_true', help=('dry-run mode: just print '
                                                    'instead of write file'))
-    parser.add_argument('-o', '--output', dest='dest',
-                        help='output filename. '
-                        'DEFAULT: edit input file in-place', default='')
-    parser.add_argument('-b', '--batch-mode', action='store_true',
+    dest_group.add_argument('-o', '--output', dest='dest',
+                        help=('output filename. '
+                            'DEFAULT: edit input file in-place'), default='')
+    audit_group.add_argument('-b', '--batch-mode', action='store_true',
                         dest='batch', help=('skip transactions that require '
                                             'user input'))
     args = vars(parser.parse_args(args=argv[1:]))
-    if args['dry-run'] and args['dest']:
-        print('Error: cannot activate dry-run mode when output is set')
-        return False
-    if args['audit'] and args['batch']:
-        print(('Error: cannot activate batch mode when audit mode is already '
-              'on'))
-        return False
+
     if not args['dest']:
         args['dest'] = args['src']
     return args
