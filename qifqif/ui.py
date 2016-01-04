@@ -8,9 +8,9 @@
 
 import readline
 import re
-
 from difflib import SequenceMatcher
 
+from qifqif.terminal import TERM
 
 readline.parse_and_bind('tab: complete')
 
@@ -38,19 +38,13 @@ def partial_pattern_match(pattern, text):
     return good_pattern_offset, good_text_offset
 
 
-def diff(_str, candidate, term, as_error=False):
-    match = SequenceMatcher(None, _str.lower(), candidate.lower())
-    match_indexes = match.find_longest_match(0, len(_str), 0, len(candidate))
-    _, beg, end = match_indexes
-    match = candidate[beg:beg + end]
-    words = match.split(' ')
-    res = term.red(candidate[:beg]) if as_error else candidate[:beg]
-    for w in words:
-        res += (term.green(w) if re.search(r'\b%s\b' % re.escape(w), _str, re.I)
-                else term.yellow(w)) + ' '
-    res += '\b' + (term.red(candidate[beg + end:]) if as_error
-                   else candidate[beg + end:])
-    return res
+def colorize_match(t, matches, field):
+    field_val = t[field]
+    match = matches.get(field, '') if matches else ''
+    seqmatch = SequenceMatcher(None, field_val, match)
+    a, b, size = seqmatch.find_longest_match(0, len(field_val), 0, len(match))
+    return (field_val[:a] + TERM.green(field_val[a:a + size]) +
+            field_val[a + size:])
 
 
 class InputCompleter(object):

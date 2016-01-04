@@ -35,13 +35,13 @@ class TestTags(unittest.TestCase):
         self.assertTrue(tags.match('sully ba', TRANSACTION))
 
     def test_find_tag_for__basic_ruler(self):
-        tag, ruler = tags.find_tag_for({'payee': 'SuLLy'})
+        tag, ruler, _ = tags.find_tag_for({'payee': 'SuLLy'})
         self.assertEqual(tag, 'Bars')
-        tag, ruler = tags.find_tag_for({'payee': 'Sullyz Sull'})
+        tag, ruler, _ = tags.find_tag_for({'payee': 'Sullyz Sull'})
         self.assertEqual(tag, None)
 
     def test_find_tag_for__best_ruler(self):
-        tag, ruler = tags.find_tag_for({'payee': 'Foo Art Brut Shop'})
+        tag, ruler, _ = tags.find_tag_for({'payee': 'Foo Art Brut Shop'})
         self.assertEqual(tag, 'Clothes')
 
     def test_convert(self):
