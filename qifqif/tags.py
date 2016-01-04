@@ -33,31 +33,38 @@ def unrulify(ruler):
 
 
 def match(ruler, t):
+    """Return a tuple (match, dict) indicating if transaction matches ruler.
+       match is a bool, while dict contains matching values for ruler fields.
+    """
+    res = {}
     ruler = rulify(ruler)
     for field in ruler:
+        rule = ruler[field]
+        field = field.lower()
         try:
-            if re.search(ruler[field], t[field.lower()], re.I) is None:
-                return False, field.lower()
+            m = re.search(rule, t[field], re.I)
+            res[field] = t[field][m.start():m.end()] if m else None
         except Exception:
-            return False, field.lower()
-    return True, None
+            res[field] = None
+    return all([x for x in res.values()]), res
 
 
 def find_tag_for(t):
     """If transaction matches a rule, returns corresponding tuple
-       (tag, rule).
+       (tag, ruler, match).
     """
     res = []
     for (tag, rulers) in TAGS.items():
         for ruler in rulers:
-            if match(ruler, t)[0]:
-                res.append((tag, ruler))
+            m, matches = match(ruler, t)
+            if m:
+                res.append((tag, ruler, matches))
     if res:
         # Return rule with the most fields.
         # If several, pick the ont with the longer rules.
-        return max(res, key=lambda (tag, ruler): (len(rulify(ruler).keys()),
-                   sum([len(v) for v in rulify(ruler).values()])))
-    return None, None
+        return max(res, key=lambda (tag, ruler, matches): (len(rulify(
+            ruler).keys()), sum([len(v) for v in matches.values() if v])))
+    return None, None, None
 
 
 def convert(tags):
@@ -100,7 +107,7 @@ def edit(t, tag, match, options={}):
 
     global TAGS
     match = unrulify(match)
-    cached_tag, cached_match = find_tag_for(t)
+    cached_tag, cached_match, _ = find_tag_for(t)
     if tag != cached_tag:
         if cached_tag:
             TAGS[cached_tag].remove(cached_match)

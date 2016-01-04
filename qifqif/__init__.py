@@ -22,7 +22,7 @@ except ImportError:  # python 2.6
     from ordereddict import OrderedDict
 
 from qifqif import tags
-from qifqif.ui import set_completer, complete_matches
+from qifqif.ui import set_completer, complete_matches, colorize_match
 from qifqif.terminal import TERM
 
 ENCODING = 'utf-8' if sys.stdin.encoding in (None, 'ascii') else \
@@ -177,11 +177,14 @@ def print_transaction(t, short=True, extras=None):
     pad_width = 12
     keys = ('date', 'amount', 'payee', 'category') if short else t.keys()
     category = ''
+    _, _, matches = tags.find_tag_for(t)
     for field in keys:
         if t[field] and not field.isdigit():
-            line = TERM.clear_eol + '%s: %s' % (TERM.ljust(extras.get(field,
-                  '  %s' % field.title()), pad_width, '.'),
-                t[field] or TERM.red('<none>'))
+            fieldname = extras.get(field, '  ' + field.title())
+            line = TERM.clear_eol + '%s: %s' % (
+                TERM.ljust(fieldname, pad_width, '.'),
+                colorize_match(t, matches, field.lower()) or TERM.red('<none>')
+            )
             if field != 'category':
                 print(line)
             else:
@@ -193,11 +196,11 @@ def process_transaction(t, options):
     """Assign a category to a transaction.
     """
     if not t['category']:
-        cat, match = tags.find_tag_for(t)
+        cat, ruler, m = tags.find_tag_for(t)
         t['category'] = cat
     else:
-        cat, match = t['category'], None
-    extras = {'category': '+ Category'} if (cat and match) else {}
+        cat, ruler = t['category'], None
+    extras = {'category': '+ Category'} if (cat and ruler) else {}
     print('---\n' + TERM.clear_eol, end='')
     print_transaction(t, extras=extras)
     edit = False
@@ -207,20 +210,20 @@ def process_transaction(t, options):
             msg = "\nEdit '%s' category" % TERM.green(t['category'])
             edit = quick_input(msg, 'yN', vanish=True) == 'Y'
         if not edit:
-            return t['category'], match
+            return t['category'], ruler
 
     # Query for category if no cached one or edit is True
     if (not cat or edit) and not options.get('batch', False):
         t['category'] = query_cat(cat)
         print(TERM.green('✔ Category..: ') + t['category'])
-    # Query match if category entered or edit
+    # Query ruler if category entered or edit
     if t['category']:
-        match = query_ruler(t)
+        ruler = query_ruler(t)
     else:  # remove category
         if cat:
             print_transaction(t)
 
-    return t['category'], match
+    return t['category'], ruler
 
 
 def process_file(transactions, options):
@@ -290,12 +293,6 @@ def dump_to_buffer(transactions):
         lines.append('^\n')
     res = ''.join(lines).strip() + '\n'
     return res
-
-
-def highlight_char(word, index=0):
-    """Return word with n-th letter highlighted
-    """
-    return word[:index] + TERM.reverse(word[index]) + word[index + 1:]
 
 
 def parse_args(argv):
