@@ -1,7 +1,9 @@
-.. image:: https://travis-ci.org/Kraymer/qifqif.svg?branch=master 
-  :target: https://travis-ci.org/Kraymer/qifqif
+.. image:: https://travis-ci.org/Kraymer/qifqif.svg?branch=master
+    :target: https://travis-ci.org/Kraymer/qifqif
 .. image:: https://coveralls.io/repos/Kraymer/qifqif/badge.svg
-  :target: https://coveralls.io/r/Kraymer/qifqif
+    :target: https://coveralls.io/r/Kraymer/qifqif
+.. image:: http://img.shields.io/pypi/v/qifqif.svg
+    :target: https://pypi.python.org/pypi/qifqif  
 
 qifqif
 ======
