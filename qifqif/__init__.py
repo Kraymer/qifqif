@@ -310,6 +310,9 @@ def parse_args(argv):
     audit_group.add_argument('-a', '--audit-mode', dest='audit',
                         action='store_true', help=('pause after '
                                                    'each transaction'))
+    audit_group.add_argument('-b', '--batch-mode', action='store_true',
+                        dest='batch', help=('skip transactions that require '
+                                            'user input'))
     parser.add_argument('-c', '--config', dest='config',
                         help='configuration filename in json format. '
                         'DEFAULT: ~/.qifqif.json',
@@ -322,9 +325,6 @@ def parse_args(argv):
     dest_group.add_argument('-o', '--output', dest='dest',
                         help=('output filename. '
                             'DEFAULT: edit input file in-place'), default='')
-    audit_group.add_argument('-b', '--batch-mode', action='store_true',
-                        dest='batch', help=('skip transactions that require '
-                                            'user input'))
     parser.add_argument('-v', '--version', action='version',
                         version='%(prog)s ' + __version__,
                         help='display version information and exit')
