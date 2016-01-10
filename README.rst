@@ -1,14 +1,17 @@
 .. image:: https://travis-ci.org/Kraymer/qifqif.svg?branch=master
-    :target: https://travis-ci.org/Kraymer/qifqif
+  :target: https://travis-ci.org/Kraymer/qifqif
 .. image:: https://coveralls.io/repos/Kraymer/qifqif/badge.svg
-    :target: https://coveralls.io/r/Kraymer/qifqif
+  :target: https://coveralls.io/r/Kraymer/qifqif
 .. image:: http://img.shields.io/pypi/v/qifqif.svg
-    :target: https://pypi.python.org/pypi/qifqif  
+    :target: https://pypi.python.org/pypi/qifqif
+.. image:: https://readthedocs.org/projects/qifqif/badge/?version=latest
+:target: http://qifqif.readthedocs.org/en/latest/?badge=latest
+:alt: Documentation Status
 
 qifqif
 ======
 
-    /kĭf kĭf/ 
+    /kĭf kĭf/
      1. *adj. inv.* arabic slang (كيف) for "it's all the same".
      2. *n.* CLI tool for *categorizing* qif files. It can make all the difference.
 
@@ -40,8 +43,8 @@ Features
   completion
 - **Auditing mode:** review your transactions one by one
 - **Batch mode (no interactive):** for easy integration with scripts
-- **Easy-going workflow:** dreading the behemoth task of importing years of 
-  accounting from a single file? Don't be. Go at your own pace and press 
+- **Easy-going workflow:** dreading the behemoth task of importing years of
+  accounting from a single file? Don't be. Go at your own pace and press
   ``<Ctrl+C>`` to exit anytime. On next run, editing will resume right where
   you left it.
 
@@ -50,13 +53,13 @@ Usage
 
 ::
 
-    usage: qifqif [-h] [-a] [-c CONFIG] [-d | -o DEST] [-b] [-v] QIF_FILE    
+    usage: qifqif [-h] [-a] [-c CONFIG] [-d | -o DEST] [-b] [-v] QIF_FILE
 
     Enrich your .QIF files with tags. See https://github.com/Kraymer/qifqif for
-    more infos.    
+    more infos.
 
     positional arguments:
-      QIF_FILE              .QIF file to process    
+      QIF_FILE              .QIF file to process
 
     optional arguments:
       -h, --help            show this help message and exit
@@ -70,9 +73,9 @@ Usage
       -b, --batch-mode      skip transactions that require user input
       -v, --version         display version information and exit
 
-More infos on the `wiki`_ page
+More infos on the `documentation`_ website.
 
-.. _wiki: https://github.com/Kraymer/qifqif/wiki
+.. _documentation: http://qifqif.rtfd.org
 
 
 Installation
@@ -82,7 +85,7 @@ qiqif is written for `Python 2.7`_ and is tested on Linux, Mac OS X and Windows.
 
 Install with `pip`_ via ``pip install qifqif`` command.
 
-If you're on Windows and don't have pip yet, follow 
+If you're on Windows and don't have pip yet, follow
 `this guide`_ to install it.
 
 .. _Python 2.7: ttps://www.python.org/downloads/
