@@ -5,8 +5,8 @@
 .. image:: http://img.shields.io/pypi/v/qifqif.svg
     :target: https://pypi.python.org/pypi/qifqif
 .. image:: https://readthedocs.org/projects/qifqif/badge/?version=latest
-:target: http://qifqif.readthedocs.org/en/latest/?badge=latest
-:alt: Documentation Status
+   :target: http://qifqif.readthedocs.org/en/latest/?badge=latest
+   :alt: Documentation Status
 
 qifqif
 ======
