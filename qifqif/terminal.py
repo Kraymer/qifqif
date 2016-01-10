@@ -14,8 +14,15 @@ class Terminus:
 
     def __getattr__(self, name):
         def handler(*args, **kwargs):
-            return '%s' % args
+            return '%s' % (args or '')
+        if 'clear' in name:
+            return self.clear
+        if 'move' in name:
+            return lambda x: ''
         return handler
+
+    def ljust(self, field, pad_width, fillchar):
+        return field.ljust(pad_width - len(field), fillchar)
 
     @contextmanager
     def fullscreen(self):
