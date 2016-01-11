@@ -1,9 +1,11 @@
 language: python
 
-matrix:
-    include:
-        - python: 2.7
-          env: {TOX_ENV: py27cov, COVERAGE: 1}
+python:
+    - 2.7
+
+env:
+  - TOX_ENV=py27cov COVERAGE=1 BLESSED=1
+  - TOX_ENV=py27win COVERAGE=0 BLESSED=0
 
 before_install:
     - "[ ! -z $COVERAGE ] && travis_retry pip install coveralls || true"
@@ -12,6 +14,7 @@ before_install:
 # test.
 install:
     - travis_retry pip install -r requirements.txt
+    - if [[ "$BLESSED" == 1 ]]; then travis_retry pip install blessed; fi
     - travis_retry tox -e $TOX_ENV --notest
 
 script: tox -e $TOX_ENV
