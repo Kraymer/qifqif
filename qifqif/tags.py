@@ -85,8 +85,8 @@ def load(filepath):
         with open(filepath, 'r') as cfg:
             try:
                 TAGS = json.load(cfg)
-            except Exception as e:
-                print("Error loading '%s'.\n%s" % (filepath, e))
+            except Exception as err:
+                print "Error loading '%s'.\n%s" % (filepath, err)
                 exit(1)
     else:
         TAGS = {}
@@ -101,28 +101,29 @@ def save(filepath, tags):
                   sort_keys=True, indent=4, separators=(',', ': ')) + '\n')
 
 
-def edit(t, tag, match, options={}):
+def edit(t, tag, _match, options=None):
     """Save a tag modification into dictionary and save the latter on file.
     """
 
-    global TAGS
-    match = unrulify(match)
+    if not options:
+        options = {}
+    _match = unrulify(_match)
     cached_tag, cached_match, _ = find_tag_for(t)
     if tag != cached_tag:
         if cached_tag:
             TAGS[cached_tag].remove(cached_match)
             if not TAGS[cached_tag]:
                 del TAGS[cached_tag]
-        if tag and match:
+        if tag and _match:
             if tag not in TAGS:
-                TAGS[tag] = [match]
+                TAGS[tag] = [_match]
             else:
-                TAGS[tag].append(match)
-    elif match != cached_match:
+                TAGS[tag].append(_match)
+    elif _match != cached_match:
         if cached_match:
             TAGS[tag].remove(cached_match)
-        if tag and match:
-            TAGS[tag].append(match)
+        if tag and _match:
+            TAGS[tag].append(_match)
     else:  # no diff
         return
 
