@@ -15,29 +15,6 @@ from qifqif.terminal import TERM
 readline.parse_and_bind('tab: complete')
 
 
-def sub_re(pattern):
-    for offset in range(len(pattern) + 1, 0, -1):
-        try:
-            re_obj = re.compile(pattern[:offset])
-        except re.error:  # syntax error in re part
-            continue
-        yield offset, re_obj
-
-
-def partial_pattern_match(pattern, text):
-    print('%s/%s' % (pattern, text))
-    good_pattern_offset = 0
-    good_text_offset = 0
-    for re_offset, re_obj in sub_re(pattern):
-        print('match %s?' % text)
-        match = re_obj.search(text)
-        if match:
-            good_pattern_offset = re_offset
-            good_text_offset = match.start()
-            return good_pattern_offset, good_text_offset
-    return good_pattern_offset, good_text_offset
-
-
 def colorize_match(t, matches, field):
     field_val = t[field]
     match = matches.get(field, '') if matches else ''

@@ -5,7 +5,7 @@ import sys
 from contextlib import contextmanager
 
 
-class Terminus:
+class Terminus(object):
     """blessed Terminal ersatz for Windows exhibiting minimum features set"""
 
     @property

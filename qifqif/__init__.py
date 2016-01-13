@@ -199,7 +199,7 @@ def process_transaction(t, options):
     """Assign a category to a transaction.
     """
     if not t['category']:
-        cat, ruler, m = tags.find_tag_for(t)
+        cat, ruler, _ = tags.find_tag_for(t)
         t['category'] = cat
     else:
         cat, ruler = t['category'], None
@@ -233,6 +233,7 @@ def process_file(transactions, options):
     """Process file's transactions."""
     cat = None
     try:
+        i = 0
         for (i, t) in enumerate(transactions):
             cat, match = process_transaction(t, options)
             tags.edit(t, cat, match, options)
