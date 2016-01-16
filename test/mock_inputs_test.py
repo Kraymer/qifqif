@@ -39,6 +39,7 @@ class TestBlackBox(unittest.TestCase):
         self.assertEqual(res, {u'date': r'\d\d/02/2014', u'memo': 'houf'})
 
     KEYBOARD_INPUTS = KEYBOARD_BASE + [
+        'Sally',  # Bad payee match
         'Sully',  # Payee match
         '',       # Edit 'Restaurant' category [y,N] ?
         '']       # Press any key

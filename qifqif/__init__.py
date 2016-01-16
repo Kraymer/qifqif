@@ -131,9 +131,11 @@ def check_ruler(ruler, t):
     """Build fields status dict obtained by applying ruler to transaction.
     """
     extras = {}
-    match, field_ko = tags.match(ruler, t)
+    match, match_info = tags.match(ruler, t)
     if not match:
-        extras[field_ko] = TERM.red('✖ %s' % field_ko.title())
+        for (key, val) in match_info.iteritems():
+             if not val:
+                 extras[key] = TERM.red('✖ %s' % key.title())
         extras['category'] = TERM.red('✖ Category')
     else:
         for field in ruler:
