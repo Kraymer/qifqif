@@ -134,8 +134,8 @@ def check_ruler(ruler, t):
     match, match_info = tags.match(ruler, t)
     if not match:
         for (key, val) in match_info.iteritems():
-             if not val:
-                 extras[key] = TERM.red('✖ %s' % key.title())
+            if not val:
+                extras[key] = TERM.red('✖ %s' % key.title())
         extras['category'] = TERM.red('✖ Category')
     else:
         for field in ruler:
@@ -168,6 +168,18 @@ def query_ruler(t):
     return ruler
 
 
+def print_field(t, field, matches=None, extras=None):
+    if not extras:
+        extras = {}
+    pad_width = 12
+    fieldname = extras.get(field, '  ' + field.title())
+    line = TERM.clear_eol + '%s: %s' % (
+        TERM.ljust(fieldname, pad_width, '.'),
+        colorize_match(t, field.lower(), matches) or TERM.red('<none>')
+    )
+    print(line)
+
+
 def print_transaction(t, short=True, extras=None):
     """Print transaction fields values and indicators about matchings status.
        If short is True, a limited set of fields is printed.
@@ -177,24 +189,12 @@ def print_transaction(t, short=True, extras=None):
        - '+' when the category is fetched from .json matches file
        - ' ' when the category is present in input file
     """
-    if not extras:
-        extras = {}
-    pad_width = 12
     keys = ('date', 'amount', 'payee', 'category') if short else t.keys()
-    category = ''
     _, _, matches = tags.find_tag_for(t)
     for field in keys:
         if t[field] and not field.isdigit():
-            fieldname = extras.get(field, '  ' + field.title())
-            line = TERM.clear_eol + '%s: %s' % (
-                TERM.ljust(fieldname, pad_width, '.'),
-                colorize_match(t, matches, field.lower()) or TERM.red('<none>')
-            )
-            if field != 'category':
-                print(line)
-            else:
-                category = line + '\n'
-    print(category + TERM.clear_eos, end='')
+            print_field(t, field, matches, extras)
+    print (TERM.clear_eos, end='')
 
 
 def process_transaction(t, options):

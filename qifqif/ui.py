@@ -15,8 +15,10 @@ from qifqif.terminal import TERM
 readline.parse_and_bind('tab: complete')
 
 
-def colorize_match(t, matches, field):
+def colorize_match(t, field, matches=None):
     field_val = t[field]
+    if not field_val:
+        return None
     match = matches.get(field, '') if matches else ''
     seqmatch = SequenceMatcher(None, field_val, match)
     a, b, size = seqmatch.find_longest_match(0, len(field_val), 0, len(match))
