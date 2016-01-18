@@ -63,11 +63,11 @@ def query_cat(cached_cat):
     cat = quick_input('\nCategory', vanish=True).strip()
 
     if not cat and cached_cat:
-        erase = quick_input('Remove existing category', 'yN')
+        erase = quick_input('\nRemove existing category', 'yN', True)
         if erase.upper() == 'N':
             cat = cached_cat
     set_completer()
-    return cat
+    return cat.strip() or None
 
 
 def query_guru_ruler(t):
@@ -220,13 +220,12 @@ def process_transaction(t, options):
     # Query for category if no cached one or edit is True
     if (not cat or edit) and not options.get('batch', False):
         t['category'] = query_cat(cat)
-        print(TERM.green('✔ Category..: ') + t['category'])
+        print(TERM.clear_last, end='')
+        print_field(t, 'category')
+
     # Query ruler if category entered or edit
     if t['category']:
         ruler = query_ruler(t)
-    else:  # remove category
-        if cat:
-            print_transaction(t)
 
     return t['category'], ruler
 
