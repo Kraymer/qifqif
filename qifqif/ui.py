@@ -4,11 +4,15 @@
 # Copyright (c) 2016 Fabrice Laporte - kray.me
 # The MIT License http://www.opensource.org/licenses/mit-license.php
 
-"""Utilities functions related to terminal display"""
+"""Utilities functions related to terminal display."""
 
-import readline
 import re
 from difflib import SequenceMatcher
+
+try:
+    import readline
+except ImportError:
+    import pyreadline as readline
 
 from qifqif.terminal import TERM
 
@@ -27,7 +31,7 @@ def colorize_match(t, field, matches=None):
 
 
 class InputCompleter(object):
-    """Input completer for categories"""
+    """Input completer for categories."""
 
     def __init__(self, options):
         self.options = options
@@ -56,8 +60,8 @@ def set_completer(options=None):
 
 
 def complete_matches(payee):
-    """Generate a limited set of matches for payee line"""
-
+    """Generate a limited set of matches for payee line.
+    """
     matches = [m for m in re.findall(r"\w+", payee) if m]
     select = True
     for (i, c) in enumerate(payee):
