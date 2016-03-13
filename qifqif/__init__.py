@@ -114,7 +114,7 @@ def query_guru_ruler(t):
 
 
 def query_basic_ruler(t, default_ruler):
-    """Defines basic rule consisting of matching full words on payee field.
+    """Define basic rule consisting of matching full words on payee field.
     """
     default_field = 'payee'
     if not t[default_field]:
@@ -162,9 +162,7 @@ def query_ruler(t):
                 break
             ruler = query_basic_ruler(t, tags.unrulify(ruler)) or \
                 query_guru_ruler(t)
-
             ok, extras = check_ruler(ruler, t)
-
     return ruler
 
 
@@ -200,12 +198,14 @@ def print_transaction(t, short=True, extras=None):
 def process_transaction(t, options):
     """Assign a category to a transaction.
     """
-    if not t['category']:
+    cat, ruler = t['category'], None
+    extras = {}
+    if not t['category']:  # Grab category from json cache
         cat, ruler, _ = tags.find_tag_for(t)
-        t['category'] = cat
-    else:
-        cat, ruler = t['category'], None
-    extras = {'category': '+ Category'} if (cat and ruler) else {}
+        if cat:
+            t['category'] = cat
+            extras = {'category': '+ Category'}
+
     print('---\n' + TERM.clear_eol, end='')
     print_transaction(t, extras=extras)
     edit = False
@@ -217,16 +217,15 @@ def process_transaction(t, options):
         if not edit:
             return t['category'], ruler
 
-    # Query for category if no cached one or edit is True
+    # Query for category and overwrite category on screen
     if (not cat or edit) and not options.get('batch', False):
         t['category'] = query_cat(cat)
+        extras = {'category': '✔ Category'} if not t['category'] else {}
         print(TERM.clear_last, end='')
-        print_field(t, 'category')
-
+        print_field(t, 'category', extras=extras)
     # Query ruler if category entered or edit
     if t['category']:
         ruler = query_ruler(t)
-
     return t['category'], ruler
 
 
