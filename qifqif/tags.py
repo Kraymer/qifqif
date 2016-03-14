@@ -104,7 +104,6 @@ def save(filepath, tags):
 def edit(t, tag, _match, options=None):
     """Save a tag modification into dictionary and save the latter on file.
     """
-
     if not options:
         options = {}
     _match = unrulify(_match)
@@ -119,10 +118,10 @@ def edit(t, tag, _match, options=None):
                 TAGS[tag] = [_match]
             else:
                 TAGS[tag].append(_match)
-    elif _match != cached_match:
+    elif _match is not None and _match != cached_match:
         if cached_match:
             TAGS[tag].remove(cached_match)
-        if tag and _match:
+        if tag and _match and not _match.isspace():
             TAGS[tag].append(_match)
     else:  # no diff
         return
