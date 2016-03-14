@@ -132,14 +132,14 @@ def check_ruler(ruler, t):
     """
     extras = {}
     match, match_info = tags.match(ruler, t)
+    for (key, val) in match_info.iteritems():
+        if not val:
+            extras[key] = TERM.red('✖ %s' % key.title())
+        else:
+            extras[key] = TERM.green('✔ %s' % key.title())
     if not match:
-        for (key, val) in match_info.iteritems():
-            if not val:
-                extras[key] = TERM.red('✖ %s' % key.title())
         extras['category'] = TERM.red('✖ Category')
     else:
-        for field in ruler:
-            extras[field] = TERM.green('✔ %s' % field.title())
         extras['category'] = TERM.green('✔ Category')
     return match, extras
 
