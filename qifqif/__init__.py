@@ -152,7 +152,7 @@ def query_ruler(t):
        ruler prompt, where ruler is a list of field/match to validate.
     """
     with TERM.fullscreen():
-        extras = {'category': '? Category'}
+        extras = {}
         ok = False
         ruler = {}
         while True:
@@ -220,12 +220,12 @@ def process_transaction(t, options):
     # Query for category and overwrite category on screen
     if (not cat or edit) and not options.get('batch', False):
         t['category'] = query_cat(cat)
-        extras = {'category': '✔ Category'} if not t['category'] else {}
-        print(TERM.clear_last, end='')
+        # Query ruler if category entered or edit
+        if t['category']:
+            ruler = query_ruler(t)
+        extras = {'category': '✔ Category'} if t['category'] else {}
         print_field(t, 'category', extras=extras)
-    # Query ruler if category entered or edit
-    if t['category']:
-        ruler = query_ruler(t)
+
     return t['category'], ruler
 
 
