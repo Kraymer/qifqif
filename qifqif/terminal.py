@@ -13,6 +13,9 @@ from contextlib import contextmanager
 class Terminus(object):
     """blessed Terminal ersatz for Windows exhibiting minimum features set"""
 
+    OK = u'+'
+    KO = u'x'
+
     @property
     def clear(self):
         return '\r'
@@ -41,6 +44,9 @@ try:
     from blessed import Terminal as BlessedTerminal
 
     class Terminal(BlessedTerminal):
+        OK = u'✔'
+        KO = u'✖'
+
         @property
         def clear_last(self):
             return self.move_up + self.move_x(0) + self.clear_eol

@@ -134,13 +134,13 @@ def check_ruler(ruler, t):
     match, match_info = tags.match(ruler, t)
     for (key, val) in match_info.iteritems():
         if not val:
-            extras[key] = TERM.red('✖ %s' % key.title())
+            extras[key] = TERM.red(u'%s %s' % (TERM.KO, key.title()))
         else:
-            extras[key] = TERM.green('✔ %s' % key.title())
+            extras[key] = TERM.green(u'%s %s' % (TERM.OK, key.title()))
     if not match:
-        extras['category'] = TERM.red('✖ Category')
+        extras['category'] = TERM.red(u'%s Category' % TERM.KO)
     else:
-        extras['category'] = TERM.green('✔ Category')
+        extras['category'] = TERM.green(u'%s Category' % TERM.OK)
     return match, extras
 
 
@@ -163,6 +163,7 @@ def query_ruler(t):
             ruler = query_basic_ruler(t, tags.unrulify(ruler)) or \
                 query_guru_ruler(t)
             ok, extras = check_ruler(ruler, t)
+
     return ruler
 
 
@@ -223,7 +224,7 @@ def process_transaction(t, options):
         # Query ruler if category entered or edit
         if t['category']:
             ruler = query_ruler(t)
-        extras = {'category': '✔ Category'} if t['category'] else {}
+        extras = {'category': TERM.OK + ' Category'} if t['category'] else {}
         print_field(t, 'category', extras=extras)
 
     return t['category'], ruler
