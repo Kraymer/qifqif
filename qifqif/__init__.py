@@ -225,6 +225,7 @@ def process_transaction(t, options):
         if t['category']:
             ruler = query_ruler(t)
         extras = {'category': TERM.OK + ' Category'} if t['category'] else {}
+        print(TERM.clear_last, end='')
         print_field(t, 'category', extras=extras)
 
     return t['category'], ruler
@@ -240,7 +241,7 @@ def process_file(transactions, options):
             tags.edit(t, cat, match, options)
         i = i + 1
         if not options.get('batch', False):
-            quick_input('Press any key to continue (Ctrl+D to discard '
+            quick_input('\nPress any key to continue (Ctrl+D to discard '
                         'edits)')
     except KeyboardInterrupt:
         return transactions[:i]
