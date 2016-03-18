@@ -93,6 +93,13 @@ If you're on Windows and don't have pip yet, follow
 .. _this guide: https://pip.pypa.io/en/latest/installing/
 .. _here: https://github.com/Kraymer/qifqif/releases
 
+Changelog
+---------
+
+Available on `Github Releases page`_.
+
+.. _Github Releases page: https://github.com/Kraymer/qifqif/releases
+
 Feedbacks
 ---------
 
