@@ -91,7 +91,6 @@ If you're on Windows and don't have pip yet, follow
 .. _Python 2.7: ttps://www.python.org/downloads/
 .. _pip: https://pip.pypa.io/en/stable/
 .. _this guide: https://pip.pypa.io/en/latest/installing/
-.. _here: https://github.com/Kraymer/qifqif/releases
 
 Changelog
 ---------
