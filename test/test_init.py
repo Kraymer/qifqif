@@ -7,6 +7,7 @@ import unittest
 from mock import patch
 
 import qifqif
+from qifqif import qifile
 import testdata
 
 OPTIONS = {'dry-run': True, 'config': testdata.CFG_FILE}
@@ -26,23 +27,23 @@ class TestInit(unittest.TestCase):
         self.assertEqual(qifqif.quick_input('', ('no', 'Yes', 'maybe')), 'Yes')
 
     def test_parse_default_transaction(self):
-        res = qifqif.parse_lines(testdata.generate_lines('PDM'))
+        res = qifile.parse_lines(testdata.generate_lines('PDM'))
         self.assertEqual(len(res), 1)
 
     def test_parse_delimiter_optional(self):
-        res_no_delim = qifqif.parse_lines(testdata.generate_lines('PDM^P'))
-        res_delim_end = qifqif.parse_lines(testdata.generate_lines('PDM^P^'))
-        res_delim_ends = qifqif.parse_lines(testdata.generate_lines('^PDM^P^'))
+        res_no_delim = qifile.parse_lines(testdata.generate_lines('PDM^P'))
+        res_delim_end = qifile.parse_lines(testdata.generate_lines('PDM^P^'))
+        res_delim_ends = qifile.parse_lines(testdata.generate_lines('^PDM^P^'))
         self.assertEqual(res_no_delim, res_delim_end)
         self.assertEqual(res_delim_end, res_delim_ends)
 
     def test_parse_empty_transaction(self):
-        res = qifqif.parse_lines(testdata.generate_lines('PDM^^'))
+        res = qifile.parse_lines(testdata.generate_lines('PDM^^'))
         self.assertEqual(len(res), 1)
 
     def test_dump_to_buffer(self):
         transactions, lines = testdata.transactions()
-        res = qifqif.dump_to_buffer(transactions)
+        res = qifile.dump_to_buffer(transactions)
         self.assertEqual(res, ''.join(lines))
 
 
@@ -53,7 +54,7 @@ class TestInitWithConfig(unittest.TestCase):
     @patch('qifqif.quick_input', side_effect=mock_input_default)
     def test_audit_mode_no_edit(self, mock_quick_input):
         OPTIONS['audit'] = True
-        res = qifqif.process_file(testdata.transactions()[0], OPTIONS)
+        res = qifqif.process_transactions(testdata.transactions()[0], OPTIONS)
         self.assertEqual(len(res), 2)
         self.assertEqual(res[0]['category'], 'Bars')
 

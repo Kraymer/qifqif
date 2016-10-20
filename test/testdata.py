@@ -2,7 +2,7 @@
 
 import io
 import os
-import qifqif
+from qifqif import config, qifile
 
 
 TAGS = {
@@ -26,11 +26,11 @@ def generate_lines(kinds):
     """
     res = []
     for k in kinds:
-        res.append(k + TRANSACTION[qifqif.FIELDS.get(k, k)])
+        res.append(k + TRANSACTION[config.FIELDS.get(k, k)])
     return res
 
 
 def transactions():
     with io.open(QIF_FILE, 'r', encoding='utf-8') as fin:
         lines = fin.readlines()
-        return qifqif.parse_lines(lines), lines
+        return qifile.parse_lines(lines), lines

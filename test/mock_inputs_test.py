@@ -5,6 +5,7 @@ import io
 from mock import patch
 
 import qifqif
+from qifqif import qifile
 import testdata
 
 
@@ -47,7 +48,7 @@ class TestBlackBox(unittest.TestCase):
     @patch('qifqif.quick_input', side_effect=KEYBOARD_INPUTS)
     def test_audit_mode(self, mock_quick_input):
         OPTIONS['audit'] = True
-        res = qifqif.process_file(testdata.transactions()[0], OPTIONS)
+        res = qifqif.process_transactions(testdata.transactions()[0], OPTIONS)
         self.assertEqual(len(res), 2)
         self.assertEqual(res[0]['category'], 'Drink')
 
@@ -79,7 +80,7 @@ class TestBlackBox(unittest.TestCase):
         """
         qifqif.main()
         with io.open(OUT_FILE.name, 'r', encoding='utf-8') as fin:
-            res = qifqif.parse_lines(fin.readlines())
+            res = qifile.parse_lines(fin.readlines())
         self.assertEqual(res[0]['category'], 'Drink')
 
 
