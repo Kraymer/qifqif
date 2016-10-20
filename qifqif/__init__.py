@@ -16,12 +16,7 @@ import sys
 import io
 import re
 
-try:
-    from collections import OrderedDict
-except ImportError:  # python 2.6
-    from ordereddict import OrderedDict
-
-from qifqif import tags
+from qifqif import tags, qifile, config
 from qifqif.ui import set_completer, complete_matches, colorize_match
 from qifqif.terminal import TERM
 
@@ -30,10 +25,6 @@ __author__ = 'Fabrice Laporte <kraymer@gmail.com>'
 
 ENCODING = 'utf-8' if sys.stdin.encoding in (None, 'ascii') else \
     sys.stdin.encoding
-FIELDS = {'D': 'date', 'T': 'amount', 'P': 'payee', 'L': 'category',
-          'N': 'number', 'M': 'memo'}
-EXTRA_FIELDS = {'F': 'filename'}
-FIELDS_FULL = dict(FIELDS.items() + EXTRA_FIELDS.items())
 
 
 def quick_input(prompt, choices='', vanish=False):
@@ -89,7 +80,8 @@ def query_guru_ruler(t):
             field = quick_input('\nMatch on field', vanish=True).lower()
             regex = '*' in field
             field = field.strip('*')
-            if not field or field in set(FIELDS_FULL.values()) - {'category'}:
+            if not field or field in set(config.FIELDS_FULL.values()) - {
+                    'category'}:
                 break
         # Enter match
         while field:
@@ -231,76 +223,6 @@ def process_transaction(t, options):
     return t['category'], ruler
 
 
-def process_file(transactions, options):
-    """Process file's transactions."""
-    cat = None
-    try:
-        i = 0
-        for (i, t) in enumerate(transactions):
-            cat, match = process_transaction(t, options)
-            tags.edit(t, cat, match, options)
-        i = i + 1
-        if not options.get('batch', False):
-            quick_input('\nPress any key to continue (Ctrl+D to discard '
-                        'edits)')
-    except KeyboardInterrupt:
-        return transactions[:i]
-    return transactions[:i]
-
-
-def parse_lines(lines, options=None):
-    """Return list of transactions as ordered dicts with fields save in same
-       order as they appear in input file.
-    """
-    if not options:
-        options = {}
-    res = []
-    transaction = OrderedDict()
-    for (idx, line) in enumerate(lines):
-        line = line.strip()
-        if not line:
-            continue
-        field_id = line[0]
-        if field_id == '^':
-            if transaction:
-                res.append(transaction)
-            transaction = OrderedDict([])
-        elif field_id in FIELDS.keys():
-            transaction[FIELDS[field_id]] = line[1:]
-        elif line:
-            transaction['%s' % idx] = line
-
-    if len(transaction.keys()):
-        res.append(transaction)
-
-    # post-check to not interfere with present keys order
-    for t in res:
-        for field in FIELDS.values():
-            if field not in t:
-                t[field] = None
-        t['filename'] = options.get('src', '')
-    return res
-
-
-def dump_to_buffer(transactions):
-    """Output transactions to file or terminal.
-    """
-    reverse_fields = {}
-    for (key, val) in FIELDS.items():
-        reverse_fields[val] = key
-    lines = []
-    for t in transactions:
-        for key in t:
-            if t[key] and key not in EXTRA_FIELDS.values():
-                try:
-                    lines.append('%s%s\n' % (reverse_fields[key], t[key]))
-                except KeyError:  # Unrecognized field
-                    lines.append(t[key] + '\n')
-        lines.append('^\n')
-    res = ''.join(lines).strip() + '\n'
-    return res
-
-
 def parse_args(argv):
     """Build application argument parser and parse command line.
     """
@@ -338,6 +260,23 @@ def parse_args(argv):
     return args
 
 
+def process_transactions(transactions, options):
+    """Process file's transactions."""
+    cat = None
+    try:
+        i = 0
+        for (i, t) in enumerate(transactions):
+            cat, match = process_transaction(t, options)
+            tags.edit(t, cat, match, options)
+        i = i + 1
+        if not options.get('batch', False):
+            quick_input('\nPress any key to continue (Ctrl+D to discard '
+                        'edits)')
+    except KeyboardInterrupt:
+        return transactions[:i]
+    return transactions[:i]
+
+
 def main(argv=None):
     """Main function: Parse, process, print"""
     if argv is None:
@@ -348,13 +287,13 @@ def main(argv=None):
     original_tags = copy.deepcopy(tags.load(args['config']))
     with io.open(args['src'], 'r', encoding='utf-8', errors='ignore') as fin:
         lines = fin.readlines()
-        transacs_orig = parse_lines(lines, options=args)
+        transacs_orig = qifile.parse_lines(lines, options=args)
     try:
-        transacs = process_file(transacs_orig, options=args)
+        transacs = process_transactions(transacs_orig, options=args)
     except EOFError:  # exit on Ctrl + D: restore original tags
         tags.save(args['config'], original_tags)
         return 1
-    res = dump_to_buffer(transacs + transacs_orig[len(transacs):])
+    res = qifile.dump_to_buffer(transacs + transacs_orig[len(transacs):])
     if not args.get('dry-run', False):
         with io.open(args['dest'], 'w', encoding='utf-8') as dest:
             dest.write(res)
