@@ -67,7 +67,7 @@ Usage
       -c CONFIG, --config CONFIG
                             configuration filename in json format. DEFAULT:
                             ~/.qifqif.json
-      -d, --dry-run         dry-run mode: just print instead of write file
+      -d, --dry-run         dry-run mode: just print instead of writing file
       -o DEST, --output DEST
                             output filename. DEFAULT: edit input file in-place
       -b, --batch-mode      skip transactions that require user input
