@@ -27,8 +27,14 @@ Json configuration file format
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. warning::
-   Editing this file manually is not recommended, as any formatting error will
-   make the program exit on error.
+   Editing this file manually is not recommended, as any formatting error will make the program exit on error.
+
+.. note::
+   qifqif is shipped with `qifacc`_ utility that automates the
+   creation of a configuration file from a csv file of exported
+   accounts.
+
+.. _qifacc: https://github.com/Kraymer/qifqif/wiki/qifacc
 
 Matchings are saved automatically by qifqif as a json dict.
 Keys are the categories, the values are their associated keyword(s).

@@ -82,6 +82,7 @@ setup(name='qifqif',
 
     entry_points={
         'console_scripts': [
+            'qifacc = qifacc:main',
             'qifqif = qifqif:main',
         ],
     },
