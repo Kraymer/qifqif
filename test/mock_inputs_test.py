@@ -11,7 +11,7 @@ import testdata
 
 OUT_FILE = tempfile.NamedTemporaryFile()
 
-OPTIONS = {'dry-run': True, 'config': testdata.CFG_FILE}
+OPTIONS = {'dry-run': True, 'force': False, 'config': testdata.CFG_FILE}
 
 KEYBOARD_BASE = [
     'Y',      # Edit 'Bars' category [y,N] ?

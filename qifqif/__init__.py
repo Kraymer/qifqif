@@ -191,6 +191,9 @@ def print_transaction(t, short=True, extras=None):
 def process_transaction(t, options):
     """Assign a category to a transaction.
     """
+    if options['force'] > 1 or (
+            options['force'] and t['category'] not in tags.TAGS):
+        t['category'] = None
     cat, ruler = t['category'], None
     extras = {}
     if not t['category']:  # Grab category from json cache
@@ -233,28 +236,26 @@ def parse_args(argv):
                         help='.QIF file to process', default='')
     audit_group = parser.add_mutually_exclusive_group()
     audit_group.add_argument('-a', '--audit-mode', dest='audit',
-                        action='store_true', help=('pause after '
-                                                   'each transaction'))
+        action='store_true', help=('pause after each transaction'))
     audit_group.add_argument('-b', '--batch-mode', action='store_true',
-                        dest='batch', help=('skip transactions that require '
-                                            'user input'))
+        dest='batch', help=('skip transactions that require user input'))
     parser.add_argument('-c', '--config', dest='config',
-                        help='configuration filename in json format. '
-                        'DEFAULT: ~/.qifqif.json',
-                        default=os.path.join(os.path.expanduser('~'),
-                                             '.qifqif.json'))
+        help='configuration filename in json format. DEFAULT: ~/.qifqif.json',
+        default=os.path.join(os.path.expanduser('~'), '.qifqif.json'))
     dest_group = parser.add_mutually_exclusive_group()
     dest_group.add_argument('-d', '--dry-run', dest='dry-run',
-                        action='store_true', help=('dry-run mode: just print '
-                                                   'instead of write file'))
+        action='store_true', help=('just print instead of writing file'))
     dest_group.add_argument('-o', '--output', dest='dest',
-                        help=('output filename. '
-                            'DEFAULT: edit input file in-place'), default='')
+        help=('output filename. DEFAULT: edit input file in-place'),
+        default='')
+    parser.add_argument("-f", "--force", action="count",
+        help=("discard transactions categories if not present in "
+            "configuration file. Repeat the flag (-ff) to force editing of "
+            "all transactions."))
     parser.add_argument('-v', '--version', action='version',
                         version='%(prog)s ' + __version__,
                         help='display version information and exit')
     args = vars(parser.parse_args(args=argv[1:]))
-
     if not args['dest']:
         args['dest'] = args['src']
     return args
