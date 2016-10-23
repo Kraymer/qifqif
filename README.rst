@@ -53,24 +53,27 @@ Usage
 
 ::
 
-    usage: qifqif [-h] [-a] [-c CONFIG] [-d | -o DEST] [-b] [-v] QIF_FILE
+    usage: qifqif.py [-h] [-a | -b] [-c CONFIG] [-d | -o DEST] [-f] [-v] QIF_FILE    
 
     Enrich your .QIF files with tags. See https://github.com/Kraymer/qifqif for
-    more infos.
+    more infos.    
 
     positional arguments:
-      QIF_FILE              .QIF file to process
+      QIF_FILE              .QIF file to process    
 
     optional arguments:
       -h, --help            show this help message and exit
       -a, --audit-mode      pause after each transaction
+      -b, --batch-mode      skip transactions that require user input
       -c CONFIG, --config CONFIG
                             configuration filename in json format. DEFAULT:
                             ~/.qifqif.json
-      -d, --dry-run         dry-run mode: just print instead of writing file
+      -d, --dry-run         just print instead of writing file
       -o DEST, --output DEST
                             output filename. DEFAULT: edit input file in-place
-      -b, --batch-mode      skip transactions that require user input
+      -f, --force           discard transactions categories if not present in
+                            configuration file. Repeat the flag (-ff) to force
+                            editing of all transactions.
       -v, --version         display version information and exit
 
 More infos on the `documentation`_ website.
