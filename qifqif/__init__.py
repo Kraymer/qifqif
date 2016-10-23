@@ -298,7 +298,8 @@ def main(argv=None):
     if not args.get('dry-run', False):
         with io.open(args['dest'], 'w', encoding='utf-8') as dest:
             dest.write(res)
-    print(res)
+    if args.get('batch', False) or args.get('dry-run', False):
+        print('\n' + res)
     return 0 if len(transacs) == len(transacs_orig) else 1
 
 if __name__ == "__main__":
