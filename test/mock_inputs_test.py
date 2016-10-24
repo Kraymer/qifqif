@@ -8,10 +8,9 @@ import qifqif
 from qifqif import qifile
 import testdata
 
-
 OUT_FILE = tempfile.NamedTemporaryFile()
+OPTIONS = qifqif.parse_args(['qifqif', '-d', '-c', testdata.CFG_FILE, 'dummy'])
 
-OPTIONS = {'dry-run': True, 'force': False, 'config': testdata.CFG_FILE}
 
 KEYBOARD_BASE = [
     'Y',      # Edit 'Bars' category [y,N] ?

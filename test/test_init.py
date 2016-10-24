@@ -10,7 +10,7 @@ import qifqif
 from qifqif import qifile
 import testdata
 
-OPTIONS = {'dry-run': True, 'force': False, 'config': testdata.CFG_FILE}
+OPTIONS = qifqif.parse_args(['qifqif', '-d', '-c', testdata.CFG_FILE, 'dummy'])
 
 
 def mock_input_default(prompt, choices='', vanish=False):

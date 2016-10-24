@@ -205,7 +205,7 @@ def process_transaction(t, options):
     print('---\n' + TERM.clear_eol, end='')
     print_transaction(t, extras=extras)
     edit = False
-    audit = options.get('audit', False)
+    audit = options['audit']
     if t['category']:
         if audit:
             msg = "\nEdit '%s' category" % TERM.green(t['category'])
@@ -214,7 +214,7 @@ def process_transaction(t, options):
             return t['category'], ruler
 
     # Query for category and overwrite category on screen
-    if (not cat or edit) and not options.get('batch', False):
+    if (not cat or edit) and not options['batch']:
         t['category'] = query_cat(cat)
         # Query ruler if category entered or edit
         if t['category']:
@@ -233,7 +233,7 @@ def parse_args(argv):
         description='Enrich your .QIF files with tags. '
         'See https://github.com/Kraymer/qifqif for more infos.')
     parser.add_argument('src', metavar='QIF_FILE',
-                        help='.QIF file to process', default='')
+        help='.QIF file to process', default='')
     audit_group = parser.add_mutually_exclusive_group()
     audit_group.add_argument('-a', '--audit-mode', dest='audit',
         action='store_true', help=('pause after each transaction'))
@@ -253,8 +253,8 @@ def parse_args(argv):
             "configuration file. Repeat the flag (-ff) to force editing of "
             "all transactions."))
     parser.add_argument('-v', '--version', action='version',
-                        version='%(prog)s ' + __version__,
-                        help='display version information and exit')
+        version='%(prog)s ' + __version__,
+        help='display version information and exit')
     args = vars(parser.parse_args(args=argv[1:]))
     if not args['dest']:
         args['dest'] = args['src']
@@ -270,7 +270,7 @@ def process_transactions(transactions, options):
             cat, match = process_transaction(t, options)
             tags.edit(t, cat, match, options)
         i = i + 1
-        if not options.get('batch', False):
+        if not options['batch']:
             quick_input('\nPress any key to continue (Ctrl+D to discard '
                         'edits)')
     except KeyboardInterrupt:
@@ -295,10 +295,10 @@ def main(argv=None):
         tags.save(args['config'], original_tags)
         return 1
     res = qifile.dump_to_buffer(transacs + transacs_orig[len(transacs):])
-    if not args.get('dry-run', False):
+    if not args.get('dry-run'):
         with io.open(args['dest'], 'w', encoding='utf-8') as dest:
             dest.write(res)
-    if args.get('batch', False) or args.get('dry-run', False):
+    if args['batch'] or args['dry-run']:
         print('\n' + res)
     return 0 if len(transacs) == len(transacs_orig) else 1
 
