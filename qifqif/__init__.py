@@ -245,13 +245,13 @@ def parse_args(argv):
     dest_group = parser.add_mutually_exclusive_group()
     dest_group.add_argument('-d', '--dry-run', dest='dry-run',
         action='store_true', help=('just print instead of writing file'))
-    dest_group.add_argument('-o', '--output', dest='dest',
-        help=('output filename. DEFAULT: edit input file in-place'),
-        default='')
     parser.add_argument("-f", "--force", action="count",
         help=("discard transactions categories if not present in "
             "configuration file. Repeat the flag (-ff) to force editing of "
             "all transactions."))
+    dest_group.add_argument('-o', '--output', dest='dest',
+        help=('output filename. DEFAULT: edit input file in-place'),
+        default='')
     parser.add_argument('-v', '--version', action='version',
         version='%(prog)s ' + __version__,
         help='display version information and exit')

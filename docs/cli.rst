@@ -3,7 +3,7 @@ CLI usage
 
 ::
 
-    qifqif.py [-h] [-a | -b] [-c CONFIG] [-d | -o DEST] [-v] QIF_FILE
+    qifqif.py [-h] [-a | -b] [-c CONFIG] [-d] [-f] [-o DEST] [-v] QIF_FILE
 
 qifqif inserts a ``L your_category`` line for each transaction
 of given QIF_FILE based on your existing matching history stored in CONFIG.
@@ -20,6 +20,9 @@ Optional flags:
   files eg one per family member.
 - ``-d, --dry-run``: print the result of qifqif work on the standard output
   only, leaving the qif file untouched. Mutually exclusive with ``--output``
+- ``-f, --force``: turn it on if you want to edit transactions having a
+  category that hasn't been set by qifqif. Repeat the flag (-ff) to force
+  editing of all transactions.
 - ``-o DEST, --output``: by default input file is edited in-place. Use that
   switch to write in another output file instead.
 - ``-v, --version``: display version information and exit
