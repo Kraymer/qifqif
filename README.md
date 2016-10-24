@@ -1,15 +1,6 @@
-![image](https://travis-ci.org/Kraymer/qifqif.svg?branch=master)
-
-> target
-> :   <https://travis-ci.org/Kraymer/qifqif>
->
-![image](https://coveralls.io/repos/Kraymer/qifqif/badge.svg)
-
-> target
-> :   <https://coveralls.io/r/Kraymer/qifqif>
->
-![image](http://img.shields.io/pypi/v/qifqif.svg%0A%20:target:%20https://pypi.python.org/pypi/qifqif)
-
+[![image](https://travis-ci.org/Kraymer/qifqif.svg?branch=master)](https://travis-ci.org/Kraymer/qifqif)
+[![image](https://coveralls.io/repos/Kraymer/qifqif/badge.svg)](https://coveralls.io/r/Kraymer/qifqif)
+[![image](http://img.shields.io/pypi/v/qifqif.svg)](https://pypi.python.org/pypi/qifqif)
 [![Documentation Status](https://readthedocs.org/projects/qifqif/badge/?version=latest)](http://qifqif.readthedocs.org/en/latest/?badge=latest)
 
 qifqif
