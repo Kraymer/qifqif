@@ -1,16 +1,22 @@
-[![image](https://travis-ci.org/Kraymer/qifqif.svg?branch=master)](https://travis-ci.org/Kraymer/qifqif)
-[![image](https://coveralls.io/repos/Kraymer/qifqif/badge.svg)](https://coveralls.io/r/Kraymer/qifqif)
-[![image](http://img.shields.io/pypi/v/qifqif.svg)](https://pypi.python.org/pypi/qifqif)
-[![Documentation Status](https://readthedocs.org/projects/qifqif/badge/?version=latest)](http://qifqif.readthedocs.org/en/latest/?badge=latest)
+[![][travis]](https://travis-ci.org/Kraymer/qifqif)
+[![][coveralls]](https://coveralls.io/r/Kraymer/qifqif)
+[![][pypi]](https://pypi.python.org/pypi/qifqif)
+[![][rtfd]](http://qifqif.readthedocs.org/en/latest/?badge=latest)
+
+[travis]: https://travis-ci.org/Kraymer/qifqif.svg?branch=master
+[coveralls]: https://coveralls.io/repos/Kraymer/qifqif/badge.svg
+[pypi]: http://img.shields.io/pypi/v/qifqif.svg
+[rtfd]: https://readthedocs.org/projects/qifqif/badge/?version=latest
 
 qifqif
 ======
 
-> /kĭf kĭf/
+> `/kĭf kĭf/`
 > :   1.  *adj. inv.* arabic slang (كيف) for "it's all the same".
 >     2.  *n.* CLI tool for *categorizing* qif files. It can make all
 >         the difference.
 >
+
 Description
 -----------
 
@@ -18,7 +24,7 @@ CLI tool to *enrich* your QIF files transactions with category
 information, hence **cutting down import time from minutes to mere
 seconds**.
 
-![image](https://raw.githubusercontent.com/Kraymer/qifqif/master/docs/_static/qifqif_demo.gif)
+![](https://raw.githubusercontent.com/Kraymer/qifqif/master/docs/_static/qifqif_demo.gif)
 
 QIF is a format widely used by personal money management software such
 as [GnuCash](http://www.gnucash.org/) to import information. Yet, the
@@ -32,17 +38,20 @@ software to perform automatic QIF imports. It picks categories by
 searching for predefined keywords in transactions descriptions lines and
 by repeating choices you previously made regarding similar transactions.
 
+
 Features
 --------
 
--   **Blazing fast edits:** thanks to well-thought-out defaults and
-    `<TAB>` completion
--   **Auditing mode:** review your transactions one by one
--   **Batch mode (no interactive):** for easy integration with scripts
--   **Easy-going workflow:** dreading the behemoth task of importing
-    years of accounting from a single file? Don't be. Go at your own
-    pace and press `<Ctrl+C>` to exit anytime. On next run, editing will
-    resume right where you left it.
+- **Quickstart:** create categories by importing your existing accounts with
+  [qifacc](https://github.com/Kraymer/qifqif/wiki/qifacc)
+- **Blazing fast edits:** thanks to well-thought-out defaults and
+  `<TAB>` completion
+- **Auditing mode:** review your transactions one by one
+- **Batch mode (no interactive):** for easy integration with scripts
+- **Easy-going workflow:** dreading the behemoth task of importing
+  years of accounting from a single file? Don't be. Go at your own
+  pace and press `<Ctrl+C>` to exit anytime. On next run, editing will
+  resume right where you left it.
 
 Usage
 -----

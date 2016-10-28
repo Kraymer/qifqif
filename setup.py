@@ -23,22 +23,24 @@ def coerce_file(fn):
             m = re.search(regex, text, re.MULTILINE)
             setattr(mock, attr, m.group(1) if m else None)
         mock.docstring = ast.get_docstring(ast.parse(text))
-        mock.version_test = '%s%s' % (mock.version, str(int(time.time())))
+        if mock.version.endswith('.dev'):
+            mock.version += str(int(time.time()))
         return mock
     if fn.endswith('md'):  # convert markdown to rest, filter out nopypi images
         text = '\n'.join([l for l in text.split('\n') if '[nopypi' not in l])
         text = re.sub(r':\S+:', '', text)  # no emojis
-        tmp = tempfile.NamedTemporaryFile(delete=True, mode='w+')
-        tmp.write(text)
-        text, stderr = subprocess.Popen(['pandoc', '-t', 'rst', tmp.name],
-            stdout=subprocess.PIPE).communicate()
+        with tempfile.NamedTemporaryFile(mode='w+') as tmp:
+            tmp.write(text)
+            tmp.flush()
+            text, stderr = subprocess.Popen(['pandoc', '-t', 'rst', tmp.name],
+                stdout=subprocess.PIPE).communicate()
     return text.decode('utf-8')
 
 
 setup(name='qifqif',
-    version=coerce_file('qifqif/__init__.py').version_test,
+    version=coerce_file('qifqif/__init__.py').version,
     description=coerce_file('qifqif/__init__.py').docstring,
-    long_description=coerce_file('README.rst'),
+    long_description=coerce_file('README.md'),
     author='Fabrice Laporte',
     author_email='kraymer@gmail.com',
     url='https://github.com/KraYmer/qifqif',
