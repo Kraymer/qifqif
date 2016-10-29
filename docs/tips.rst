@@ -89,10 +89,12 @@ Handling QIF files with no *payee* lines
 
 Default matching method performs search on the payee field
 (see :ref:`mastering-keywords`).
+
 The QIF file you process may have this payee information located in another
 field like *memo* for example. In such a case it's preferable to pre-process
 your file by converting *memo* lines to *payee* lines by switching the line
 identifier.
+
 *sed* is a good candidate for that task : ::
 
     sed -i 's/^M/P/' my_file.qif
