@@ -191,11 +191,9 @@ def print_transaction(t, short=True, extras=None):
 def process_transaction(t, options):
     """Assign a category to a transaction.
     """
-    if options['force'] > 1 or (
-            options['force'] and t['category'] not in tags.TAGS):
-        t['category'] = None
     cat, ruler = t['category'], None
     extras = {}
+
     if not t['category']:  # Grab category from json cache
         cat, ruler, _ = tags.find_tag_for(t)
         if cat:
@@ -204,7 +202,8 @@ def process_transaction(t, options):
 
     print('---\n' + TERM.clear_eol, end='')
     print_transaction(t, extras=extras)
-    edit = False
+    edit = options['force'] > 1 or (options['force'] and
+        t['category'] not in tags.TAGS)
     audit = options['audit']
     if t['category']:
         if audit:
