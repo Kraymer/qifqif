@@ -49,7 +49,7 @@ setup(name='qifqif',
     packages=['qifqif', ],
     entry_points={
         'console_scripts': [
-            'qifacc = qifacc:main',
+            'qifacc = qifqif.qifacc:main',
             'qifqif = qifqif:main',
         ],
     },
