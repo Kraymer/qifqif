@@ -93,12 +93,18 @@ def load(filepath):
     return TAGS
 
 
+def prettify(tags):
+    """Format tags for json output.
+    """
+    return json.dumps(tags, sort_keys=True, indent=4,
+        separators=(',', ': ')) + '\n'
+
+
 def save(filepath, tags):
     """Save tags dictionary on disk
     """
     with open(filepath, 'w+') as cfg:
-        cfg.write(json.dumps(tags,
-                  sort_keys=True, indent=4, separators=(',', ': ')) + '\n')
+        cfg.write(prettify(tags))
 
 
 def edit(t, tag, _match, options=None):
