@@ -5,6 +5,8 @@ Advanced tips
 
    <br />
 
+.. _mastering-keywords:
+
 Mastering keywords
 ^^^^^^^^^^^^^^^^^^
 
@@ -20,7 +22,6 @@ other by pressing ``<Enter>`` when presented with a match prompt :
   unlock the regex input method. |br|
   The two-steps prompt is repeated so you can combine rules on multiple fields.
   Enter no char at prompt to validate the set of rules.
-
 
 
 Json configuration file format
@@ -72,6 +73,7 @@ a given transaction.
 Enter a match containing only space(s) to undo and go back to edit category
 prompt.
 
+
 Save or discard?
 ^^^^^^^^^^^^^^^^
 
@@ -80,3 +82,17 @@ Stop whenever you are bored by pressing ``Ctrl+C`` and resume the task where
 you left it at next run.
 
 Use ``Ctrl+D`` to exit brutally and discard all changes
+
+
+Handling different QIF formats
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Default matching method performs search on the payee field
+(see :ref:`mastering-keywords`).
+The QIF file you process may have this payee information located in another
+field like *memo* for example. In such a case it's preferable to pre-process
+your file by converting *memo* lines to *payee* lines by switching the line
+identifier.
+*sed* is a good candidate for that task ::
+
+    sed -i 's/^M/P/' my_file.qif
