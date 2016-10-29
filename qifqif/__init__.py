@@ -267,6 +267,9 @@ def process_transactions(transactions, options):
     try:
         i = 0
         for (i, t) in enumerate(transactions):
+            if not t['payee']:
+                print('Skip transaction #%s with no payee field' % (i + 1))
+                continue
             cat, match = process_transaction(t, options)
             tags.edit(t, cat, match, options)
         i = i + 1
