@@ -5,7 +5,7 @@
 import os
 import unittest
 
-import qifacc
+from qifqif import qifacc
 import testdata
 
 OPTIONS = {'dry-run': True, 'config': testdata.CFG_FILE}
