@@ -53,9 +53,10 @@ setup(name='qifqif',
             'qifqif = qifqif:main',
         ],
     },
-    install_requires=[] + (
+    install_requires=['argparse', 'ordereddict', 'pyyaml'] + (
         ['pyreadline', 'colorama'] if sys.platform == 'win32' else
-        ['blessed']),
+        ['blessed']) + (
+        ['gnureadline'] if sys.platform == 'darwin' else []),
     classifiers=[
         'License :: OSI Approved :: MIT License',
         'Programming Language :: Python',

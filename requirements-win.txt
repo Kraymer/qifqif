@@ -1,6 +1,0 @@
-argparse
-coveralls
-mock
-ordereddict
-tox
-pyyaml

@@ -50,7 +50,6 @@ def query_cat(cached_cat):
        category, if any.
     """
     set_completer(sorted(tags.TAGS.keys()))
-
     cat = quick_input('\nCategory', vanish=True).strip()
 
     if not cat and cached_cat:

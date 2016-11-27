@@ -10,9 +10,12 @@ import re
 from difflib import SequenceMatcher
 
 try:
-    import readline
+    import pyreadline as readline  # Windows
 except ImportError:
-    import pyreadline as readline
+    try:
+        import gnureadline as readline  # Mac OS X
+    except ImportError:
+        import readline
 
 from qifqif.terminal import TERM
 
@@ -53,8 +56,8 @@ class InputCompleter(object):
 def set_completer(options=None):
     if options:
         completer = InputCompleter(options)
-        readline.set_completer(completer.complete)
         readline.set_completer_delims('')
+        readline.set_completer(completer.complete)
     else:
         readline.set_completer(None)
 
