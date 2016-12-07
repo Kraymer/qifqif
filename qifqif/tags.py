@@ -29,6 +29,8 @@ def unrulify(ruler):
             # uppercase dict key and should be unrulified to a string for the
             # sake of json readability.
             return ruler[field].strip(r'\b')
+    elif ruler and ruler.isspace():
+        return
     return ruler
 
 
@@ -127,7 +129,7 @@ def edit(t, tag, _match, options=None):
     elif _match is not None and _match != cached_match:
         if cached_match:
             TAGS[tag].remove(cached_match)
-        if tag and _match and not _match.isspace():
+        if tag and _match:
             TAGS[tag].append(_match)
     else:  # no diff
         return

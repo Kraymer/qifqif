@@ -56,6 +56,8 @@ class TestTags(unittest.TestCase):
         res = tags.edit(TRANSACTION, 'Drinks', 'Sully bar', OPTIONS)
         self.assertEqual(set(res.keys()), set(['Bars', 'Clothes', 'Drinks']))
         self.assertEqual(res['Bars'], ['Art Brut'])
+        res = tags.edit(TRANSACTION, 'Drinks', {'payee': 'Sully'}, OPTIONS)
+        self.assertEqual(res['Drinks'], [{'payee': 'Sully'}])
 
     def test_edit__drop_empty_category(self):
         t = TRANSACTION.copy()
