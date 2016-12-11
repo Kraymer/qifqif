@@ -23,7 +23,7 @@ def coerce_file(fn):
             m = re.search(regex, text, re.MULTILINE)
             setattr(mock, attr, m.group(1) if m else None)
         mock.docstring = ast.get_docstring(ast.parse(text))
-        if mock.version.endswith('.dev'):
+        if mock.version.endswith('dev'):
             mock.version += str(int(time.time()))
         return mock
     if 'upload' in sys.argv and fn.endswith('md'):  # convert markdown to rest
