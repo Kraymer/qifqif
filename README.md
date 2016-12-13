@@ -2,7 +2,7 @@
 [![][coveralls]](https://coveralls.io/r/Kraymer/qifqif)
 [![][pypi]](https://pypi.python.org/pypi/qifqif)
 [![][rtfd]](http://qifqif.readthedocs.org/en/latest/?badge=latest)
-[![nopypi rss](https://img.shields.io/badge/rss-subscribe-orange.svg)](https://github.com/Kraymer/qifqif/releases.atom)
+[![nopypi rss](https://img.shields.io/badge/releases-atom-orange.svg)](https://github.com/Kraymer/qifqif/releases.atom)
 
 [travis]: https://travis-ci.org/Kraymer/qifqif.svg?branch=master
 [coveralls]: https://coveralls.io/repos/Kraymer/qifqif/badge.svg
