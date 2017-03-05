@@ -20,7 +20,7 @@ from qifqif import tags, qifile, config
 from qifqif.ui import set_completer, complete_matches, colorize_match
 from qifqif.terminal import TERM
 
-__version__ = '0.7.0'
+__version__ = '0.7.1-dev'
 __author__ = 'Fabrice Laporte <kraymer+qifqif@gmail.com>'
 
 ENCODING = 'utf-8' if sys.stdin.encoding in (None, 'ascii') else \
@@ -94,7 +94,6 @@ def query_guru_ruler(t):
             if ruler.isspace():  # remove field rule from ruler
                 extras.pop(field, None)
                 guru_ruler.pop(field, None)
-                # break
             elif ruler:
                 guru_ruler[field] = r'%s' % ruler if regex else re.escape(
                     ruler)
@@ -244,9 +243,9 @@ def parse_args(argv):
     dest_group.add_argument('-d', '--dry-run', dest='dry-run',
         action='store_true', help=('just print instead of writing file'))
     parser.add_argument("-f", "--force", action="count",
-        help=("discard transactions categories if not present in "
-            "configuration file. Repeat the flag (-ff) to force editing of "
-            "all transactions."))
+        help=("ignore unknown categories and force editing of associated "
+            "transactions. Repeat the flag (-ff) to force editing of all "
+            "transactions."))
     dest_group.add_argument('-o', '--output', dest='dest',
         help=('output filename. DEFAULT: edit input file in-place'),
         default='')
