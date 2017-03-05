@@ -232,9 +232,9 @@ def parse_args(argv):
     parser.add_argument('src', metavar='QIF_FILE',
         help='.QIF file to process', default='')
     audit_group = parser.add_mutually_exclusive_group()
-    audit_group.add_argument('-a', '--audit-mode', dest='audit',
+    audit_group.add_argument('-a', '--audit', dest='audit',
         action='store_true', help=('pause after each transaction'))
-    audit_group.add_argument('-b', '--batch-mode', action='store_true',
+    audit_group.add_argument('-b', '--batch', action='store_true',
         dest='batch', help=('skip transactions that require user input'))
     parser.add_argument('-c', '--config', dest='config',
         help='configuration filename in json format. DEFAULT: ~/.qifqif.json',
