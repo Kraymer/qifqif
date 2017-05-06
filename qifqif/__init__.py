@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2016 Fabrice Laporte - kray.me
+# Copyright (c) 2017 Fabrice Laporte - kray.me
 # The MIT License http://www.opensource.org/licenses/mit-license.php
 
 """Enrich your QIF files with categories.
@@ -36,7 +36,7 @@ def quick_input(prompt, choices='', vanish=False):
     default = default[0] if default else ''
     print(TERM.clear_eol, end='')
     _input = raw_input('%s%s' % (prompt, (' [%s] ? ' % ','.join(choices)) if
-                       choices else ': ')).decode(ENCODING)
+                                 choices else ': ')).decode(ENCODING)
     if _input in choices:
         _input = _input.upper()
     if vanish:
@@ -87,10 +87,10 @@ def query_guru_ruler(t):
             print(TERM.move_y(0))
             print_transaction(t, short=False, extras=extras)
             existing_match = guru_ruler.get(field, '')
-            ruler = quick_input('\n%s match (%s)%s' % (field.title(),
-                    'regex' if regex else 'chars',
-                    ' [%s]' % existing_match if existing_match else ''),
-                vanish=True)
+            ruler = quick_input('\n%s match (%s)%s' % (
+                field.title(),
+                'regex' if regex else 'chars',
+                ' [%s]' % existing_match if existing_match else ''), vanish=True)
             if ruler.isspace():  # remove field rule from ruler
                 extras.pop(field, None)
                 guru_ruler.pop(field, None)
@@ -111,7 +111,7 @@ def query_basic_ruler(t, default_ruler):
         return
     set_completer(sorted(complete_matches(t[default_field])))
     ruler = quick_input('\n%s match %s' % (default_field.title(),
-            '[%s]' % default_ruler if default_ruler else ''))
+                                           '[%s]' % default_ruler if default_ruler else ''))
     ruler = tags.rulify(ruler)
     set_completer()
     return ruler
@@ -183,7 +183,7 @@ def print_transaction(t, short=True, extras=None):
     for field in keys:
         if t[field] and not field.isdigit():
             print_field(t, field, matches, extras)
-    print (TERM.clear_eos, end='')
+    print(TERM.clear_eos, end='')
 
 
 def process_transaction(t, options):
@@ -201,7 +201,7 @@ def process_transaction(t, options):
     print('---\n' + TERM.clear_eol, end='')
     print_transaction(t, extras=extras)
     edit = options['force'] > 1 or (options['force'] and
-        t['category'] not in tags.TAGS)
+                                    t['category'] not in tags.TAGS)
     audit = options['audit']
     if t['category']:
         if audit:
@@ -230,28 +230,28 @@ def parse_args(argv):
         description='Enrich your .QIF files with tags. '
         'See https://github.com/Kraymer/qifqif for more infos.')
     parser.add_argument('src', metavar='QIF_FILE',
-        help='.QIF file to process', default='')
+                        help='.QIF file to process', default='')
     audit_group = parser.add_mutually_exclusive_group()
     audit_group.add_argument('-a', '--audit', dest='audit',
-        action='store_true', help=('pause after each transaction'))
+                             action='store_true', help=('pause after each transaction'))
     audit_group.add_argument('-b', '--batch', action='store_true',
-        dest='batch', help=('skip transactions that require user input'))
+                             dest='batch', help=('skip transactions that require user input'))
     parser.add_argument('-c', '--config', dest='config',
-        help='configuration filename in json format. DEFAULT: ~/.qifqif.json',
-        default=os.path.join(os.path.expanduser('~'), '.qifqif.json'))
+                        help='configuration filename in json format. DEFAULT: ~/.qifqif.json',
+                        default=os.path.join(os.path.expanduser('~'), '.qifqif.json'))
     dest_group = parser.add_mutually_exclusive_group()
     dest_group.add_argument('-d', '--dry-run', dest='dry-run',
-        action='store_true', help=('just print instead of writing file'))
+                            action='store_true', help=('just print instead of writing file'))
     parser.add_argument("-f", "--force", action="count",
-        help=("ignore unknown categories and force editing of associated "
-            "transactions. Repeat the flag (-ff) to force editing of all "
-            "transactions."))
+                        help=("ignore unknown categories and force editing of associated "
+                              "transactions. Repeat the flag (-ff) to force editing of all "
+                              "transactions."))
     dest_group.add_argument('-o', '--output', dest='dest',
-        help=('output filename. DEFAULT: edit input file in-place'),
-        default='')
+                            help=('output filename. DEFAULT: edit input file in-place'),
+                            default='')
     parser.add_argument('-v', '--version', action='version',
-        version='%(prog)s ' + __version__,
-        help='display version information and exit')
+                        version='%(prog)s ' + __version__,
+                        help='display version information and exit')
     args = vars(parser.parse_args(args=argv[1:]))
     if not args['dest']:
         args['dest'] = args['src']
