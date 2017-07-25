@@ -29,17 +29,17 @@ def parse_lines(lines, options=None):
             if transaction:
                 res.append(transaction)
             transaction = OrderedDict([])
-        elif field_id in config.FIELDS.keys():
+        elif field_id in list(config.FIELDS.keys()):
             transaction[config.FIELDS[field_id]] = line[1:]
         elif line:
             transaction['%s' % idx] = line
 
-    if len(transaction.keys()):
+    if len(list(transaction.keys())):
         res.append(transaction)
 
     # post-check to not interfere with present keys order
     for t in res:
-        for field in config.FIELDS.values():
+        for field in list(config.FIELDS.values()):
             if field not in t:
                 t[field] = None
         t['filename'] = options.get('src', '')
@@ -50,12 +50,12 @@ def dump_to_buffer(transactions):
     """Output transactions to file or terminal.
     """
     reverse_fields = {}
-    for (key, val) in config.FIELDS.items():
+    for (key, val) in list(config.FIELDS.items()):
         reverse_fields[val] = key
     lines = []
     for t in transactions:
         for key in t:
-            if t[key] and key not in config.EXTRA_FIELDS.values():
+            if t[key] and key not in list(config.EXTRA_FIELDS.values()):
                 try:
                     lines.append('%s%s\n' % (reverse_fields[key], t[key]))
                 except KeyError:  # Unrecognized field

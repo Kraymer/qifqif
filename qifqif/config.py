@@ -7,4 +7,4 @@
 FIELDS = {'D': 'date', 'T': 'amount', 'P': 'payee', 'L': 'category',
           'N': 'number', 'M': 'memo'}
 EXTRA_FIELDS = {'F': 'filename'}
-FIELDS_FULL = dict(FIELDS.items() + EXTRA_FIELDS.items())
+FIELDS_FULL = dict(list(FIELDS.items()) + list(EXTRA_FIELDS.items()))

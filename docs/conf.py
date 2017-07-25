@@ -45,8 +45,8 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'qifqif'
-copyright = u'2016, Fabrice Laporte'
+project = 'qifqif'
+copyright = '2016, Fabrice Laporte'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -235,8 +235,8 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-  ('index', 'qifqif.tex', u'qifqif Documentation',
-   u'Fabrice Laporte', 'manual'),
+  ('index', 'qifqif.tex', 'qifqif Documentation',
+   'Fabrice Laporte', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -265,8 +265,8 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'qifqif', u'qifqif Documentation',
-     [u'Fabrice Laporte'], 1)
+    ('index', 'qifqif', 'qifqif Documentation',
+     ['Fabrice Laporte'], 1)
 ]
 
 # If true, show URL addresses after external links.
@@ -279,8 +279,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  ('index', 'qifqif', u'qifqif Documentation',
-   u'Fabrice Laporte', 'qifqif', 'One line description of project.',
+  ('index', 'qifqif', 'qifqif Documentation',
+   'Fabrice Laporte', 'qifqif', 'One line description of project.',
    'Miscellaneous'),
 ]
 

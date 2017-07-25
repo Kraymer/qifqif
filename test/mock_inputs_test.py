@@ -36,7 +36,7 @@ class TestBlackBox(unittest.TestCase):
     def test_query_guru_ruler(self, mock_quick_input):
         t, _ = testdata.transactions()
         res = qifqif.query_guru_ruler(t[0])
-        self.assertEqual(res, {u'date': r'\d\d/02/2014', u'memo': 'houf'})
+        self.assertEqual(res, {'date': r'\d\d/02/2014', 'memo': 'houf'})
 
     KEYBOARD_INPUTS = KEYBOARD_BASE + [
         'Sally',  # Bad payee match

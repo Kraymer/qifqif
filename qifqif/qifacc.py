@@ -57,7 +57,7 @@ def write_config(accounts, cfg_path, dry_run):
         json_accs[account] = []
     json_accs.update(tags.load(cfg_path))
     if dry_run:
-        print(tags.prettify(json_accs))
+        print((tags.prettify(json_accs)))
     else:
         tags.save(cfg_path, json_accs)
     return json_accs

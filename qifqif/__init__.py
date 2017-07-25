@@ -34,7 +34,7 @@ def quick_input(prompt, choices='', vanish=False):
     default = [x for x in choices if x[0].isupper()]
     default = default[0] if default else ''
     print(TERM.clear_eol, end='')
-    _input = raw_input('%s%s' % (prompt, (' [%s] ? ' % ','.join(choices)) if
+    _input = input('%s%s' % (prompt, (' [%s] ? ' % ','.join(choices)) if
                                  choices else ': ')).decode(ENCODING)
     if _input in choices:
         _input = _input.upper()
@@ -63,7 +63,7 @@ def query_guru_ruler(t):
     """Define rules on a combination of fields. All rules must match
        corresponding fields for the ruler to be valid.
     """
-    extras = sorted([k for (k, v) in t.iteritems() if (
+    extras = sorted([k for (k, v) in t.items() if (
                      v and not k.isdigit())])
     set_completer(extras)
     guru_ruler = {}
@@ -121,15 +121,15 @@ def check_ruler(ruler, t):
     """
     extras = {}
     match, match_info = tags.match(ruler, t)
-    for (key, val) in match_info.iteritems():
+    for (key, val) in match_info.items():
         if not val:
-            extras[key] = TERM.red(u'%s %s' % (TERM.KO, key.title()))
+            extras[key] = TERM.red('%s %s' % (TERM.KO, key.title()))
         else:
-            extras[key] = TERM.green(u'%s %s' % (TERM.OK, key.title()))
+            extras[key] = TERM.green('%s %s' % (TERM.OK, key.title()))
     if not match:
-        extras['category'] = TERM.red(u'%s Category' % TERM.KO)
+        extras['category'] = TERM.red('%s Category' % TERM.KO)
     else:
-        extras['category'] = TERM.green(u'%s Category' % TERM.OK)
+        extras['category'] = TERM.green('%s Category' % TERM.OK)
     return match, extras
 
 
@@ -177,7 +177,7 @@ def print_transaction(t, short=True, extras=None):
        - '+' when the category is fetched from .json matches file
        - ' ' when the category is present in input file
     """
-    keys = ('date', 'amount', 'payee', 'category') if short else t.keys()
+    keys = ('date', 'amount', 'payee', 'category') if short else list(t.keys())
     _, _, matches = tags.find_tag_for(t)
     for field in keys:
         if t[field] and not field.isdigit():

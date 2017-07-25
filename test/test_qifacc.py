@@ -24,7 +24,7 @@ class TestQifacc(unittest.TestCase):
         res = qifacc.write_config(['MYBANK', 'Bars'], CFG_FILE, dry_run=True)
         self.assertEqual(res['MYBANK'], [])
         self.assertNotEqual(res['Bars'], [])
-        self.assertTrue(len(res.keys()) > 2)
+        self.assertTrue(len(list(res.keys())) > 2)
 
 
 if __name__ == '__main__':

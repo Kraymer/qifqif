@@ -15,15 +15,15 @@ TAGS = dict()
 
 def rulify(obj):
     """Convert rulelike object to a ruler"""
-    if isinstance(obj, basestring):
+    if isinstance(obj, str):
         return {'PAYEE': r'\b%s\b' % obj} if obj else None
     return obj
 
 
 def unrulify(ruler):
     """Convert regex payee rule to string"""
-    if ruler and not isinstance(ruler, basestring):
-        field = ruler.keys()[0]
+    if ruler and not isinstance(ruler, str):
+        field = list(ruler.keys())[0]
         if field.isupper():
             # Basic rulers entered at first prompt are recognizable by the
             # uppercase dict key and should be unrulified to a string for the
@@ -48,7 +48,7 @@ def match(ruler, t):
             res[field] = t[field][m.start():m.end()] if m else None
         except Exception:
             res[field] = None
-    return all([x for x in res.values()]), res
+    return all([x for x in list(res.values())]), res
 
 
 def find_tag_for(t):
@@ -56,7 +56,7 @@ def find_tag_for(t):
        (tag, ruler, match).
     """
     res = []
-    for (tag, rulers) in TAGS.items():
+    for (tag, rulers) in list(TAGS.items()):
         for ruler in rulers:
             m, matches = match(ruler, t)
             if m:
@@ -64,15 +64,15 @@ def find_tag_for(t):
     if res:
         # Return rule with the most fields.
         # If several, pick the ont with the longer rules.
-        return max(res, key=lambda (tag, ruler, matches): (len(rulify(
-            ruler).keys()), sum([len(v) for v in matches.values() if v])))
+        return max(res, key=lambda tag_ruler_matches: (len(list(rulify(
+            tag_ruler_matches[1]).keys())), sum([len(v) for v in list(tag_ruler_matches[2].values()) if v])))
     return None, None, None
 
 
 def convert(tags):
     """Rulify all objects of given tags dict.
     """
-    for (tag, rulers) in tags.items():
+    for (tag, rulers) in list(tags.items()):
         tags[tag] = []
         for ruler in rulers:
             tags[tag].append(rulify(ruler))
@@ -88,7 +88,7 @@ def load(filepath):
             try:
                 TAGS = json.load(cfg)
             except Exception as err:
-                print "Error loading '%s'.\n%s" % (filepath, err)
+                print("Error loading '%s'.\n%s" % (filepath, err))
                 exit(1)
     else:
         TAGS = {}
