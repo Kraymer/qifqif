@@ -43,7 +43,7 @@ def parse_args(argv):
 def read_accounts(csvfile, field, delimiter=','):
     """Extract accounts from csv file.
     """
-    with open(csvfile, 'rb') as csvfile:
+    with open(csvfile, 'r') as csvfile:
         csvrows = csv.reader(csvfile, delimiter=delimiter)
         accounts = [row[field] for row in csvrows]
     return accounts
