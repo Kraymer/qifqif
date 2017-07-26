@@ -2,14 +2,19 @@
 
 """Units tests for __init__.py"""
 
+import sys
 import unittest
 
-from mock import patch
+try:
+    from mock import patch  # py2
+except ImportError:
+    import unittest.mock.patch as patch  # py3
 
 import qifqif
 from qifqif import qifile
 import testdata
 
+PATCH_BUILTIN = '__builtin__.raw_input' if sys.version_info[0] < 3 else 'builtins.input'
 OPTIONS = qifqif.parse_args(['qifqif', '-d', '-c', testdata.CFG_FILE, 'dummy'])
 
 
@@ -21,7 +26,7 @@ def mock_input_default(prompt, choices='', vanish=False):
 
 
 class TestInit(unittest.TestCase):
-    @patch('__builtin__.raw_input', return_value='')
+    @patch(PATCH_BUILTIN, return_value='')
     def test_quick_input(self, mock_raw_input):
         self.assertEqual(qifqif.quick_input('', 'Yn'), 'Y')
         self.assertEqual(qifqif.quick_input('', ('no', 'Yes', 'maybe')), 'Yes')
