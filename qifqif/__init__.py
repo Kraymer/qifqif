@@ -241,7 +241,7 @@ def parse_args(argv):
     dest_group = parser.add_mutually_exclusive_group()
     dest_group.add_argument('-d', '--dry-run', dest='dry-run',
                             action='store_true', help=('just print instead of writing file'))
-    parser.add_argument("-f", "--force", action="count",
+    parser.add_argument("-f", "--force", action="count", default=0,
                         help=("ignore unknown categories and force editing of associated "
                               "transactions. Repeat the flag (-ff) to force editing of all "
                               "transactions."))
