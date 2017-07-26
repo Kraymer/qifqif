@@ -42,7 +42,7 @@ def match(ruler, t):
     """
     res = {}
     ruler = rulify(ruler)
-    for field in ruler:
+    for field in ruler.keys():
         rule = ruler[field]
         field = field.lower()
         try:
@@ -67,7 +67,8 @@ def find_tag_for(t):
         # Return rule with the most fields.
         # If several, pick the ont with the longer rules.
         return max(res, key=lambda tag_ruler_matches: (len(list(rulify(
-            tag_ruler_matches[1]).keys())), sum([len(v) for v in list(tag_ruler_matches[2].values()) if v])))
+            tag_ruler_matches[1]).keys())), sum(
+            [len(v) for v in list(tag_ruler_matches[2].values()) if v])))
     return None, None, None
 
 
@@ -101,7 +102,7 @@ def prettify(tags):
     """Format tags for json output.
     """
     return json.dumps(tags, sort_keys=True, indent=4,
-        separators=(',', ': ')) + '\n'
+                      separators=(',', ': ')) + '\n'
 
 
 def save(filepath, tags):
