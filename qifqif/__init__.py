@@ -124,13 +124,13 @@ def check_ruler(ruler, t):
     match, match_info = tags.match(ruler, t)
     for (key, val) in match_info.items():
         if not val:
-            extras[key] = TERM.red('%s %s' % (TERM.KO, key.title()))
+            extras[key] = TERM.red(u'%s %s' % (TERM.KO, key.title()))
         else:
-            extras[key] = TERM.green('%s %s' % (TERM.OK, key.title()))
+            extras[key] = TERM.green(u'%s %s' % (TERM.OK, key.title()))
     if not match:
-        extras['category'] = TERM.red('%s Category' % TERM.KO)
+        extras['category'] = TERM.red(u'%s Category' % TERM.KO)
     else:
-        extras['category'] = TERM.green('%s Category' % TERM.OK)
+        extras['category'] = TERM.green(u'%s Category' % TERM.OK)
     return match, extras
 
 
