@@ -4,3 +4,4 @@ mock
 ordereddict
 tox
 pyyaml
+six

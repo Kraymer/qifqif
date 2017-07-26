@@ -10,19 +10,21 @@ import json
 import os
 import re
 
+from six import string_types
+
 TAGS = dict()
 
 
 def rulify(obj):
     """Convert rulelike object to a ruler"""
-    if isinstance(obj, str):
+    if isinstance(obj, string_types):
         return {'PAYEE': r'\b%s\b' % obj} if obj else None
     return obj
 
 
 def unrulify(ruler):
     """Convert regex payee rule to string"""
-    if ruler and not isinstance(ruler, str):
+    if ruler and not isinstance(ruler, string_types):
         field = list(ruler.keys())[0]
         if field.isupper():
             # Basic rulers entered at first prompt are recognizable by the

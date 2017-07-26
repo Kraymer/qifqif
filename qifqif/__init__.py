@@ -15,6 +15,7 @@ import os
 import sys
 import io
 import re
+import six
 
 from qifqif import tags, qifile, config
 from qifqif.ui import set_completer, complete_matches, colorize_match
@@ -34,8 +35,8 @@ def quick_input(prompt, choices='', vanish=False):
     default = [x for x in choices if x[0].isupper()]
     default = default[0] if default else ''
     print(TERM.clear_eol, end='')
-    _input = input('%s%s' % (prompt, (' [%s] ? ' % ','.join(choices)) if
-                                 choices else ': ')).decode(ENCODING)
+    _input = six.moves.input('%s%s' % (prompt, (' [%s] ? ' % ','.join(choices)) if
+                                 choices else ': ')) # .decode(ENCODING)
     if _input in choices:
         _input = _input.upper()
     if vanish:
