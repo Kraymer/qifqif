@@ -26,14 +26,14 @@ def coerce_file(fn):
         if mock.version.endswith('dev'):
             mock.version += str(int(time.time()))
         return mock
-    if fn.endswith('md'):  # convert markdown to rest
+    if fn.endswith('md') and 'upload' in sys.argv:  # convert md to rest on pypi package upload
         text = '\n'.join([l for l in text.split('\n') if '[nopypi' not in l])
         text = re.sub(r':\S+:', '', text)  # no emojis
         with tempfile.NamedTemporaryFile(mode='w+') as tmp:
             tmp.write(text)
             tmp.flush()
             text, stderr = subprocess.Popen(['pandoc', '-t', 'rst', tmp.name],
-                stdout=subprocess.PIPE).communicate()
+                                            stdout=subprocess.PIPE).communicate()
     return text.decode('utf-8')
 
 
