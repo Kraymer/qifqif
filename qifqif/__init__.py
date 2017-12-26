@@ -21,7 +21,7 @@ from qifqif import tags, qifile, config
 from qifqif.ui import set_completer, complete_matches, colorize_match
 from qifqif.terminal import TERM
 
-__version__ = '0.7.2'
+__version__ = '0.7.3'
 __author__ = 'Fabrice Laporte <kraymer+qifqif@gmail.com>'
 
 ENCODING = 'utf-8' if sys.stdin.encoding in (None, 'ascii') else sys.stdin.encoding
