@@ -1,7 +1,12 @@
 qifqif.egg-info/
+bin/
 build/
 dist/
 *.pyc
 .tox
 .coverage
 docs/_build
+.Python
+include/
+lib/
+pip-selfcheck.json

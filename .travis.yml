@@ -9,6 +9,7 @@ env:
 
 before_install:
     - "[ ! -z $COVERAGE ] && travis_retry pip install coveralls || true"
+    - sudo apt-get install pandoc
 
 # To install dependencies, tell tox to do everything but actually running the
 # test.
