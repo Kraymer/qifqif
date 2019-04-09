@@ -1,3 +1,5 @@
+.envrc
+.direnv
 qifqif.egg-info/
 bin/
 build/
