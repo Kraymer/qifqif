@@ -64,11 +64,17 @@ def set_completer(options=None):
 
 def complete_matches(payee):
     """Generate a limited set of matches for payee line.
+
+    >>> complete_matches("foo bar spam")
+    ['foo', 'bar', 'spam', 'foo bar spam', 'bar spam', 'spam']
     """
+    # Append each individual word to result
     matches = [m for m in re.findall(r"\w+", payee) if m]
     select = True
-    for (i, c) in enumerate(payee):
-        if c.isalnum() and select:
-            matches.append(payee[i:])
-        select = not c.isalnum()
+    if len(matches) > 1:
+        for (i, c) in enumerate(payee):
+            if c.isalnum() and select:
+                # Append suffixes to result
+                matches.append(payee[i:])
+            select = not c.isalnum()
     return matches
