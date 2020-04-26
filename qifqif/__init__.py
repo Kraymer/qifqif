@@ -24,6 +24,7 @@ from qifqif._version import __version__
 
 ENCODING = "utf-8" if sys.stdin.encoding in (None, "ascii") else sys.stdin.encoding
 
+__version__ = "0.7.3"
 
 def quick_input(prompt, choices="", vanish=False):
     """raw_input wrapper that automates display of choices and return default

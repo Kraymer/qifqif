@@ -7,9 +7,28 @@
 import sys
 from setuptools import setup
 
-exec(open('qifqif/_version.py').read())
+try:
+    from semantic_release import setup_hook
 
-setup(name='qifqif',
+    setup_hook(sys.argv)
+except ImportError:
+    pass
+
+PKG_NAME = "qifqif"
+DIRPATH = os.path.dirname(__file__)
+
+
+def read_rsrc(filename):
+    with codecs.open(os.path.join(DIRPATH, filename), encoding="utf-8") as _file:
+        return _file.read().strip()
+
+
+with codecs.open(os.path.join(PKG_NAME, "__init__.py"), encoding="utf-8") as fd:
+    version = re.search(
+        r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]', fd.read(), re.MULTILINE
+    ).group(1)
+
+setup(name=PKG_NAME,
     version=__version__,
     description='Enrich your QIF files with categories',
     long_description=open('README.md').read(),
