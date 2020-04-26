@@ -16,9 +16,11 @@ import sys
 import io
 import re
 import six
+from prompt_toolkit import prompt
+from prompt_toolkit.completion import WordCompleter
 
 from qifqif import tags, qifile, config
-from qifqif.ui import set_completer, complete_matches, colorize_match
+from qifqif.ui import complete_matches, colorize_match
 from qifqif.terminal import TERM
 from qifqif._version import __version__
 
@@ -26,21 +28,28 @@ ENCODING = "utf-8" if sys.stdin.encoding in (None, "ascii") else sys.stdin.encod
 
 __version__ = "0.7.3"
 
-def quick_input(prompt, choices="", clear=False):
+
+def quick_input(msg, choices="", sugg=None, clear=False):
     """raw_input wrapper that automates display of choices and return default
     choice when empty string entered.
     The prompt line(s) get cleared when done if clear is True.
     """
+    if not sugg:
+        sugg = []
     default = [x for x in choices if x[0].isupper()]
     default = default[0] if default else ""
     print(TERM.clear_eol, end="")
-    _input = six.moves.input(
-        "%s%s" % (prompt, (" [%s] ? " % ",".join(choices)) if choices else ": ")
-    )  # .decode(ENCODING)
+    msg = "%s%s" % (msg, (" [%s] ? " % ",".join(choices)) if choices else ": ")
+    _input = prompt(
+        msg,
+        completer=WordCompleter(sugg, ignore_case=True,),
+        complete_while_typing=False,
+    )
+
     if _input in choices:
         _input = _input.upper()
     if clear:
-        for _ in range(0, prompt.count("\n") + 1):
+        for _ in range(0, msg.count("\n") + 1):
             print(TERM.clear_last, end="")
     return _input or default
 
@@ -49,14 +58,12 @@ def query_cat(cached_cat):
     """Query category. If empty string entered then prompt to remove existing
        category, if any.
     """
-    set_completer(sorted(tags.TAGS.keys()))
-    cat = quick_input("\nCategory", clear=True).strip()
+    cat = quick_input("\nCategory", sugg=tags.TAGS.keys(), clear=True).strip()
 
     if not cat and cached_cat:
         erase = quick_input("\nRemove existing category", "yN", True)
         if erase.upper() == "N":
             cat = cached_cat
-    set_completer()
     return cat.strip() or None
 
 
@@ -65,7 +72,6 @@ def query_guru_ruler(t):
        corresponding fields for the ruler to be valid.
     """
     extras = sorted([k for (k, v) in t.items() if (v and not k.isdigit())])
-    set_completer(extras)
     guru_ruler = {}
     extras = {}
     field = True
@@ -108,16 +114,15 @@ def query_guru_ruler(t):
 def query_basic_ruler(t, default_ruler):
     """Define basic rule consisting of matching full words on payee field.
     """
-    default_field = "payee"
+    default_field = u"payee"
     if not t[default_field]:
         return
-    set_completer(sorted(complete_matches(t[default_field])))
     ruler = quick_input(
-        "\n%s match %s"
-        % (default_field.title(), "[%s]" % default_ruler if default_ruler else "")
+        "%s match %s"
+        % (default_field.title(), "[%s]" % default_ruler if default_ruler else ""),
+        sugg=complete_matches(t[default_field]),
     )
     ruler = tags.rulify(ruler)
-    set_completer()
     return ruler
 
 
@@ -132,9 +137,9 @@ def check_ruler(ruler, t):
         else:
             extras[key] = TERM.green("%s %s" % (TERM.OK, key.title()))
     if not match:
-        extras["category"] = TERM.red("%s Category" % TERM.KO)
+        extras[u"category"] = TERM.red("%s Category" % TERM.KO)
     else:
-        extras["category"] = TERM.green("%s Category" % TERM.OK)
+        extras[u"category"] = TERM.green("%s Category" % TERM.OK)
     return match, extras
 
 
@@ -181,7 +186,7 @@ def print_transaction(t, short=True, extras=None):
        - '+' when the category is fetched from .json matches file
        - ' ' when the category is present in input file
     """
-    keys = ("date", "amount", "payee", "category") if short else list(t.keys())
+    keys = (u"date", u"amount", u"payee", u"category") if short else list(t.keys())
     _, _, matches = tags.find_tag_for(t)
     for field in keys:
         if t[field] and not field.isdigit():
@@ -192,37 +197,36 @@ def print_transaction(t, short=True, extras=None):
 def process_transaction(t, options):
     """Assign a category to a transaction.
     """
-    cat, ruler = t["category"], None
+    cat, ruler = t[u"category"], None
     extras = {}
 
-    if not t["category"]:  # Grab category from json cache
+    if not t[u"category"]:  # Grab category from json cache
         cat, ruler, _ = tags.find_tag_for(t)
         if cat:
-            t["category"] = cat
-            extras = {"category": "+ Category"}
+            t[u"category"] = cat
+            extras = {u"category": "+ Category"}
 
-    print("---\n" + TERM.clear_eol, end="")
     print_transaction(t, extras=extras)
-    edit = options["force"] > 1 or (options["force"] and t["category"] not in tags.TAGS)
+    edit = options["force"] > 1 or (options["force"] and t[u"category"] not in tags.TAGS)
     audit = options["audit"]
-    if t["category"]:
+    if t[u"category"]:
         if audit:
-            msg = "\nEdit '%s' category" % TERM.green(t["category"])
+            msg = "\nEdit '%s' category" % TERM.green(t[u"category"])
             edit = quick_input(msg, "yN", clear=True) == "Y"
         if not edit:
-            return t["category"], ruler
+            return t[u"category"], ruler
 
     # Query for category and overwrite category on screen
     if (not cat or edit) and not options["batch"]:
-        t["category"] = query_cat(cat)
+        t[u"category"] = query_cat(cat)
         # Query ruler if category entered or edit
-        if t["category"]:
+        if t[u"category"]:
             ruler = query_ruler(t)
-        extras = {"category": TERM.OK + " Category"} if t["category"] else {}
+        extras = {u"category": TERM.OK + " Category"} if t[u"category"] else {}
         print(TERM.clear_last, end="")
-        print_field(t, "category", extras=extras)
+        print_field(t, u"category", extras=extras)
 
-    return t["category"], ruler
+    return t[u"category"], ruler
 
 
 def parse_args(argv):
@@ -302,7 +306,9 @@ def process_transactions(transactions, options):
     try:
         i = 0
         for (i, t) in enumerate(transactions):
-            if not t["payee"]:
+            print("\n---")
+            if not t[u"payee"]:
+                print_transaction(t)
                 print("Skip transaction #%s with no payee field" % (i + 1))
                 continue
             cat, match = process_transaction(t, options)
