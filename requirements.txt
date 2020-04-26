@@ -1,4 +1,5 @@
 argparse
+blessed>=1.16
 coveralls
 mock
 ordereddict

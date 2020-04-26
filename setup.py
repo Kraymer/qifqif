@@ -1,9 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2017 Fabrice Laporte - kray.me
+# Copyright (c) 2017-2020 Fabrice Laporte - kray.me
 # The MIT License http://www.opensource.org/licenses/mit-license.php
 
+import codecs
+import os
+import re
 import sys
 from setuptools import setup
 
@@ -24,12 +27,12 @@ def read_rsrc(filename):
 
 
 with codecs.open(os.path.join(PKG_NAME, "__init__.py"), encoding="utf-8") as fd:
-    version = re.search(
+    VERSION = re.search(
         r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]', fd.read(), re.MULTILINE
     ).group(1)
 
 setup(name=PKG_NAME,
-    version=__version__,
+    version=VERSION,
     description='Enrich your QIF files with categories',
     long_description=open('README.md').read(),
     author='Fabrice Laporte',
@@ -44,10 +47,7 @@ setup(name=PKG_NAME,
             'qifqif = qifqif:main',
         ],
     },
-    install_requires=['argparse', 'ordereddict', 'pyyaml'] + (
-        ['pyreadline', 'colorama'] if sys.platform == 'win32' else
-        ['blessed']) + (
-        ['gnureadline'] if sys.platform == 'darwin' else []),
+    install_requires=read_rsrc("requirements.txt").split("\n"),
     classifiers=[
         'License :: OSI Approved :: MIT License',
         'Programming Language :: Python',
