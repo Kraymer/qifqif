@@ -26,10 +26,10 @@ ENCODING = "utf-8" if sys.stdin.encoding in (None, "ascii") else sys.stdin.encod
 
 __version__ = "0.7.3"
 
-def quick_input(prompt, choices="", vanish=False):
+def quick_input(prompt, choices="", clear=False):
     """raw_input wrapper that automates display of choices and return default
     choice when empty string entered.
-    The prompt line(s) get cleared when done if vanish is True.
+    The prompt line(s) get cleared when done if clear is True.
     """
     default = [x for x in choices if x[0].isupper()]
     default = default[0] if default else ""
@@ -39,7 +39,7 @@ def quick_input(prompt, choices="", vanish=False):
     )  # .decode(ENCODING)
     if _input in choices:
         _input = _input.upper()
-    if vanish:
+    if clear:
         for _ in range(0, prompt.count("\n") + 1):
             print(TERM.clear_last, end="")
     return _input or default
@@ -50,7 +50,7 @@ def query_cat(cached_cat):
        category, if any.
     """
     set_completer(sorted(tags.TAGS.keys()))
-    cat = quick_input("\nCategory", vanish=True).strip()
+    cat = quick_input("\nCategory", clear=True).strip()
 
     if not cat and cached_cat:
         erase = quick_input("\nRemove existing category", "yN", True)
@@ -75,7 +75,7 @@ def query_guru_ruler(t):
             # Update fields match indicators
             print(TERM.move_y(0))
             print_transaction(t, short=False, extras=extras)
-            field = quick_input("\nMatch on field", vanish=True).lower()
+            field = quick_input("\nMatch on field", clear=True).lower()
             regex = "*" in field
             field = field.strip("*")
             if not field or field in set(config.FIELDS_FULL.values()) - {"category"}:
@@ -92,7 +92,7 @@ def query_guru_ruler(t):
                     "regex" if regex else "chars",
                     " [%s]" % existing_match if existing_match else "",
                 ),
-                vanish=True,
+                clear=True,
             )
             if ruler.isspace():  # remove field rule from ruler
                 extras.pop(field, None)
@@ -208,7 +208,7 @@ def process_transaction(t, options):
     if t["category"]:
         if audit:
             msg = "\nEdit '%s' category" % TERM.green(t["category"])
-            edit = quick_input(msg, "yN", vanish=True) == "Y"
+            edit = quick_input(msg, "yN", clear=True) == "Y"
         if not edit:
             return t["category"], ruler
 

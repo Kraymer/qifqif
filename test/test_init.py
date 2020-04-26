@@ -18,7 +18,7 @@ PATCH_BUILTIN = '__builtin__.raw_input' if sys.version_info[0] < 3 else 'builtin
 OPTIONS = qifqif.parse_args(['qifqif', '-d', '-c', testdata.CFG_FILE, 'dummy'])
 
 
-def mock_input_default(prompt, choices='', vanish=False):
+def mock_input_default(prompt, choices='', clear=False):
     """Enter default choice at prompts
     """
     res = [x for x in choices if x.isupper()]
