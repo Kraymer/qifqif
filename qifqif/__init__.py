@@ -72,6 +72,9 @@ def query_guru_ruler(t):
        corresponding fields for the ruler to be valid.
     """
     extras = sorted([k for (k, v) in t.items() if (v and not k.isdigit())])
+    matchable_fields = sorted(set([x for x in t if t[x] and not x.isdigit()]) - {u"category",
+        u"number"})
+
     guru_ruler = {}
     extras = {}
     field = True
@@ -81,10 +84,12 @@ def query_guru_ruler(t):
             # Update fields match indicators
             print(TERM.move_y(0))
             print_transaction(t, short=False, extras=extras)
-            field = quick_input("\nMatch on field", clear=True).lower()
+            field = quick_input(
+                "\nMatch on field", sugg=matchable_fields, clear=True
+            ).lower()
             regex = "*" in field
             field = field.strip("*")
-            if not field or field in set(config.FIELDS_FULL.values()) - {"category"}:
+            if not field or field in matchable_fields:
                 break
         # Enter match
         while field:
