@@ -3,14 +3,12 @@
 [![][pypi]](https://pypi.python.org/pypi/qifqif)
 [![][rtfd]](http://qifqif.readthedocs.org/en/latest/?badge=latest)
 [![][atom]](https://github.com/Kraymer/qifqif/releases.atom)
-[![][patreon]](https://www.patreon.com/kraymer)
 
 [travis]: https://travis-ci.org/Kraymer/qifqif.svg?branch=master
 [coveralls]: https://coveralls.io/repos/Kraymer/qifqif/badge.svg
 [pypi]: http://img.shields.io/pypi/v/qifqif.svg
 [rtfd]: https://readthedocs.org/projects/qifqif/badge/?version=latest
 [atom]: https://img.shields.io/badge/releases-atom-orange.svg
-[patreon]: https://img.shields.io/badge/-%E2%99%A1%20Donate%20-ff69b4
 
 qifqif
 ======
