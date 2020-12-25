@@ -20,7 +20,6 @@ import six
 from qifqif import tags, qifile, config
 from qifqif.ui import set_completer, complete_matches, colorize_match
 from qifqif.terminal import TERM
-from qifqif._version import __version__
 
 ENCODING = "utf-8" if sys.stdin.encoding in (None, "ascii") else sys.stdin.encoding
 
@@ -328,7 +327,7 @@ def main(argv=None):
     except EOFError:  # exit on Ctrl + D: restore original tags
         tags.save(args["config"], original_tags)
         return 1
-    res = qifile.dump_to_buffer(transacs + transacs_orig[len(transacs) :])
+    res = qifile.dump_to_buffer(transacs + transacs_orig[len(transacs):])
     if not args.get("dry-run"):
         with io.open(args["dest"], "w", encoding="utf-8") as dest:
             dest.write(res)
