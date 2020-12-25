@@ -1,18 +1,15 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2017 Fabrice Laporte - kray.me
+# Copyright (c) 2017-2020 Fabrice Laporte - kray.me
 # The MIT License http://www.opensource.org/licenses/mit-license.php
 
+import codecs
+import os
+import re
 import sys
+import time
 from setuptools import setup
-
-try:
-    from semantic_release import setup_hook
-
-    setup_hook(sys.argv)
-except ImportError:
-    pass
 
 PKG_NAME = "qifqif"
 DIRPATH = os.path.dirname(__file__)
@@ -20,16 +17,17 @@ DIRPATH = os.path.dirname(__file__)
 
 def read_rsrc(filename):
     with codecs.open(os.path.join(DIRPATH, filename), encoding="utf-8") as _file:
-        return _file.read().strip()
+        return re.sub(r":(\w+\\?)+:", u"", _file.read().strip())  # no emoji
 
 
-with codecs.open(os.path.join(PKG_NAME, "__init__.py"), encoding="utf-8") as fd:
+with codecs.open("cronicle/__init__.py", encoding="utf-8") as fd:
     version = re.search(
         r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]', fd.read(), re.MULTILINE
     ).group(1)
+    version = version.replace("dev", str(int(time.time())))
 
 setup(name=PKG_NAME,
-    version=__version__,
+    version=version,
     description='Enrich your QIF files with categories',
     long_description=open('README.md').read(),
     author='Fabrice Laporte',
