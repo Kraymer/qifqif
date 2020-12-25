@@ -76,8 +76,9 @@ More infos on the `documentation <http://qifqif.rtfd.org>`__ website.
 Installation
 ------------
 
-qiqif is written for `Python 2.7 <ttps://www.python.org/downloads/>`__
-and works on Linux and Mac OS X.
+qiqif is written for `Python 2.7 <https://www.python.org/downloads/>`__
+and `Python
+3 <https://www.python.org/downloads/>`__, it works on Linux and Mac OS X.
 
 Install with `pip <https://pip.pypa.io/en/stable/>`__ via
 ``pip install qifqif`` command.
