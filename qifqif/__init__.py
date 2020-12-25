@@ -26,6 +26,7 @@ ENCODING = "utf-8" if sys.stdin.encoding in (None, "ascii") else sys.stdin.encod
 
 __version__ = "0.7.3"
 
+
 def quick_input(prompt, choices="", clear=False):
     """raw_input wrapper that automates display of choices and return default
     choice when empty string entered.
@@ -47,7 +48,7 @@ def quick_input(prompt, choices="", clear=False):
 
 def query_cat(cached_cat):
     """Query category. If empty string entered then prompt to remove existing
-       category, if any.
+    category, if any.
     """
     set_completer(sorted(tags.TAGS.keys()))
     cat = quick_input("\nCategory", clear=True).strip()
@@ -62,7 +63,7 @@ def query_cat(cached_cat):
 
 def query_guru_ruler(t):
     """Define rules on a combination of fields. All rules must match
-       corresponding fields for the ruler to be valid.
+    corresponding fields for the ruler to be valid.
     """
     extras = sorted([k for (k, v) in t.items() if (v and not k.isdigit())])
     set_completer(extras)
@@ -106,8 +107,7 @@ def query_guru_ruler(t):
 
 
 def query_basic_ruler(t, default_ruler):
-    """Define basic rule consisting of matching full words on payee field.
-    """
+    """Define basic rule consisting of matching full words on payee field."""
     default_field = "payee"
     if not t[default_field]:
         return
@@ -122,8 +122,7 @@ def query_basic_ruler(t, default_ruler):
 
 
 def check_ruler(ruler, t):
-    """Build fields status dict obtained by applying ruler to transaction.
-    """
+    """Build fields status dict obtained by applying ruler to transaction."""
     extras = {}
     match, match_info = tags.match(ruler, t)
     for (key, val) in match_info.items():
@@ -140,10 +139,10 @@ def check_ruler(ruler, t):
 
 def query_ruler(t):
     """Prompt user to enter a valid matching ruler for transaction.
-       First prompt is used to enter a basic ruler aka successive words to look
-       for on payee line.
-       This prompt can be skipped by pressing <Enter> to have access to guru
-       ruler prompt, where ruler is a list of field/match to validate.
+    First prompt is used to enter a basic ruler aka successive words to look
+    for on payee line.
+    This prompt can be skipped by pressing <Enter> to have access to guru
+    ruler prompt, where ruler is a list of field/match to validate.
     """
     with TERM.fullscreen():
         extras = {}
@@ -174,12 +173,12 @@ def print_field(t, field, matches=None, extras=None):
 
 def print_transaction(t, short=True, extras=None):
     """Print transaction fields values and indicators about matchings status.
-       If short is True, a limited set of fields is printed.
-       extras dict can be used to add leading character to fields lines:
-       - '✖' when the field don't match the prompted rule
-       - '✔' when the field match the prompted rule
-       - '+' when the category is fetched from .json matches file
-       - ' ' when the category is present in input file
+    If short is True, a limited set of fields is printed.
+    extras dict can be used to add leading character to fields lines:
+    - '✖' when the field don't match the prompted rule
+    - '✔' when the field match the prompted rule
+    - '+' when the category is fetched from .json matches file
+    - ' ' when the category is present in input file
     """
     keys = ("date", "amount", "payee", "category") if short else list(t.keys())
     _, _, matches = tags.find_tag_for(t)
@@ -190,8 +189,7 @@ def print_transaction(t, short=True, extras=None):
 
 
 def process_transaction(t, options):
-    """Assign a category to a transaction.
-    """
+    """Assign a category to a transaction."""
     cat, ruler = t["category"], None
     extras = {}
 
@@ -226,8 +224,7 @@ def process_transaction(t, options):
 
 
 def parse_args(argv):
-    """Build application argument parser and parse command line.
-    """
+    """Build application argument parser and parse command line."""
     parser = argparse.ArgumentParser(
         description="Enrich your .QIF files with tags. "
         "See https://github.com/Kraymer/qifqif for more infos."

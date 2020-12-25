@@ -26,30 +26,32 @@ with codecs.open("cronicle/__init__.py", encoding="utf-8") as fd:
     ).group(1)
     version = version.replace("dev", str(int(time.time())))
 
-setup(name=PKG_NAME,
+setup(
+    name=PKG_NAME,
     version=version,
-    description='Enrich your QIF files with categories',
-    long_description=open('README.md').read(),
-    author='Fabrice Laporte',
-    author_email='kraymer@gmail.com',
-    url='https://github.com/KraYmer/qifqif',
-    license='MIT',
-    platforms='ALL',
-    packages=['qifqif', ],
+    description="Enrich your QIF files with categories",
+    long_description=read_rsrc("README.rst"),
+    author="Fabrice Laporte",
+    author_email="kraymer@gmail.com",
+    url="https://github.com/KraYmer/qifqif",
+    license="MIT",
+    platforms="ALL",
+    packages=[
+        "qifqif",
+    ],
     entry_points={
-        'console_scripts': [
-            'qifacc = qifqif.qifacc:main',
-            'qifqif = qifqif:main',
+        "console_scripts": [
+            "qifacc = qifqif.qifacc:main",
+            "qifqif = qifqif:main",
         ],
     },
-    install_requires=['argparse', 'ordereddict', 'pyyaml'] + (
-        ['pyreadline', 'colorama'] if sys.platform == 'win32' else
-        ['blessed']) + (
-        ['gnureadline'] if sys.platform == 'darwin' else []),
+    install_requires=["argparse", "ordereddict", "pyyaml"]
+    + (["pyreadline", "colorama"] if sys.platform == "win32" else ["blessed"])
+    + (["gnureadline"] if sys.platform == "darwin" else []),
     classifiers=[
-        'License :: OSI Approved :: MIT License',
-        'Programming Language :: Python',
-        'Environment :: Console',
-        'Topic :: Office/Business :: Financial :: Accounting'
-    ]
+        "License :: OSI Approved :: MIT License",
+        "Programming Language :: Python",
+        "Environment :: Console",
+        "Topic :: Office/Business :: Financial :: Accounting",
+    ],
 )

@@ -18,7 +18,7 @@ TAGS = dict()
 def rulify(obj):
     """Convert rulelike object to a ruler"""
     if isinstance(obj, string_types):
-        return {'PAYEE': r'\b%s\b' % obj} if obj else None
+        return {"PAYEE": r"\b%s\b" % obj} if obj else None
     return obj
 
 
@@ -30,7 +30,7 @@ def unrulify(ruler):
             # Basic rulers entered at first prompt are recognizable by the
             # uppercase dict key and should be unrulified to a string for the
             # sake of json readability.
-            return ruler[field].strip(r'\b')
+            return ruler[field].strip(r"\b")
     elif ruler and ruler.isspace():
         return
     return ruler
@@ -38,7 +38,7 @@ def unrulify(ruler):
 
 def match(ruler, t):
     """Return a tuple (match, dict) indicating if transaction matches ruler.
-       match is a bool, while dict contains matching values for ruler fields.
+    match is a bool, while dict contains matching values for ruler fields.
     """
     res = {}
     ruler = rulify(ruler)
@@ -47,7 +47,7 @@ def match(ruler, t):
         field = field.lower()
         try:
             m = re.search(rule, t[field], re.I)
-            res[field] = t[field][m.start():m.end()] if m else None
+            res[field] = t[field][m.start() : m.end()] if m else None
         except Exception:
             res[field] = None
     return all([x for x in list(res.values())]), res
@@ -55,7 +55,7 @@ def match(ruler, t):
 
 def find_tag_for(t):
     """If transaction matches a rule, returns corresponding tuple
-       (tag, ruler, match).
+    (tag, ruler, match).
     """
     res = []
     for (tag, rulers) in list(TAGS.items()):
@@ -66,15 +66,18 @@ def find_tag_for(t):
     if res:
         # Return rule with the most fields.
         # If several, pick the ont with the longer rules.
-        return max(res, key=lambda tag_ruler_matches: (len(list(rulify(
-            tag_ruler_matches[1]).keys())), sum(
-            [len(v) for v in list(tag_ruler_matches[2].values()) if v])))
+        return max(
+            res,
+            key=lambda tag_ruler_matches: (
+                len(list(rulify(tag_ruler_matches[1]).keys())),
+                sum([len(v) for v in list(tag_ruler_matches[2].values()) if v]),
+            ),
+        )
     return None, None, None
 
 
 def convert(tags):
-    """Rulify all objects of given tags dict.
-    """
+    """Rulify all objects of given tags dict."""
     for (tag, rulers) in list(tags.items()):
         tags[tag] = []
         for ruler in rulers:
@@ -83,11 +86,10 @@ def convert(tags):
 
 
 def load(filepath):
-    """Load tags dictionary.
-    """
+    """Load tags dictionary."""
     global TAGS
     if os.path.isfile(filepath):
-        with open(filepath, 'r') as cfg:
+        with open(filepath, "r") as cfg:
             try:
                 TAGS = json.load(cfg)
             except Exception as err:
@@ -99,22 +101,18 @@ def load(filepath):
 
 
 def prettify(tags):
-    """Format tags for json output.
-    """
-    return json.dumps(tags, sort_keys=True, indent=4,
-                      separators=(',', ': ')) + '\n'
+    """Format tags for json output."""
+    return json.dumps(tags, sort_keys=True, indent=4, separators=(",", ": ")) + "\n"
 
 
 def save(filepath, tags):
-    """Save tags dictionary on disk
-    """
-    with open(filepath, 'w+') as cfg:
+    """Save tags dictionary on disk"""
+    with open(filepath, "w+") as cfg:
         cfg.write(prettify(tags))
 
 
 def edit(t, tag, _match, options=None):
-    """Save a tag modification into dictionary and save the latter on file.
-    """
+    """Save a tag modification into dictionary and save the latter on file."""
     if not options:
         options = {}
     _match = unrulify(_match)
@@ -137,6 +135,6 @@ def edit(t, tag, _match, options=None):
     else:  # no diff
         return
 
-    if not options.get('dry-run', False):
-        save(options['config'], TAGS)
+    if not options.get("dry-run", False):
+        save(options["config"], TAGS)
     return TAGS
