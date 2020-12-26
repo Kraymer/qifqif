@@ -6,7 +6,6 @@
 
 """Utilities functions related to terminal display."""
 
-import re
 from difflib import SequenceMatcher
 from itertools import chain, combinations
 
@@ -17,11 +16,10 @@ def colorize_match(t, field, matches=None):
     field_val = t[field]
     if not field_val:
         return None
-    match = matches.get(field, '') if matches else ''
+    match = matches.get(field, "") if matches else ""
     seqmatch = SequenceMatcher(None, field_val, match)
     a, b, size = seqmatch.find_longest_match(0, len(field_val), 0, len(match))
-    return (field_val[:a] + TERM.green(field_val[a:a + size]) +
-            field_val[a + size:])
+    return field_val[:a] + TERM.green(field_val[a : a + size]) + field_val[a + size :]
 
 
 def complete_matches(payee):
