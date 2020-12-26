@@ -2,7 +2,6 @@
 
 """Units tests for __init__.py"""
 
-import sys
 import unittest
 
 try:
@@ -14,7 +13,6 @@ import qifqif
 from qifqif import qifile
 import testdata
 
-PATCH_BUILTIN = "__builtin__.raw_input" if sys.version_info[0] < 3 else "builtins.input"
 OPTIONS = qifqif.parse_args(["qifqif", "-d", "-c", testdata.CFG_FILE, "dummy"])
 
 
@@ -25,11 +23,6 @@ def mock_input_default(prompt, choices="", clear=False):
 
 
 class TestInit(unittest.TestCase):
-    @patch(PATCH_BUILTIN, return_value="")
-    def test_quick_input(self, mock_raw_input):
-        self.assertEqual(qifqif.quick_input("", "Yn"), "Y")
-        self.assertEqual(qifqif.quick_input("", ("no", "Yes", "maybe")), "Yes")
-
     def test_parse_default_transaction(self):
         res = qifile.parse_lines(testdata.generate_lines("PDM"))
         self.assertEqual(len(res), 1)
