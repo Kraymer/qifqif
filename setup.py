@@ -19,7 +19,7 @@ def read_rsrc(filename):
         return re.sub(r":(\w+\\?)+:", u"", _file.read().strip())  # no emoji
 
 
-with codecs.open("cronicle/__init__.py", encoding="utf-8") as fd:
+with codecs.open("{}/__init__.py".format(PKG_NAME), encoding="utf-8") as fd:
     version = re.search(
         r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]', fd.read(), re.MULTILINE
     ).group(1)
