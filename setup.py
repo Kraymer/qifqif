@@ -1,13 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2017-2020 Fabrice Laporte - kray.me
+# Copyright (c) 2015-2020 Fabrice Laporte - kray.me
 # The MIT License http://www.opensource.org/licenses/mit-license.php
 
 import codecs
 import os
 import re
-import sys
 import time
 from setuptools import setup
 
@@ -20,7 +19,7 @@ def read_rsrc(filename):
         return re.sub(r":(\w+\\?)+:", u"", _file.read().strip())  # no emoji
 
 
-with codecs.open("cronicle/__init__.py", encoding="utf-8") as fd:
+with codecs.open("{}/__init__.py".format(PKG_NAME), encoding="utf-8") as fd:
     version = re.search(
         r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]', fd.read(), re.MULTILINE
     ).group(1)
@@ -45,9 +44,7 @@ setup(
             "qifqif = qifqif:main",
         ],
     },
-    install_requires=["argparse", "ordereddict", "pyyaml"]
-    + (["pyreadline", "colorama"] if sys.platform == "win32" else ["blessed"])
-    + (["gnureadline"] if sys.platform == "darwin" else []),
+    install_requires=read_rsrc("requirements.txt").split("\n"),
     classifiers=[
         "License :: OSI Approved :: MIT License",
         "Programming Language :: Python",

@@ -42,7 +42,7 @@ def parse_lines(lines, options=None):
         for field in list(config.FIELDS.values()):
             if field not in t:
                 t[field] = None
-        t["filename"] = options.get("src", "")
+        t[u"filename"] = options.get("src", "")
     return res
 
 

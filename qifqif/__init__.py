@@ -15,10 +15,11 @@ import os
 import sys
 import io
 import re
-import six
+from prompt_toolkit import prompt
+from prompt_toolkit.completion import WordCompleter
 
-from qifqif import tags, qifile, config
-from qifqif.ui import set_completer, complete_matches, colorize_match
+from qifqif import tags, qifile
+from qifqif.ui import complete_matches, colorize_match
 from qifqif.terminal import TERM
 
 ENCODING = "utf-8" if sys.stdin.encoding in (None, "ascii") else sys.stdin.encoding
@@ -26,21 +27,30 @@ ENCODING = "utf-8" if sys.stdin.encoding in (None, "ascii") else sys.stdin.encod
 __version__ = "0.7.3"
 
 
-def quick_input(prompt, choices="", clear=False):
+def quick_input(msg, choices="", sugg=None, clear=False):
     """raw_input wrapper that automates display of choices and return default
     choice when empty string entered.
     The prompt line(s) get cleared when done if clear is True.
     """
+    if not sugg:
+        sugg = []
     default = [x for x in choices if x[0].isupper()]
     default = default[0] if default else ""
     print(TERM.clear_eol, end="")
-    _input = six.moves.input(
-        "%s%s" % (prompt, (" [%s] ? " % ",".join(choices)) if choices else ": ")
-    )  # .decode(ENCODING)
+    msg = "%s%s" % (msg, (" [%s] ? " % ",".join(choices)) if choices else ": ")
+    _input = prompt(
+        msg,
+        completer=WordCompleter(
+            sugg,
+            ignore_case=True,
+        ),
+        complete_while_typing=False,
+    )
+
     if _input in choices:
         _input = _input.upper()
     if clear:
-        for _ in range(0, prompt.count("\n") + 1):
+        for _ in range(0, msg.count("\n") + 1):
             print(TERM.clear_last, end="")
     return _input or default
 
@@ -49,14 +59,12 @@ def query_cat(cached_cat):
     """Query category. If empty string entered then prompt to remove existing
     category, if any.
     """
-    set_completer(sorted(tags.TAGS.keys()))
-    cat = quick_input("\nCategory", clear=True).strip()
+    cat = quick_input("\nCategory", sugg=tags.TAGS.keys(), clear=True).strip()
 
     if not cat and cached_cat:
         erase = quick_input("\nRemove existing category", "yN", True)
         if erase.upper() == "N":
             cat = cached_cat
-    set_completer()
     return cat.strip() or None
 
 
@@ -65,7 +73,10 @@ def query_guru_ruler(t):
     corresponding fields for the ruler to be valid.
     """
     extras = sorted([k for (k, v) in t.items() if (v and not k.isdigit())])
-    set_completer(extras)
+    matchable_fields = sorted(
+        set([x for x in t if t[x] and not x.isdigit()]) - {"category", "number"}
+    )
+
     guru_ruler = {}
     extras = {}
     field = True
@@ -75,10 +86,12 @@ def query_guru_ruler(t):
             # Update fields match indicators
             print(TERM.move_y(0))
             print_transaction(t, short=False, extras=extras)
-            field = quick_input("\nMatch on field", clear=True).lower()
+            field = quick_input(
+                "\nMatch on field", sugg=matchable_fields, clear=True
+            ).lower()
             regex = "*" in field
             field = field.strip("*")
-            if not field or field in set(config.FIELDS_FULL.values()) - {"category"}:
+            if not field or field in matchable_fields:
                 break
         # Enter match
         while field:
@@ -110,13 +123,12 @@ def query_basic_ruler(t, default_ruler):
     default_field = "payee"
     if not t[default_field]:
         return
-    set_completer(sorted(complete_matches(t[default_field])))
     ruler = quick_input(
-        "\n%s match %s"
-        % (default_field.title(), "[%s]" % default_ruler if default_ruler else "")
+        "%s match %s"
+        % (default_field.title(), "[%s]" % default_ruler if default_ruler else ""),
+        sugg=complete_matches(t[default_field]),
     )
     ruler = tags.rulify(ruler)
-    set_completer()
     return ruler
 
 
@@ -198,7 +210,6 @@ def process_transaction(t, options):
             t["category"] = cat
             extras = {"category": "+ Category"}
 
-    print("---\n" + TERM.clear_eol, end="")
     print_transaction(t, extras=extras)
     edit = options["force"] > 1 or (options["force"] and t["category"] not in tags.TAGS)
     audit = options["audit"]
@@ -298,7 +309,9 @@ def process_transactions(transactions, options):
     try:
         i = 0
         for (i, t) in enumerate(transactions):
+            print("\n---")
             if not t["payee"]:
+                print_transaction(t)
                 print("Skip transaction #%s with no payee field" % (i + 1))
                 continue
             cat, match = process_transaction(t, options)
@@ -327,7 +340,7 @@ def main(argv=None):
     except EOFError:  # exit on Ctrl + D: restore original tags
         tags.save(args["config"], original_tags)
         return 1
-    res = qifile.dump_to_buffer(transacs + transacs_orig[len(transacs):])
+    res = qifile.dump_to_buffer(transacs + transacs_orig[len(transacs) :])
     if not args.get("dry-run"):
         with io.open(args["dest"], "w", encoding="utf-8") as dest:
             dest.write(res)

@@ -5,12 +5,12 @@
 # The MIT License http://www.opensource.org/licenses/mit-license.php
 
 FIELDS = {
-    "D": "date",
-    "T": "amount",
-    "P": "payee",
-    "L": "category",
-    "N": "number",
-    "M": "memo",
+    "D": u"date",
+    "T": u"amount",
+    "P": u"payee",
+    "L": u"category",
+    "N": u"number",
+    "M": u"memo",
 }
-EXTRA_FIELDS = {"F": "filename"}
+EXTRA_FIELDS = {"F": u"filename"}
 FIELDS_FULL = dict(list(FIELDS.items()) + list(EXTRA_FIELDS.items()))

@@ -1,7 +1,9 @@
 argparse
+blessed>=1.16
 coveralls
 mock
 ordereddict
-tox
+prompt-toolkit>=2,<3
 pyyaml
 six
+tox
