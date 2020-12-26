@@ -1,6 +1,7 @@
 import unittest
 import tempfile
 import io
+import os
 
 from mock import patch
 
@@ -8,7 +9,7 @@ import qifqif
 from qifqif import qifile
 import testdata
 
-OUT_FILE = tempfile.NamedTemporaryFile()
+OUT_FILE = tempfile.NamedTemporaryFile(delete=False)
 OPTIONS = qifqif.parse_args(["qifqif", "-d", "-c", testdata.CFG_FILE, "dummy"])
 
 
@@ -82,8 +83,10 @@ class TestBlackBox(unittest.TestCase):
     def test_sigint(self, mock_quick_input):
         """Check that processed transactions are not lost on interruption."""
         qifqif.main()
+        OUT_FILE.close()
         with io.open(OUT_FILE.name, "r", encoding="utf-8") as fin:
             res = qifile.parse_lines(fin.readlines())
+        os.unlink(OUT_FILE.name)
         self.assertEqual(res[0]["category"], "Drink")
 
 
