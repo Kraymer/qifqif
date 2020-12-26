@@ -40,7 +40,10 @@ def quick_input(msg, choices="", sugg=None, clear=False):
     msg = "%s%s" % (msg, (" [%s] ? " % ",".join(choices)) if choices else ": ")
     _input = prompt(
         msg,
-        completer=WordCompleter(sugg, ignore_case=True,),
+        completer=WordCompleter(
+            sugg,
+            ignore_case=True,
+        ),
         complete_while_typing=False,
     )
 
@@ -70,8 +73,9 @@ def query_guru_ruler(t):
     corresponding fields for the ruler to be valid.
     """
     extras = sorted([k for (k, v) in t.items() if (v and not k.isdigit())])
-    matchable_fields = sorted(set([x for x in t if t[x] and not x.isdigit()]) - {u"category",
-        u"number"})
+    matchable_fields = sorted(
+        set([x for x in t if t[x] and not x.isdigit()]) - {"category", "number"}
+    )
 
     guru_ruler = {}
     extras = {}
@@ -115,9 +119,8 @@ def query_guru_ruler(t):
 
 
 def query_basic_ruler(t, default_ruler):
-    """Define basic rule consisting of matching full words on payee field.
-    """
-    default_field = u"payee"
+    """Define basic rule consisting of matching full words on payee field."""
+    default_field = "payee"
     if not t[default_field]:
         return
     ruler = quick_input(
@@ -139,9 +142,9 @@ def check_ruler(ruler, t):
         else:
             extras[key] = TERM.green("%s %s" % (TERM.OK, key.title()))
     if not match:
-        extras[u"category"] = TERM.red("%s Category" % TERM.KO)
+        extras["category"] = TERM.red("%s Category" % TERM.KO)
     else:
-        extras[u"category"] = TERM.green("%s Category" % TERM.OK)
+        extras["category"] = TERM.green("%s Category" % TERM.OK)
     return match, extras
 
 
@@ -188,7 +191,7 @@ def print_transaction(t, short=True, extras=None):
     - '+' when the category is fetched from .json matches file
     - ' ' when the category is present in input file
     """
-    keys = (u"date", u"amount", u"payee", u"category") if short else list(t.keys())
+    keys = ("date", "amount", "payee", "category") if short else list(t.keys())
     _, _, matches = tags.find_tag_for(t)
     for field in keys:
         if t[field] and not field.isdigit():
@@ -197,38 +200,37 @@ def print_transaction(t, short=True, extras=None):
 
 
 def process_transaction(t, options):
-    """Assign a category to a transaction.
-    """
-    cat, ruler = t[u"category"], None
+    """Assign a category to a transaction."""
+    cat, ruler = t["category"], None
     extras = {}
 
-    if not t[u"category"]:  # Grab category from json cache
+    if not t["category"]:  # Grab category from json cache
         cat, ruler, _ = tags.find_tag_for(t)
         if cat:
-            t[u"category"] = cat
-            extras = {u"category": "+ Category"}
+            t["category"] = cat
+            extras = {"category": "+ Category"}
 
     print_transaction(t, extras=extras)
-    edit = options["force"] > 1 or (options["force"] and t[u"category"] not in tags.TAGS)
+    edit = options["force"] > 1 or (options["force"] and t["category"] not in tags.TAGS)
     audit = options["audit"]
-    if t[u"category"]:
+    if t["category"]:
         if audit:
-            msg = "\nEdit '%s' category" % TERM.green(t[u"category"])
+            msg = "\nEdit '%s' category" % TERM.green(t["category"])
             edit = quick_input(msg, "yN", clear=True) == "Y"
         if not edit:
-            return t[u"category"], ruler
+            return t["category"], ruler
 
     # Query for category and overwrite category on screen
     if (not cat or edit) and not options["batch"]:
-        t[u"category"] = query_cat(cat)
+        t["category"] = query_cat(cat)
         # Query ruler if category entered or edit
-        if t[u"category"]:
+        if t["category"]:
             ruler = query_ruler(t)
-        extras = {u"category": TERM.OK + " Category"} if t[u"category"] else {}
+        extras = {"category": TERM.OK + " Category"} if t["category"] else {}
         print(TERM.clear_last, end="")
-        print_field(t, u"category", extras=extras)
+        print_field(t, "category", extras=extras)
 
-    return t[u"category"], ruler
+    return t["category"], ruler
 
 
 def parse_args(argv):
@@ -308,7 +310,7 @@ def process_transactions(transactions, options):
         i = 0
         for (i, t) in enumerate(transactions):
             print("\n---")
-            if not t[u"payee"]:
+            if not t["payee"]:
                 print_transaction(t)
                 print("Skip transaction #%s with no payee field" % (i + 1))
                 continue
@@ -338,7 +340,7 @@ def main(argv=None):
     except EOFError:  # exit on Ctrl + D: restore original tags
         tags.save(args["config"], original_tags)
         return 1
-    res = qifile.dump_to_buffer(transacs + transacs_orig[len(transacs):])
+    res = qifile.dump_to_buffer(transacs + transacs_orig[len(transacs) :])
     if not args.get("dry-run"):
         with io.open(args["dest"], "w", encoding="utf-8") as dest:
             dest.write(res)
