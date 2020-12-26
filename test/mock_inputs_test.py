@@ -26,7 +26,7 @@ class TestBlackBox(unittest.TestCase):
         "memo",  # match on field
         "houf",  # memo match (chars)
         "date*",  # match on field
-        "\d\d/02/2014",  # date match (regex)
+        "\\d\\d/02/2014",  # date match (regex)
         "",  # match on field
     ]
 
