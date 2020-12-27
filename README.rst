@@ -98,8 +98,8 @@ tracker <https://github.com/Kraymer/qifqif/issues>`__.
 
 .. |image0| image:: http://github.com/kraymer/qifqif/workflows/build/badge.svg
    :target: https://github.com/kraymer/qifqif/actions
-.. |image1| image:: https://coveralls.io/repos/Kraymer/qifqif/badge.svg
-   :target: https://coveralls.io/r/Kraymer/qifqif
+.. |image1| image:: https://codecov.io/gh/Kraymer/qifqif/branch/master/graph/badge.svg?token=p1GTuHDmVD
+   :target: https://codecov.io/gh/Kraymer/qifqif
 .. |image2| image:: http://img.shields.io/pypi/v/qifqif.svg
    :target: https://pypi.python.org/pypi/qifqif
 .. |image3| image:: https://readthedocs.org/projects/qifqif/badge/?version=latest
