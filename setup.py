@@ -14,9 +14,17 @@ PKG_NAME = "qifqif"
 DIRPATH = os.path.dirname(__file__)
 
 
-def read_rsrc(filename):
+def read_rsrc(filename, pypi_compat=False):
+    """Return content of filename.
+
+       If pypi_compat is True, remove emojis and anything preceding
+       `.. pypi` comment if present.
+    """
     with codecs.open(os.path.join(DIRPATH, filename), encoding="utf-8") as _file:
-        return re.sub(r":(\w+\\?)+:", u"", _file.read().strip())  # no emoji
+        data = _file.read().strip()
+        if pypi_compat or filename == "README.rst":
+            data = re.sub(r":(\w+\\?)+:", u"", data[data.find(".. pypi"):] or data)
+    return data
 
 
 with codecs.open("{}/__init__.py".format(PKG_NAME), encoding="utf-8") as fd:

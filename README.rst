@@ -1,5 +1,18 @@
 |image0| |image1| |image2| |image3| |image4|
 
+.. |image0| image:: http://github.com/kraymer/qifqif/workflows/build/badge.svg
+   :target: https://github.com/kraymer/qifqif/actions
+.. |image1| image:: https://codecov.io/gh/Kraymer/qifqif/branch/master/graph/badge.svg?token=p1GTuHDmVD
+   :target: https://codecov.io/gh/Kraymer/qifqif
+.. |image2| image:: http://img.shields.io/pypi/v/qifqif.svg
+   :target: https://pypi.python.org/pypi/qifqif
+.. |image3| image:: https://readthedocs.org/projects/qifqif/badge/?version=latest
+   :target: http://qifqif.readthedocs.org/en/latest/?badge=latest
+.. |image4| image:: https://img.shields.io/badge/releases-atom-orange.svg
+   :target: https://github.com/Kraymer/qifqif/releases.atom
+   
+.. pypi
+
 qifqif
 ======
 
@@ -95,15 +108,3 @@ Feedbacks
 
 Please submit bugs and features requests on the `Issue
 tracker <https://github.com/Kraymer/qifqif/issues>`__.
-
-.. |image0| image:: https://github.com/kraymer/qifqif/workflows/build/badge.svg
-   :target: https://github.com/kraymer/qifqif/actions
-.. |image1| image:: https://codecov.io/gh/Kraymer/qifqif/branch/master/graph/badge.svg?token=p1GTuHDmVD
-   :target: https://codecov.io/gh/Kraymer/qifqif
-.. |image2| image:: http://img.shields.io/pypi/v/qifqif.svg
-   :target: https://pypi.python.org/pypi/qifqif
-.. |image3| image:: https://readthedocs.org/projects/qifqif/badge/?version=latest
-   :target: http://qifqif.readthedocs.org/en/latest/?badge=latest
-.. |image4| image:: https://img.shields.io/badge/releases-atom-orange.svg
-   :target: https://github.com/Kraymer/qifqif/releases.atom
-
