@@ -24,7 +24,7 @@ from qifqif.terminal import TERM
 
 ENCODING = "utf-8" if sys.stdin.encoding in (None, "ascii") else sys.stdin.encoding
 
-__version__ = "0.7.3"
+__version__ = "0.8.0"
 
 
 def quick_input(msg, choices="", sugg=None, clear=False):
