@@ -96,7 +96,7 @@ Feedbacks
 Please submit bugs and features requests on the `Issue
 tracker <https://github.com/Kraymer/qifqif/issues>`__.
 
-.. |image0| image:: http://github.com/kraymer/qifqif/workflows/build/badge.svg
+.. |image0| image:: https://github.com/kraymer/qifqif/workflows/build/badge.svg
    :target: https://github.com/kraymer/qifqif/actions
 .. |image1| image:: https://codecov.io/gh/Kraymer/qifqif/branch/master/graph/badge.svg?token=p1GTuHDmVD
    :target: https://codecov.io/gh/Kraymer/qifqif
